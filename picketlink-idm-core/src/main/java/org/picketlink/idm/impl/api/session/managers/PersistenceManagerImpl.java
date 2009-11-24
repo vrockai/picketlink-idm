@@ -125,7 +125,12 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
 
       IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), identityName, iot);
 
-      User user = createUser(identityObject);
+      User user = null;
+
+      if (identityObject != null)
+      {
+         user = new SimpleUser(identityName);
+      }
 
       //Cache
       if (cache != null)
@@ -135,7 +140,7 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
          cache.putUser(cacheNS, user);
       }
 
-      postCreate(new SimpleUser(identityName));
+      postCreate(user);
 
 
       return user;
@@ -154,7 +159,13 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
 
       IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), groupName, iot);
 
-      Group group = createGroup(identityObject);
+
+      Group group = null;
+
+      if (identityObject != null)
+      {
+         group = new SimpleGroup(groupName, groupType);
+      }
 
       if (cache != null)
       {

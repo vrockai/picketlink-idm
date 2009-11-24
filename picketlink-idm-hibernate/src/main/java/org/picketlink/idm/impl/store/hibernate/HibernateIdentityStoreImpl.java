@@ -64,6 +64,7 @@ import org.hibernate.*;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -73,23 +74,6 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 {
 
    //TODO: logging
-
-   private final String QUERY_RELATIONSHIP_BY_FROM_TO =
-      "select r from HibernateIdentityObjectRelationship r where r.fromIdentityObject = :fromIO and " +
-         "r.toIdentityObject = :toIO";
-
-   private final String QUERY_RELATIONSHIP_BY_FROM_TO_TYPE =
-      "select r from HibernateIdentityObjectRelationship r where r.fromIdentityObject = :fromIO and " +
-         "r.toIdentityObject = :toIO and r.type.name = :typeName";
-
-   private final String QUERY_RELATIONSHIP_BY_FROM_TO_TYPE_NAME =
-      "select r from HibernateIdentityObjectRelationship r where r.fromIdentityObject = :fromIO and " +
-         "r.toIdentityObject = :toIO and r.type.name = :typeName and r.name.name = :name";
-
-   private final String QUERY_RELATIONSHIP_BY_IDENTITIES =
-      "select r from HibernateIdentityObjectRelationship r where " +
-         "(r.fromIdentityObject = :IO1 and r.toIdentityObject = :IO2) or " +
-         "(r.fromIdentityObject = :IO2 and r.toIdentityObject = :IO1)";
 
    public static final String HIBERNATE_SESSION_FACTORY_REGISTRY_NAME = "hibernateSessionFactoryRegistryName";
 
@@ -494,15 +478,18 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       HibernateRealm realm = getRealm(session, ctx);
 
-      // Check if object with a given name and type is not present already
-      List<?> results = session.createQuery(HibernateIdentityObject.findIdentityObjectByNameAndType)
-         .setParameter("realmName", realm.getName())
-         .setParameter("name", name)
-         .setParameter("typeName", identityObjectType.getName())
+      int size = (Integer)session.createCriteria(HibernateIdentityObject.class)
+         .createAlias("identityType", "type")
+         .createAlias("realm", "rm")
+         .add(Restrictions.eq("name", name))
+         .add(Restrictions.eq("rm.name", realm.getName()))
+         .add(Restrictions.eq("type.name", identityObjectType.getName()))
+         .setProjection(Projections.rowCount())
          .setCacheable(true)
-         .list();
+         .list().get(0);
 
-      if (results.size() != 0)
+
+      if (size != 0)
       {
          throw new IdentityException("IdentityObject already present in this IdentityStore:" +
             "name=" + name + "; type=" + identityObjectType.getName() + "; realm=" + realm);
@@ -549,7 +536,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             relationship.getFromIdentityObject().getFromRelationships().remove(relationship);
             relationship.getToIdentityObject().getToRelationships().remove(relationship);
             hibernateSession.delete(relationship);
-            hibernateSession.flush();
+//            hibernateSession.flush();
          }
          
          HibernateIdentityObjectRelationship[] to =  new HibernateIdentityObjectRelationship[hibernateObject.getToRelationships().size()];      
@@ -559,12 +546,12 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             relationship.getToIdentityObject().getToRelationships().remove(relationship);
 
             hibernateSession.delete(relationship);
-            hibernateSession.flush();
+//            hibernateSession.flush();
 
          }
 
          hibernateSession.delete(hibernateObject);
-         hibernateSession.flush();
+//         hibernateSession.flush();
          
       }
       catch (Exception e)
@@ -923,7 +910,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          Session session = getHibernateSession(ctx);
          session.persist(relationship);
-         session.flush();
+//         session.flush();
 
       }
       catch (HibernateException e)
@@ -950,14 +937,20 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationshipType);
 
       org.hibernate.Query query = null;
+      Criteria crit = null;
 
       if (name == null)
       {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
+
+         crit = getHibernateSession(ctx).createCriteria(HibernateIdentityObjectRelationship.class)
+            .createAlias("type", "t")
+            .add(Restrictions.eq("fromIdentityObject", fromIO))
+            .add(Restrictions.eq("toIdentityObject", toIO))
+            .add(Restrictions.eq("t.name", type.getName()))
             .setCacheable(true);
+
+
+
       }
       else
       {
@@ -971,16 +964,19 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             throw new IdentityException("Relationship name not present in the store");
          }
 
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE_NAME)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setParameter("name", name)
+
+         crit = getHibernateSession(ctx).createCriteria(HibernateIdentityObjectRelationship.class)
+            .createAlias("type", "t")
+            .createAlias("name", "n")
+            .add(Restrictions.eq("fromIdentityObject", fromIO))
+            .add(Restrictions.eq("toIdentityObject", toIO))
+            .add(Restrictions.eq("t.name", type.getName()))
+            .add(Restrictions.eq("n.name", name))
             .setCacheable(true);
       }
 
 
-      HibernateIdentityObjectRelationship relationship = (HibernateIdentityObjectRelationship)query.uniqueResult();
+      HibernateIdentityObjectRelationship relationship = (HibernateIdentityObjectRelationship)crit.uniqueResult();
 
       if (relationship == null)
       {
@@ -992,7 +988,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          fromIO.getFromRelationships().remove(relationship);
          toIO.getToRelationships().remove(relationship);
          getHibernateSession(ctx).delete(relationship);
-         getHibernateSession(ctx).flush();
+//         getHibernateSession(ctx).flush();
       }
       catch (HibernateException e)
       {
@@ -1007,11 +1003,23 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject hio1 = safeGet(ctx, identity1);
       HibernateIdentityObject hio2 = safeGet(ctx, identity2);
 
-      org.hibernate.Query query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_IDENTITIES)
-         .setParameter("IO1", hio1)
-         .setParameter("IO2", hio2);
 
-      List results = query.list();
+      Criteria criteria = getHibernateSession(ctx).createCriteria(HibernateIdentityObjectRelationship.class)
+         .setCacheable(true)
+         .add(Restrictions.or(
+            Restrictions.and(
+               Restrictions.eq("fromIdentityObject", hio1),
+               Restrictions.eq("toIdentityObject", hio2)
+            ),
+            Restrictions.and(
+               Restrictions.eq("fromIdentityObject", hio2),
+               Restrictions.eq("toIdentityObject", hio1)
+            )
+         ));
+
+
+
+      List results = criteria.list();
       Hibernate.initialize(results);
 
       for (Iterator iterator = results.iterator(); iterator.hasNext();)
@@ -1026,7 +1034,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                relationship.getFromIdentityObject().getFromRelationships().remove(relationship);
                relationship.getToIdentityObject().getToRelationships().remove(relationship);
                getHibernateSession(ctx).delete(relationship);
-               getHibernateSession(ctx).flush();
+//               getHibernateSession(ctx).flush();
             }
             catch (HibernateException e)
             {
@@ -1045,24 +1053,20 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject hio1 = safeGet(ctx, fromIdentity);
       HibernateIdentityObject hio2 = safeGet(ctx, toIdentity);
 
-      org.hibernate.Query query = null;
+      Criteria criteria = getHibernateSession(ctx).createCriteria(HibernateIdentityObjectRelationship.class)
+         .setCacheable(true);
 
-      if (relationshipType == null)
-      {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO);
-      }
-      else
-      {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE)
-            .setParameter("typeName", relationshipType.getName());
 
+      if (relationshipType != null)
+      {
+         criteria.createAlias("type", "t").add(Restrictions.eq("t.name", relationshipType.getName()));
       }
 
-      query.setParameter("fromIO", hio1)
-         .setParameter("toIO", hio2);
 
+      criteria.add(Restrictions.eq("fromIdentityObject", hio1))
+         .add(Restrictions.eq("toIdentityObject", hio2));
 
-      List<HibernateIdentityObjectRelationship> results = query.list();
+      List<HibernateIdentityObjectRelationship> results = criteria.list();
       Hibernate.initialize(results);
 
       return new HashSet<IdentityObjectRelationship>(results);
@@ -1140,7 +1144,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          hiorn = new HibernateIdentityObjectRelationshipName(name, realm);
          getHibernateSession(ctx).persist(hiorn);
-         getHibernateSession(ctx).flush();
+//         getHibernateSession(ctx).flush();
 
 
       }
@@ -1167,9 +1171,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       try
       {
          HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession
-            .createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNameByName)
-            .setParameter("name", name)
-            .setParameter("realmName", getRealmName(ctx))
+            .createCriteria(HibernateIdentityObjectRelationshipName.class)
+            .createAlias("realm", "rm")
+            .add(Restrictions.eq("name", name))
+            .add(Restrictions.eq("rm.name", getRealmName(ctx)))
+            .setCacheable(true)
             .uniqueResult();
 
          if (hiorn == null)
@@ -1211,48 +1217,49 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       try
       {
-         Query q = null;
+         //Query q = null;
+
+         Criteria c = hibernateSession.createCriteria(HibernateIdentityObjectRelationshipName.class)
+            .setCacheable(true)
+            .createAlias("realm", "r")
+            .setProjection(Projections.property("name"));
+
+
 
          if (criteria != null && criteria.isSorted())
          {
             if (criteria.isAscending())
             {
-               q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNamesOrderedByNameAsc);
+               c.addOrder(Order.asc("name"));
             }
             else
             {
-               q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNamesOrderedByNameDesc);
+               c.addOrder(Order.desc("name"));
             }
          }
-         else
-         {
-            q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNames);
-         }
 
-         q.setCacheable(true);
-
-         q.setParameter("realmName", getRealmName(ctx));
+         c.add(Restrictions.eq("r.name", getRealmName(ctx)));
 
          if (criteria != null && criteria.getFilter() != null)
          {
-            q.setParameter("nameFilter", criteria.getFilter().replaceAll("\\*", "%"));
+            c.add(Restrictions.like("name", criteria.getFilter().replaceAll("\\*", "%")));
          }
          else
          {
-            q.setParameter("nameFilter", "%");
+            c.add(Restrictions.like("name", "%"));
          }
 
 
          if (criteria != null && criteria.isPaged())
          {
-            q.setFirstResult(criteria.getMaxResults());
+            c.setFirstResult(criteria.getMaxResults());
             if (criteria.getFirstResult() > 0)
             {
-               q.setMaxResults(criteria.getMaxResults());
+               c.setMaxResults(criteria.getMaxResults());
             }
          }
 
-         List<String> results = (List<String>)q.list();
+         List<String> results = (List<String>)c.list();
 
          Hibernate.initialize(results);
 
@@ -1283,37 +1290,38 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       try
       {
-         Query q = null;
+         Criteria c = hibernateSession.createCriteria(HibernateIdentityObjectRelationship.class)
+            .setCacheable(true)
+            .createAlias("name", "n")
+            .setProjection(Projections.property("n.name"));
 
          if (criteria != null)
          {
             if (criteria.isAscending())
             {
-               q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNamesForIdentityObjectOrderedByNameAsc).setCacheable(true);
+               c.addOrder(Order.asc("n.name"));
             }
             else
             {
-               q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNamesForIdentityObjectOrdereByNameDesc).setCacheable(true);
+               c.addOrder(Order.desc("n.name"));
             }
          }
-         else
-         {
-            q = hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNamesForIdentityObject);
-         }
 
-         q.setCacheable(true);
-         q.setParameter("identityObject", hibernateObject);
+         c.add(Restrictions.or(
+            Restrictions.eq("fromIdentityObject", hibernateObject),
+            Restrictions.eq("toIdentityObject",hibernateObject)
+         ));
 
          if (criteria != null && criteria.isPaged())
          {
-            q.setFirstResult(criteria.getFirstResult());
+            c.setFirstResult(criteria.getFirstResult());
             if (criteria.getMaxResults() > 0)
             {
-               q.setMaxResults(criteria.getMaxResults());
+               c.setMaxResults(criteria.getMaxResults());
             }
          }
 
-         List<String> results = (List<String>)q.list();
+         List<String> results = (List<String>)c.list();
 
          Hibernate.initialize(results);
 
@@ -1345,8 +1353,14 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       try
       {
-         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNameByName)
-            .setParameter("name", name).setParameter("realmName", getRealmName(ctx)).setCacheable(true).uniqueResult();
+
+         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.
+            createCriteria(HibernateIdentityObjectRelationshipName.class)
+            .setCacheable(true)
+            .createAlias("realm", "r")
+            .add(Restrictions.eq("name", name))
+            .add(Restrictions.eq("r.name", getRealmName(ctx)))
+            .uniqueResult();
 
          if (hiorn == null)
          {
@@ -1376,8 +1390,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       try
       {
-         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNameByName)
-                     .setParameter("name", name).setParameter("realmName", getRealmName(ctx)).setCacheable(true).uniqueResult();
+         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.
+            createCriteria(HibernateIdentityObjectRelationshipName.class)
+            .setCacheable(true)
+            .createAlias("realm", "r")
+            .add(Restrictions.eq("name", name))
+            .add(Restrictions.eq("r.name", getRealmName(ctx)))
+            .uniqueResult();
 
          if (hiorn == null)
          {
@@ -1405,8 +1424,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       try
       {
-         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.createQuery(HibernateIdentityObjectRelationshipName.findIdentityObjectRelationshipNameByName)
-                     .setParameter("name", name).setParameter("realmName", getRealmName(ctx)).setCacheable(true).uniqueResult();
+         HibernateIdentityObjectRelationshipName hiorn = (HibernateIdentityObjectRelationshipName)hibernateSession.
+            createCriteria(HibernateIdentityObjectRelationshipName.class)
+            .setCacheable(true)
+            .createAlias("realm", "r")
+            .add(Restrictions.eq("name", name))
+            .add(Restrictions.eq("r.name", getRealmName(ctx)))
+            .uniqueResult();
 
          if (hiorn == null)
          {
@@ -1434,16 +1458,16 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject toIO = safeGet(ctx, relationship.getToIdentityObject());
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationship.getType());
 
-      Query query = null;
+      Criteria criteria = getHibernateSession(ctx).
+         createCriteria(HibernateIdentityObjectRelationship.class)
+         .setCacheable(true)
+         .createAlias("type", "t")
+         .add(Restrictions.eq("t.name", type.getName()))
+         .add(Restrictions.eq("fromIdentityObject", fromIO))
+         .add(Restrictions.eq("toIdentityObject", toIO));
 
-      if (relationship.getName() == null)
-      {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName()).setCacheable(true);
-      }
-      else
+
+      if (relationship.getName() != null)
       {
          HibernateIdentityObjectRelationshipName relationshipName =
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx)
@@ -1455,18 +1479,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             throw new IdentityException("Relationship name not present in the store");
          }
 
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE_NAME)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setParameter("name", relationship.getName())
-            .setCacheable(true);
+         criteria.createAlias("name", "n").add(Restrictions.eq("n.name", relationship.getName()));
       }
 
 
       try
       {
-         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)query.uniqueResult();
+         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)criteria.uniqueResult();
 
          Hibernate.initialize(hibernateRelationship.getProperties());
          
@@ -1484,18 +1503,17 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject toIO = safeGet(ctx, relationship.getToIdentityObject());
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationship.getType());
 
-      Query query = null;
+       Criteria criteria = getHibernateSession(ctx).
+         createCriteria(HibernateIdentityObjectRelationship.class)
+         .setCacheable(true)
+         .createAlias("type", "t")
+         .add(Restrictions.eq("t.name", type.getName()))
+         .add(Restrictions.eq("fromIdentityObject", fromIO))
+         .add(Restrictions.eq("toIdentityObject", toIO));
 
-      if (relationship.getName() == null)
+      if (relationship.getName() != null)
       {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setCacheable(true);
-      }
-      else
-      {
+
          HibernateIdentityObjectRelationshipName relationshipName =
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx)
                .createCriteria(HibernateIdentityObjectRelationshipName.class).add(Restrictions.eq("name", relationship.getName()))
@@ -1507,18 +1525,14 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             throw new IdentityException("Relationship name not present in the store");
          }
 
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE_NAME)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setParameter("name", relationship.getName())
-            .setCacheable(true);
+         criteria.createAlias("name", "n").add(Restrictions.eq("n.name", relationship.getName()));
+
       }
 
 
       try
       {
-         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)query.uniqueResult();
+         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)criteria.uniqueResult();
 
          hibernateRelationship.getProperties().putAll(properties);
       }
@@ -1534,17 +1548,15 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject toIO = safeGet(ctx, relationship.getToIdentityObject());
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationship.getType());
 
-      Query query = null;
+       Criteria criteria = getHibernateSession(ctx).
+         createCriteria(HibernateIdentityObjectRelationship.class)
+         .setCacheable(true)
+         .createAlias("type", "t")
+         .add(Restrictions.eq("t.name", type.getName()))
+         .add(Restrictions.eq("fromIdentityObject", fromIO))
+         .add(Restrictions.eq("toIdentityObject", toIO));
 
       if (relationship.getName() == null)
-      {
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setCacheable(true);
-      }
-      else
       {
          HibernateIdentityObjectRelationshipName relationshipName =
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx)
@@ -1557,18 +1569,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             throw new IdentityException("Relationship name not present in the store");
          }
 
-         query = getHibernateSession(ctx).createQuery(QUERY_RELATIONSHIP_BY_FROM_TO_TYPE_NAME)
-            .setParameter("fromIO", fromIO)
-            .setParameter("toIO", toIO)
-            .setParameter("typeName", type.getName())
-            .setParameter("name", relationship.getName())
-            .setCacheable(true);
+         criteria.createAlias("name", "n").add(Restrictions.eq("n.name", relationship.getName()));
       }
 
 
       try
       {
-         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)query.uniqueResult();
+         HibernateIdentityObjectRelationship hibernateRelationship = (HibernateIdentityObjectRelationship)criteria.uniqueResult();
 
          Hibernate.initialize(hibernateRelationship.getProperties());
 
@@ -2265,7 +2272,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          hibernateObject.addCredential(hibernateCredential);
 
-         hibernateSession.flush();
+//         hibernateSession.flush();
 
       }
       else
@@ -2285,7 +2292,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
       HibernateIdentityObjectType hibernateType = new HibernateIdentityObjectType(type);
       getHibernateSession(ctx).persist(hibernateType);
-      getHibernateSession(ctx).flush();
+//      getHibernateSession(ctx).flush();
 
    }
 
@@ -2294,7 +2301,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
       HibernateIdentityObjectRelationshipType hibernateType = new HibernateIdentityObjectRelationshipType(type);
       getHibernateSession(ctx).persist(hibernateType);
-      getHibernateSession(ctx).flush();
+//      getHibernateSession(ctx).flush();
    }
 
 

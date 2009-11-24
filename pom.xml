@@ -54,7 +54,6 @@
             <module>picketlink-idm-docs</module>
             <module>integration</module>
             <module>assembly</module>
-
          </modules>
          <properties>
             <skipTests>true</skipTests>

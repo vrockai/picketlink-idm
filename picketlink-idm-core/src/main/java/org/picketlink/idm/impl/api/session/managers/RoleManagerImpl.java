@@ -279,7 +279,15 @@ public class RoleManagerImpl extends AbstractManager implements RoleManager, Ser
 
       IdentityObjectRelationship rel = getRepository().createRelationship(getInvocationContext(), createIdentityObject(group), createIdentityObject(user), ROLE, roleType.getName(), false);
 
-      Role role = new SimpleRole(new SimpleRoleType(rel.getName()), createUser(rel.getToIdentityObject()), createGroup(rel.getFromIdentityObject()));
+
+
+
+      Role role = null;
+
+      if (rel != null)
+      {
+         role = new SimpleRole(roleType, user, group); 
+      }
 
       if (cache != null)
       {
