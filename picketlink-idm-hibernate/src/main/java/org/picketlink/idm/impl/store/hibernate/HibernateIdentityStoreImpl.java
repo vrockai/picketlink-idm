@@ -536,7 +536,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             relationship.getFromIdentityObject().getFromRelationships().remove(relationship);
             relationship.getToIdentityObject().getToRelationships().remove(relationship);
             hibernateSession.delete(relationship);
-//            hibernateSession.flush();
+            hibernateSession.flush();
          }
          
          HibernateIdentityObjectRelationship[] to =  new HibernateIdentityObjectRelationship[hibernateObject.getToRelationships().size()];      
@@ -546,12 +546,12 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             relationship.getToIdentityObject().getToRelationships().remove(relationship);
 
             hibernateSession.delete(relationship);
-//            hibernateSession.flush();
+            hibernateSession.flush();
 
          }
 
          hibernateSession.delete(hibernateObject);
-//         hibernateSession.flush();
+         hibernateSession.flush();
          
       }
       catch (Exception e)
@@ -910,7 +910,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          Session session = getHibernateSession(ctx);
          session.persist(relationship);
-//         session.flush();
+         session.flush();
 
       }
       catch (HibernateException e)
@@ -988,7 +988,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          fromIO.getFromRelationships().remove(relationship);
          toIO.getToRelationships().remove(relationship);
          getHibernateSession(ctx).delete(relationship);
-//         getHibernateSession(ctx).flush();
+         getHibernateSession(ctx).flush();
       }
       catch (HibernateException e)
       {
@@ -1034,7 +1034,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                relationship.getFromIdentityObject().getFromRelationships().remove(relationship);
                relationship.getToIdentityObject().getToRelationships().remove(relationship);
                getHibernateSession(ctx).delete(relationship);
-//               getHibernateSession(ctx).flush();
+               getHibernateSession(ctx).flush();
             }
             catch (HibernateException e)
             {
@@ -1144,7 +1144,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          hiorn = new HibernateIdentityObjectRelationshipName(name, realm);
          getHibernateSession(ctx).persist(hiorn);
-//         getHibernateSession(ctx).flush();
+         getHibernateSession(ctx).flush();
 
 
       }
@@ -2272,7 +2272,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          hibernateObject.addCredential(hibernateCredential);
 
-//         hibernateSession.flush();
+         hibernateSession.flush();
 
       }
       else
@@ -2292,7 +2292,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
       HibernateIdentityObjectType hibernateType = new HibernateIdentityObjectType(type);
       getHibernateSession(ctx).persist(hibernateType);
-//      getHibernateSession(ctx).flush();
+      getHibernateSession(ctx).flush();
 
    }
 
@@ -2301,7 +2301,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
       HibernateIdentityObjectRelationshipType hibernateType = new HibernateIdentityObjectRelationshipType(type);
       getHibernateSession(ctx).persist(hibernateType);
-//      getHibernateSession(ctx).flush();
+      getHibernateSession(ctx).flush();
    }
 
 
