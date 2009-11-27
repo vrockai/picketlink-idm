@@ -28,15 +28,15 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="class" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="external-config" type="{urn:picketlink:idm:config:v1_0_0_cr1}external-configType"/>
- *         &lt;element name="supported-relationship-types" type="{urn:picketlink:idm:config:v1_0_0_cr1}supported-relationship-typesType"/>
- *         &lt;element name="supported-identity-object-types" type="{urn:picketlink:idm:config:v1_0_0_cr1}supported-identity-object-typesType"/>
+ *         &lt;element name="external-config" type="{urn:picketlink:idm:config:v1_0_0_ga}external-configType"/>
+ *         &lt;element name="supported-relationship-types" type="{urn:picketlink:idm:config:v1_0_0_ga}supported-relationship-typesType"/>
+ *         &lt;element name="supported-identity-object-types" type="{urn:picketlink:idm:config:v1_0_0_ga}supported-identity-object-typesType"/>
  *         &lt;element name="options">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_ga}optionType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -229,7 +229,7 @@ public class IdentityStoreType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_ga}optionType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>

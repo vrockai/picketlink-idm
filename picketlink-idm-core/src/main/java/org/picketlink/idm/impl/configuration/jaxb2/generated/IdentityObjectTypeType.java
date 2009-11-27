@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="relationship" type="{urn:picketlink:idm:config:v1_0_0_cr1}relationshipType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="relationship" type="{urn:picketlink:idm:config:v1_0_0_ga}relationshipType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="attribute" type="{urn:picketlink:idm:config:v1_0_0_cr1}attributeType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="attribute" type="{urn:picketlink:idm:config:v1_0_0_ga}attributeType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -65,7 +65,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_ga}optionType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -231,7 +231,7 @@ public class IdentityObjectTypeType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="attribute" type="{urn:picketlink:idm:config:v1_0_0_cr1}attributeType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="attribute" type="{urn:picketlink:idm:config:v1_0_0_ga}attributeType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -350,7 +350,7 @@ public class IdentityObjectTypeType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="option" type="{urn:picketlink:idm:config:v1_0_0_ga}optionType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -409,7 +409,7 @@ public class IdentityObjectTypeType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="relationship" type="{urn:picketlink:idm:config:v1_0_0_cr1}relationshipType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="relationship" type="{urn:picketlink:idm:config:v1_0_0_ga}relationshipType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>

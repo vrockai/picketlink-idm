@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="identity-mapping" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="group-type-mapping" type="{urn:picketlink:idm:config:v1_0_0_cr1}group-type-mappingType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="group-type-mapping" type="{urn:picketlink:idm:config:v1_0_0_ga}group-type-mappingType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="attribute-stores" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="identity-stores" type="{urn:picketlink:idm:config:v1_0_0_cr1}identity-storesType"/>
+ *         &lt;element name="identity-stores" type="{urn:picketlink:idm:config:v1_0_0_ga}identity-storesType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

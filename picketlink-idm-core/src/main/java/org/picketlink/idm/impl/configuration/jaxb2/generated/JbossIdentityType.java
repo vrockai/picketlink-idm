@@ -24,9 +24,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="realms" type="{urn:picketlink:idm:config:v1_0_0_cr1}realmsType"/>
- *         &lt;element name="repositories" type="{urn:picketlink:idm:config:v1_0_0_cr1}repositoriesType"/>
- *         &lt;element name="stores" type="{urn:picketlink:idm:config:v1_0_0_cr1}storesType"/>
+ *         &lt;element name="realms" type="{urn:picketlink:idm:config:v1_0_0_ga}realmsType"/>
+ *         &lt;element name="repositories" type="{urn:picketlink:idm:config:v1_0_0_ga}repositoriesType"/>
+ *         &lt;element name="stores" type="{urn:picketlink:idm:config:v1_0_0_ga}storesType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

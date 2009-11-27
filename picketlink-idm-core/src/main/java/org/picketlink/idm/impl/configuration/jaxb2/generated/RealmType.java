@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="repository-id-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="identity-type-mappings" type="{urn:picketlink:idm:config:v1_0_0_cr1}identity-type-mappingsType" minOccurs="0"/>
- *         &lt;element name="options" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionsType" minOccurs="0"/>
+ *         &lt;element name="identity-type-mappings" type="{urn:picketlink:idm:config:v1_0_0_ga}identity-type-mappingsType" minOccurs="0"/>
+ *         &lt;element name="options" type="{urn:picketlink:idm:config:v1_0_0_ga}optionsType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="realm" type="{urn:picketlink:idm:config:v1_0_0_cr1}realmType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="realm" type="{urn:picketlink:idm:config:v1_0_0_ga}realmType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

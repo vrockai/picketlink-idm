@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="identity-store-id" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="identity-object-types" type="{urn:picketlink:idm:config:v1_0_0_cr1}identity-object-typesType"/>
- *         &lt;element name="options" type="{urn:picketlink:idm:config:v1_0_0_cr1}optionsType"/>
+ *         &lt;element name="identity-object-types" type="{urn:picketlink:idm:config:v1_0_0_ga}identity-object-typesType"/>
+ *         &lt;element name="options" type="{urn:picketlink:idm:config:v1_0_0_ga}optionsType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

@@ -14,7 +14,7 @@
                     xmlns:xi="http://www.w3.org/2001/XInclude"/>
     
        <releaseinfo>
-          1.0.0.CR1
+          1.0.0.GA
        </releaseinfo>
                 
     
@@ -603,9 +603,9 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
            <programlisting>
               <![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
-<jboss-identity xmlns="urn:picketlink:idm:config:v1_0_0_cr1"
+<jboss-identity xmlns="urn:picketlink:idm:config:v1_0_0_ga"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="urn:picketlink:idm:config:v1_0_0_cr1 identity-config.xsd">
+                xsi:schemaLocation="urn:picketlink:idm:config:v1_0_0_ga identity-config.xsd">
     <realms>
         <realm>
             <id>realm://JBossIdentityExample/SampleRealm</id>
@@ -1379,17 +1379,17 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
                 </para>
                 <programlisting>
                     <![CDATA[
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateRealm"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObject"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectCredential"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectCredentialType"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectAttribute"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectTextAttribute"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectBinaryAttribute"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectType"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectRelationship"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectRelationshipType"/>
-<mapping class="org.picketlink.idm.impl.model.hibernate.HibernateIdentityObjectRelationshipName"/>
+<mapping resource="mappings/HibernateRealm.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectCredentialBinaryValue.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectAttributeBinaryValue.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObject.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectCredential.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectCredentialType.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectAttribute.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectType.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectRelationship.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectRelationshipType.hbm.xml"/>
+<mapping resource="mappings/HibernateIdentityObjectRelationshipName.hbm.xml"/>
                             ]]>
                 </programlisting>
 
@@ -1686,9 +1686,9 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
           <programlisting>
              <![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
-<jboss-identity xmlns="urn:picketlink:idm:config:v1_0_0_cr1"
+<jboss-identity xmlns="urn:picketlink:idm:config:v1_0_0_ga"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="urn:picketlink:idm:config:v1_0_0_cr1 identity-config.xsd">
+                xsi:schemaLocation="urn:picketlink:idm:config:v1_0_0_ga identity-config.xsd">
    <realms>
       <realm>
          <id>realm://FlexibleRealm</id>

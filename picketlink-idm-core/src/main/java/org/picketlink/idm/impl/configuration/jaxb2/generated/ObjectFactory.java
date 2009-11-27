@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _JbossIdentity_QNAME = new QName("urn:picketlink:idm:config:v1_0_0_cr1", "jboss-identity");
+    private final static QName _JbossIdentity_QNAME = new QName("urn:picketlink:idm:config:v1_0_0_ga", "jboss-identity");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.picketlink.impl.configuration.jaxb2.generated
@@ -276,7 +276,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link JbossIdentityType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "urn:picketlink:idm:config:v1_0_0_cr1", name = "jboss-identity")
+    @XmlElementDecl(namespace = "urn:picketlink:idm:config:v1_0_0_ga", name = "jboss-identity")
     public JAXBElement<JbossIdentityType> createJbossIdentity(JbossIdentityType value) {
         return new JAXBElement<JbossIdentityType>(_JbossIdentity_QNAME, JbossIdentityType.class, null, value);
     }

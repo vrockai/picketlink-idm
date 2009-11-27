@@ -5,5 +5,5 @@
 // Generated on: 2008.12.18 at 03:00:04 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "urn:picketlink:idm:config:v1_0_0_cr1", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "urn:picketlink:idm:config:v1_0_0_ga", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.picketlink.idm.impl.configuration.jaxb2.generated;
