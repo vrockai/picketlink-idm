@@ -116,7 +116,7 @@
       <directory-name>OpenLDAP-23</directory-name>
       <description>ldap://vmg17.mw.lab.eng.bos.redhat.com:389</description>
 
-      <config-file>test-identity-config-openldapds.xml</config-file>
+      <config-file>test-identity-config-openldapd-23.xml</config-file>
       <host>vmg17.mw.lab.eng.bos.redhat.com</host>
       <port>389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
@@ -131,7 +131,7 @@
       <directory-name>OpenLDAP-24</directory-name>
       <description>ldap://vmg12.mw.lab.eng.bos.redhat.com:389</description>
 
-      <config-file>test-identity-config-openldapds.xml</config-file>
+      <config-file>test-identity-config-openldapd-24.xml</config-file>
       <host>vmg12.mw.lab.eng.bos.redhat.com</host>
       <port>389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
