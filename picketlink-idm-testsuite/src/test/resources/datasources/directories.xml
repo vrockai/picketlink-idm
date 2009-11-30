@@ -113,6 +113,36 @@
       <cleanup-dn>o=jbid,dc=my-domain,dc=com</cleanup-dn>
    </directory>
    <directory>
+      <directory-name>OpenLDAP-23</directory-name>
+      <description>ldap://vmg17.mw.lab.eng.bos.redhat.com:389</description>
+
+      <config-file>test-identity-config-openldapds.xml</config-file>
+      <host>vmg17.mw.lab.eng.bos.redhat.com</host>
+      <port>389</port>
+      <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
+      <admin-dn>cn=Manager,dc=my-domain,dc=com</admin-dn>
+      <admin-password>hatetothinkofapassword</admin-password>
+
+      <populate-ldif>ldap/initial-empty-openldapds.ldif</populate-ldif>
+
+      <cleanup-dn>o=jbid,dc=my-domain,dc=com</cleanup-dn>
+   </directory>
+   <directory>
+      <directory-name>OpenLDAP-24</directory-name>
+      <description>ldap://vmg12.mw.lab.eng.bos.redhat.com:389</description>
+
+      <config-file>test-identity-config-openldapds.xml</config-file>
+      <host>vmg12.mw.lab.eng.bos.redhat.com</host>
+      <port>389</port>
+      <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
+      <admin-dn>cn=Manager,dc=my-domain,dc=com</admin-dn>
+      <admin-password>hatetothinkofapassword</admin-password>
+
+      <populate-ldif>ldap/initial-empty-openldapds.ldif</populate-ldif>
+
+      <cleanup-dn>o=jbid,dc=my-domain,dc=com</cleanup-dn>
+   </directory>
+   <directory>
       <directory-name>MSAD-2k3</directory-name>
       <description>ldap://dev44.qa.atl.jboss.com:389</description>
 
