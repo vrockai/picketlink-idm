@@ -488,11 +488,25 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
                                                                       IdentityObjectSearchCriteria criteria)
    {
       List<T> results = new LinkedList<T>();
-      for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+
+      if (criteria.getMaxResults() == 0)
       {
-         if (i < objects.size())
+         for (int i = criteria.getFirstResult(); i < objects.size(); i++)
          {
-            results.add(objects.get(i));
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
+         }
+      }
+      else
+      {
+         for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+         {
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
          }
       }
       return results;

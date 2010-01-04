@@ -2649,12 +2649,27 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    //TODO: dummy and inefficient temporary workaround. Need to be implemented with ldap request control
    private List<IdentityObject> cutPageFromResults(List<IdentityObject> objects, IdentityObjectSearchCriteria criteria)
    {
+
       List<IdentityObject> results = new LinkedList<IdentityObject>();
-      for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+
+      if (criteria.getMaxResults() == 0)
       {
-         if (i < objects.size())
+         for (int i = criteria.getFirstResult(); i < objects.size(); i++)
          {
-            results.add(objects.get(i));
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
+         }
+      }
+      else
+      {
+         for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+         {
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
          }
       }
       return results;

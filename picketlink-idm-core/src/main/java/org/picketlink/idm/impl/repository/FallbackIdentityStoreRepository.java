@@ -646,7 +646,8 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       // For any IdentityStore that supports named relationships...
       for (IdentityStore identityStore : configuredIdentityStores)
       {
-         if (!identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
+         if (relationshipType.getName() != null &&
+            !identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
          {
             continue;
          }
@@ -888,7 +889,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
       }
 
-      return mdMap;
+      return mdMap;                                                                          
    }
 
    public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext, IdentityObject identity, String name) throws IdentityException
@@ -980,7 +981,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       if (isAllowNotDefinedAttributes())
       {
-         defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
+          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+          {
+              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+          }
+          defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
       }
       else
       {
@@ -1042,6 +1047,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       if (isAllowNotDefinedAttributes())
       {
+          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+          {
+              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+          }
+
          defaultAttributeStore.addAttributes(defaultCtx, identity, attributesToAdd);
       }
       else
@@ -1102,6 +1112,10 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       if (isAllowNotDefinedAttributes())
       {
+          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+          {
+              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+          }
          defaultAttributeStore.removeAttributes(defaultCtx, identity, leftAttrs.toArray(new String[leftAttrs.size()]));
       }
       else
@@ -1177,12 +1191,27 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    //TODO: other way
    private List<IdentityObject> cutPageFromResults(List<IdentityObject> objects, IdentityObjectSearchCriteria criteria)
    {
+
       List<IdentityObject> results = new LinkedList<IdentityObject>();
-      for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+
+      if (criteria.getMaxResults() == 0)
       {
-         if (i < objects.size())
+         for (int i = criteria.getFirstResult(); i < objects.size(); i++)
          {
-            results.add(objects.get(i));
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
+         }
+      }
+      else
+      {
+         for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+         {
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
          }
       }
       return results;
