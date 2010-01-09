@@ -34,6 +34,7 @@
       <admin-password>password</admin-password>
       <!--ldif from which LDAP will be populated before each test-->
       <populate-ldif>ldap/initial-empty-opends.ldif</populate-ldif>
+      <!--<populate-ldif></populate-ldif>-->
       <!--DN that will be removed to perform cleanup after each test-->
       <cleanup-dn>o=jbid,dc=example,dc=com</cleanup-dn>
    </directory>

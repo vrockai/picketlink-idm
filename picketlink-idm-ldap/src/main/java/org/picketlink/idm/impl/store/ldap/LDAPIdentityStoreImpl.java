@@ -160,6 +160,55 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          attributesMetaData.put(identityObjectTypeMetaData.getName(), metadataMap);
 
       }
+
+      if (configuration.isCreateMissingContexts())
+      {
+         // Get all configured DNs
+         Set<String> dns = new HashSet<String>();
+
+         if (configuration.getRelationshipNamesCtxDNs() != null)
+         {
+            for (String dn : configuration.getRelationshipNamesCtxDNs())
+            {
+               dns.add(dn);
+            }
+         }
+         
+         for (LDAPIdentityObjectTypeConfiguration typeCfg : configuration.getTypesConfiguration().values())
+         {
+            for (String dn : typeCfg.getCtxDNs())
+            {
+               dns.add(dn);
+            }
+         }
+
+         DirContext ctx = (DirContext)createIdentityStoreSession().getSessionContext();
+
+         try
+         {
+
+            for (String dn : dns)
+            {
+               checkCtx(ctx, dn);
+            }
+         }
+         catch (Exception e)
+         {
+            throw new IdentityException("Cannot create entries in LDAP during store initialization: " + e);
+         }
+         finally
+         {
+            try
+            {
+               ctx.close();
+            }
+            catch (NamingException e)
+            {
+               throw new IdentityException("Cannot close LDAP connection: ", e);
+            }
+         }
+      }
+
    }
 
    public IdentityStoreSession createIdentityStoreSession()
@@ -177,7 +226,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return supportedFeatures;
    }
 
-   public IdentityObject createIdentityObject(IdentityStoreInvocationContext invocationCtx, String name, IdentityObjectType identityObjectType) throws IdentityException
+   public IdentityObject createIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                              String name,
+                                              IdentityObjectType identityObjectType) throws IdentityException
    {
       return createIdentityObject(invocationCtx, name, identityObjectType, null);
    }
@@ -350,6 +401,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
 
          String[] entryCtxs = getTypeConfiguration(ctx, identityType).getCtxDNs();
+         String scope = getTypeConfiguration(ctx, identityType).getEntrySearchScope();
 
          //log.debug("Search filter: " + filter);
          List sr = searchIdentityObjects(ctx, 
@@ -357,6 +409,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             filter, 
             null, 
             new String[]{getTypeConfiguration(ctx, identityType).getIdAttributeName()},
+            scope,
             null);
 
          return sr.size();
@@ -397,6 +450,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
+         String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
 
 
          if (filter != null && filter.length() > 0)
@@ -407,6 +461,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                filter,
                filterArgs,
                new String[]{getTypeConfiguration(invocationCtx, type).getIdAttributeName()},
+               scope,
                null);
          }
          else
@@ -418,6 +473,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                filter,
                null,
                new String[]{getTypeConfiguration(invocationCtx, type).getIdAttributeName()},
+               scope,
                null);
          }
 
@@ -609,6 +665,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          List<SearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
+         String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
 
          if (filter != null && filter.length() > 0)
          {
@@ -619,6 +676,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                filterArgs,
                new String[]{typeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
          else
@@ -629,6 +687,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                null,
                new String[]{typeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
 
@@ -697,7 +756,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return objects;
    }
 
-   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx, IdentityObjectType type) throws IdentityException
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                                        IdentityObjectType type) throws IdentityException
    {
       return findIdentityObject(invocationCtx, type, null);
    }
@@ -1002,6 +1062,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          List<SearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
+         String scope = checkedTypeConfiguration.getEntrySearchScope();
 
          if (filter != null && filter.length() > 0)
          {
@@ -1012,6 +1073,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                filterArgs,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
          else
@@ -1022,6 +1084,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                null,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
 
@@ -1286,6 +1349,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          List<SearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
+         String scope = checkedTypeConfiguration.getEntrySearchScope();
 
          if (filter != null && filter.length() > 0)
          {
@@ -1296,6 +1360,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                filterArgs,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
          else
@@ -1306,6 +1371,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                null,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
 
@@ -2376,6 +2442,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          List<SearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
+         String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
 
          if (filter != null && filter.length() > 0)
          {
@@ -2386,6 +2453,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                filterArgs,
                new String[]{typeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
          else
@@ -2396,6 +2464,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "(&(" + filter + ")" + af.toString() + ")",
                null,
                new String[]{typeConfiguration.getIdAttributeName()},
+               scope,
                requestControls);
          }
 
@@ -2479,6 +2548,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                    String filter,
                                                    Object[] filterArgs,
                                                    String[] returningAttributes,
+                                                   String searchScope,
                                                    Control[] requestControls) throws NamingException, IdentityException
    {
 
@@ -2495,7 +2565,17 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       {
 
          SearchControls searchControls = new SearchControls();
-         searchControls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+         if (searchScope != null)
+         {
+            if (searchScope.equalsIgnoreCase("subtree"))
+            {
+               searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            }
+            else if (searchScope.equalsIgnoreCase("object"))
+            {
+               searchControls.setSearchScope(SearchControls.OBJECT_SCOPE);
+            }
+         }
          searchControls.setReturningObjFlag(true);
          searchControls.setTimeLimit(getConfiguration(ctx).getSearchTimeLimit());
 
@@ -2673,6 +2753,173 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
       return results;
+   }
+
+   protected void checkCtx(DirContext ctx, String dn) throws Exception
+   {
+      String[] parts = dn.split(",");
+
+      // Reverse array so we start with the root DN
+
+      int l  = 0;
+      int r = parts.length-1;
+
+      while (l < r)
+      {
+         String temp = parts[l];
+         parts[l]  = parts[r];
+         parts[r] = temp;
+
+         l++;
+         r--;
+      }
+
+      // Discover root DN
+      String rootDN = "";
+      DirContext root = null;
+
+      for (String part : parts)
+      {
+
+         if (rootDN.length() > 0)
+         {
+            rootDN = part + "," + rootDN;
+         }
+         else
+         {
+            rootDN = part;
+         }
+
+
+         try
+         {
+            root = (DirContext)ctx.lookup(rootDN);
+         }
+         catch (NamingException e)
+         {
+            // Ignore
+         }
+
+         if (root != null)
+         {
+            break;
+         }
+      }
+
+
+      DirContext dx = root;
+
+      String parsedDN = "";
+
+      try
+      {
+         for (String part : parts)
+         {
+            if (parsedDN.length() > 0)
+            {
+               parsedDN = part + "," + parsedDN;
+            }
+            else
+            {
+               parsedDN = part;
+            }
+
+
+            if (parsedDN.length() > rootDN.length())
+            {
+               dx = obtainOrCreateContext(dx, part);
+            }
+
+         }
+      }
+      finally
+      {
+         if (dx != null)
+         {
+            dx.close();
+         }
+      }
+
+
+   }
+
+
+   protected DirContext obtainOrCreateContext(DirContext ctx, String dn) throws Exception
+   {
+
+      if (ctx == null)
+      {
+         throw new IllegalArgumentException("DirContext is null");
+      }
+      if (dn == null || dn.length() == 0 || !dn.contains("="))
+      {
+         throw new IllegalArgumentException("DN doens't have proper format: " + dn);
+      }
+
+      DirContext subContext = null;
+      try
+      {
+         subContext = (LdapContext)ctx.lookup(dn);
+      }
+      catch (NamingException e)
+      {
+         // Ignore
+      }
+
+      if (subContext != null)
+      {
+         ctx.close();
+         return subContext;
+      }
+
+      // Create new context
+      Attributes attrs = new BasicAttributes(true);
+
+      String[] parts = dn.split("=");
+
+      // Set the dn attr
+      Attribute attr = new BasicAttribute(parts[0]);
+      attr.add(parts[1]);
+      attrs.put(attr);
+
+      // objectClass=top
+      attr = new BasicAttribute("objectClass");
+      attr.add("top");
+
+      if (parts[0].equalsIgnoreCase("dc"))
+      {
+         attr.add("dcObject");
+      }
+      else if (parts[0].equalsIgnoreCase("o"))
+      {
+         attr.add("organization");
+      }
+      else if (parts[0].equalsIgnoreCase("ou"))
+      {
+         attr.add("organizationalUnit");
+      }
+      else if (parts[0].equalsIgnoreCase("cn"))
+      {
+         attr.add("organizationalRole");
+      }
+      else if (parts[0].equalsIgnoreCase("c"))
+      {
+         attr.add("country");
+      }
+      
+      attrs.put(attr);
+
+      try
+      {
+         subContext = ctx.createSubcontext(dn, attrs);
+      }
+      finally
+      {
+         ctx.close();
+      }
+      return subContext;
+
+
    }
 
 }

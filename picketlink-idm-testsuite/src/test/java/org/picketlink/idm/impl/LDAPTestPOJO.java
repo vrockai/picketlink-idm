@@ -142,7 +142,12 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
    public void populateClean() throws Exception
    {
-      populateLDIF(directoryConfig.getPopulateLdif());
+
+      String ldif = directoryConfig.getPopulateLdif();
+      if (ldif != null && ldif.length() != 0)
+      {
+         populateLDIF(directoryConfig.getPopulateLdif());
+      }
    }
 
    public void populateLDIF(String ldif) throws Exception

@@ -915,6 +915,10 @@
                   <name>searchTimeLimit</name>
                   <value>10000</value>
                </option>
+              <!--<option>-->
+                  <!--<name>createMissingContexts</name>-->
+                  <!--<value>true</value>-->
+               <!--</option>-->
             </options>
          </identity-store>
       </identity-stores>

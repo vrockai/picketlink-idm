@@ -84,4 +84,6 @@ public interface LDAPIdentityStoreConfiguration
 
    boolean isSortExtensionSupported();
 
+   boolean isCreateMissingContexts();
+
 }

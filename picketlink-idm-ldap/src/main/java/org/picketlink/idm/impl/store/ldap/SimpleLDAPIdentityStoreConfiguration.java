@@ -84,6 +84,8 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final boolean sortExtensionSupported;
 
+   private final boolean createMissingContexts;
+
 
    // Consts
 
@@ -128,6 +130,8 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final String NAMED_RELATIONSHIP_MEMBER_ATTRIBUTE_NAME = "namedRelationshipMemberAttributeName";
 
    public static final String SORT_EXTENSION_SUPPORTED = "sortExtensionSupported";
+
+   public static final String CREATE_MISSING_CONTEXTS = "createMissingContexts";
 
    public SimpleLDAPIdentityStoreConfiguration(IdentityStoreConfigurationMetaData storeMD)
    {
@@ -181,6 +185,15 @@ public class SimpleLDAPIdentityStoreConfiguration
          this.sortExtensionSupported = true;
       }
 
+      String createMissingContexts = storeMD.getOptionSingleValue(CREATE_MISSING_CONTEXTS);
+      if (createMissingContexts != null && createMissingContexts.equalsIgnoreCase("true"))
+      {
+         this.createMissingContexts = true;
+      }
+      else
+      {
+         this.createMissingContexts = false;
+      }
 
       Map<String, LDAPIdentityObjectTypeConfiguration> types = new HashMap<String, LDAPIdentityObjectTypeConfiguration>();
 
@@ -478,5 +491,10 @@ public class SimpleLDAPIdentityStoreConfiguration
    public boolean isSortExtensionSupported()
    {
       return sortExtensionSupported;
+   }
+
+   public boolean isCreateMissingContexts()
+   {
+      return createMissingContexts;
    }
 }
