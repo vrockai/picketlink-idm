@@ -42,7 +42,11 @@ public class OrganizationTestCase extends IdentityTestPOJO implements APITestCon
 
    private String samplePortalRealmName = "realm://portal/SamplePortal/DB";
 
+   private String samplePortalRealmCloneName = "realm://portal/SamplePortal/DB-clone";
+
    private String sampleOrganizationRealmName = "realm://RedHat/DB";
+
+   private String sampleOrganizationRealmCloneName = "realm://RedHat/DB-clone";
 
 
    @Create
@@ -72,6 +76,7 @@ public class OrganizationTestCase extends IdentityTestPOJO implements APITestCon
    {
 
       orgTest.testRedHatOrganization(getSampleOrganizationRealmName());
+      orgTest.testRedHatOrganization(getSampleOrganizationRealmCloneName());
    }
 
    @Test
@@ -79,6 +84,7 @@ public class OrganizationTestCase extends IdentityTestPOJO implements APITestCon
    {
 
       orgTest.testSamplePortal(getSamplePortalRealmName());
+      orgTest.testSamplePortal(getSamplePortalRealmCloneName());
 
    }
 
@@ -102,5 +108,25 @@ public class OrganizationTestCase extends IdentityTestPOJO implements APITestCon
    public void setSampleOrganizationRealmName(String sampleOrganizationRealmName)
    {
       this.sampleOrganizationRealmName = sampleOrganizationRealmName;
+   }
+
+   public String getSamplePortalRealmCloneName()
+   {
+      return samplePortalRealmCloneName;
+   }
+
+   public void setSamplePortalRealmCloneName(String samplePortalRealmCloneName)
+   {
+      this.samplePortalRealmCloneName = samplePortalRealmCloneName;
+   }
+
+   public String getSampleOrganizationRealmCloneName()
+   {
+      return sampleOrganizationRealmCloneName;
+   }
+
+   public void setSampleOrganizationRealmCloneName(String sampleOrganizationRealmCloneName)
+   {
+      this.sampleOrganizationRealmCloneName = sampleOrganizationRealmCloneName;
    }
 }

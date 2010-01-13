@@ -20,8 +20,42 @@
             </option>
          </options>
       </realm>
+     <realm>
+         <id>realm://RedHat/DB-clone</id>
+         <repository-id-ref>RedHat Repository DB</repository-id-ref>
+         <identity-type-mappings>
+            <user-mapping>USER</user-mapping>
+         </identity-type-mappings>
+         <options>
+            <option>
+               <name>cache.providerClass</name>
+               <value>org.picketlink.idm.impl.cache.JBossCacheAPICacheProviderImpl</value>
+            </option>
+            <option>
+               <name>cache.configFile</name>
+               <value>jboss-cache.xml</value>
+            </option>
+         </options>
+      </realm>
       <realm>
          <id>realm://portal/SamplePortal/DB</id>
+         <repository-id-ref>Sample Portal Repository DB</repository-id-ref>
+         <identity-type-mappings>
+            <user-mapping>USER</user-mapping>
+         </identity-type-mappings>
+         <options>
+            <option>
+               <name>cache.providerClass</name>
+               <value>org.picketlink.idm.impl.cache.JBossCacheAPICacheProviderImpl</value>
+            </option>
+            <option>
+               <name>cache.configFile</name>
+               <value>jboss-cache.xml</value>
+            </option>
+         </options>
+      </realm>
+     <realm>
+         <id>realm://portal/SamplePortal/DB-clone</id>
          <repository-id-ref>Sample Portal Repository DB</repository-id-ref>
          <identity-type-mappings>
             <user-mapping>USER</user-mapping>

@@ -873,6 +873,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject fromIO = safeGet(ctx, fromIdentity);      
       HibernateIdentityObject toIO = safeGet(ctx, toIdentity);
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationshipType);
+
+      HibernateRealm realm = getRealm(getHibernateSession(ctx), ctx);
       
       if (!getSupportedFeatures().isRelationshipTypeSupported(fromIO.getIdentityType(), toIO.getIdentityType(), relationshipType))
       {
@@ -890,7 +892,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          HibernateIdentityObjectRelationshipName relationshipName =
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx).
-               createCriteria(HibernateIdentityObjectRelationshipName.class).setCacheable(true).add(Restrictions.eq("name", name)).
+               createCriteria(HibernateIdentityObjectRelationshipName.class).
+               setCacheable(true).
+               createAlias("realm", "r").
+               add(Restrictions.eq("name", name)).
+               add(Restrictions.eq("r.name", realm.getName())).
                uniqueResult();
 
          if (relationshipName == null)
@@ -2079,7 +2085,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       Session session = getHibernateSession(invocationCtx);
 
-
+      HibernateRealm realm = getRealm(session, invocationCtx);
 
       if (attribute.getValues() == null || attribute.getValues().size() == 0)
       {
@@ -2094,7 +2100,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
 
       StringBuffer queryString = new StringBuffer("select a from HibernateIdentityObjectAttribute a where a.identityObject.identityType = :identityType " +
-         "and a.name = :attributeName");
+         "and a.name = :attributeName and a.identityObject.realm = :realm");
 
       if (attrDuctTypeText)
       {
@@ -2113,7 +2119,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       Query q = session.createQuery(queryString.toString());
       q.setParameter("identityType", hiot)
-      .setParameter("attributeName", attrMappedName);
+      .setParameter("attributeName", attrMappedName)
+      .setParameter("realm", realm);
 
       if (attrDuctTypeText)
       {

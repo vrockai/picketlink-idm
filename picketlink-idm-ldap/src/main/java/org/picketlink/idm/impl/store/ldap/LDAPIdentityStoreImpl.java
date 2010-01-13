@@ -1737,30 +1737,278 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return relationships;
    }
 
-   public String createRelationshipName(IdentityStoreInvocationContext ctx, String name) throws IdentityException, OperationNotSupportedException
+   public String createRelationshipName(IdentityStoreInvocationContext invocationCtx, String name) throws IdentityException, OperationNotSupportedException
    {
-      throw new OperationNotSupportedException("Named relationships are not supported by this implementation of LDAP IdentityStore");
+      if (name == null)
+      {
+         throw new IdentityException("Name cannot be null");
+      }
+
+
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(toString() + ".createRelationshipName with name: " + name);
+      }
+
+      LdapContext ldapContext = getLDAPContext(invocationCtx);
+
+      try
+      {
+         //  If there are many contexts specified in the configuration the first one is used
+         LdapContext ctx = (LdapContext)ldapContext.lookup(getConfiguration(invocationCtx).getRelationshipNamesCtxDNs()[0]);
+
+         Attributes attrs = new BasicAttributes(true);
+
+         //create attribute using provided configuration
+         Map<String, String[]> attributesToAdd = getConfiguration(invocationCtx).
+            getRelationshipNameCreateEntryAttributeValues();
+
+         //attributes
+         for (Iterator it1 = attributesToAdd.keySet().iterator(); it1.hasNext();)
+         {
+            String attributeName = (String)it1.next();
+
+
+            Attribute attr = new BasicAttribute(attributeName);
+            String[] attributeValues = attributesToAdd.get(attributeName);
+
+            //values
+
+            for (String attrValue : attributeValues)
+            {
+               attr.add(attrValue);
+            }
+
+            attrs.put(attr);
+         }
+
+         // Make it RFC 2253 compliant
+         LdapName validLDAPName = new LdapName(getConfiguration(invocationCtx).getRelationshipNameAttributeName().concat("=").concat(name));
+
+         log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
+         ctx.createSubcontext(validLDAPName, attrs);
+      }
+      catch (Exception e)
+      {
+         throw new IdentityException("Failed to create relationship name object", e);
+      }
+      finally
+      {
+         try
+         {
+            ldapContext.close();
+         }
+         catch (NamingException e)
+         {
+            throw new IdentityException("Failed to close LDAP connection", e);
+         }
+      }
+
+      return name;
    }
 
-   public String removeRelationshipName(IdentityStoreInvocationContext ctx, String name)  throws IdentityException, OperationNotSupportedException
+   public String removeRelationshipName(IdentityStoreInvocationContext invocationCtx, String name)  throws IdentityException, OperationNotSupportedException
    {
-      throw new OperationNotSupportedException("Named relationships are not supported by this implementation of LDAP IdentityStore");
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(toString() + ".removeRelationshipName with name: " + name);
+      }
+
+      Context ctx = null;
+      try
+      {
+
+         if (name == null)
+         {
+            throw new IdentityException("relationship name canot be null");
+         }
+
+         String filter = getConfiguration(invocationCtx).getRelationshipNameSearchFilter();
+         List sr = null;
+
+
+         String[] entryCtxs = getConfiguration(invocationCtx).getRelationshipNamesCtxDNs();
+         String scope = getConfiguration(invocationCtx).getRelationshipNameSearchScope();
+
+
+         if (filter != null && filter.length() > 0)
+         {
+            Object[] filterArgs = {name};
+            sr = searchIdentityObjects(invocationCtx,
+               entryCtxs,
+               filter,
+               filterArgs,
+               new String[]{getConfiguration(invocationCtx).getRelationshipNameAttributeName()},
+               scope,
+               null);
+         }
+         else
+         {
+            //search all entries
+            filter = "(".concat(getConfiguration(invocationCtx).getRelationshipNameAttributeName()).concat("=").concat(name).concat(")");
+            sr = searchIdentityObjects(invocationCtx,
+               entryCtxs,
+               filter,
+               null,
+               new String[]{getConfiguration(invocationCtx).getRelationshipNameAttributeName()},
+               scope,
+               null);
+         }
+
+
+         if (sr.size() > 1)
+         {
+            throw new IdentityException("Found more than one relationship name entry: " + name +
+               "; Posible data inconsistency");
+         }
+         SearchResult res = (SearchResult)sr.iterator().next();
+         ctx = (Context)res.getObject();
+         String dn = ctx.getNameInNamespace();
+
+         ctx.unbind(dn);
+
+         ctx.close();
+         return null;
+
+      }
+      catch (NoSuchElementException e)
+      {
+         //log.debug("No identity object found with name: " + name, e);
+      }
+      catch (NamingException e)
+      {
+         throw new IdentityException("relationship name remove failed.", e);
+      }
+      finally
+      {
+         try
+         {
+            if (ctx != null)
+            {
+               ctx.close();
+            }
+         }
+         catch (NamingException e)
+         {
+            throw new IdentityException("Failed to close LDAP connection", e);
+         }
+      }
+
+      return null;
    }
 
-   public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx, IdentityObjectSearchCriteria criteria) throws IdentityException, OperationNotSupportedException
+   public Set<String> getRelationshipNames(IdentityStoreInvocationContext invocationCtx, final IdentityObjectSearchCriteria criteria) throws IdentityException, OperationNotSupportedException
    {
-      throw new OperationNotSupportedException("Named relationships are not supported by this implementation of LDAP IdentityStore");
+
+      //TODO: page control with LDAP request control
+
+      String nameFilter = "*";
+
+      //Filter by name
+      if (criteria != null  && criteria.getFilter() != null)
+      {
+         nameFilter = criteria.getFilter();
+      }
+
+
+      LdapContext ctx = getLDAPContext(invocationCtx);
+
+
+      Set<String> names = new HashSet<String>();
+
+      LDAPIdentityStoreConfiguration config = getConfiguration(invocationCtx);
+
+      try
+      {
+         Control[] requestControls = null;
+
+         StringBuilder af = new StringBuilder();
+
+         String filter = config.getRelationshipNameSearchFilter();
+         List<SearchResult> sr = null;
+
+         String[] entryCtxs = config.getRelationshipNamesCtxDNs();
+         String scope = config.getRelationshipNameSearchScope();
+
+         if (filter != null && filter.length() > 0)
+         {
+
+            Object[] filterArgs = {nameFilter};
+            sr = searchIdentityObjects(invocationCtx,
+               entryCtxs,
+               "(&(" + filter + ")" + af.toString() + ")",
+               filterArgs,
+               new String[]{config.getRelationshipNameAttributeName()},
+               scope,
+               requestControls);
+         }
+         else
+         {
+            filter = "(".concat(config.getRelationshipNameAttributeName()).concat("=").concat(nameFilter).concat(")");
+            sr = searchIdentityObjects(invocationCtx,
+               entryCtxs,
+               "(&(" + filter + ")" + af.toString() + ")",
+               null,
+               new String[]{config.getRelationshipNameAttributeName()},
+               scope,
+               requestControls);
+         }
+
+
+         for (SearchResult res : sr)
+         {
+            ctx = (LdapContext)res.getObject();
+            String dn = ctx.getNameInNamespace();
+            String[] parts = dn.split("=");
+
+            names.add(parts[1]);
+
+         }
+
+         ctx.close();
+
+
+      }
+      catch (NoSuchElementException e)
+      {
+      }
+      catch (Exception e)
+      {
+         throw new IdentityException("relationship names search failed.", e);
+      }
+      finally
+      {
+         try
+         {
+            if (ctx != null)
+            {
+               ctx.close();
+            }
+         }
+         catch (NamingException e)
+         {
+            throw new IdentityException("Failed to close LDAP connection", e);
+         }
+      }
+
+//      if (criteria != null && criteria.isPaged())
+//      {
+//         names = (LinkedList)(cutPageFromResults(names, criteria);
+//      }
+
+      return names;
    }
 
    public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx) throws IdentityException, OperationNotSupportedException
    {
-      throw new OperationNotSupportedException("Named relationships are not supported by this implementation of LDAP IdentityStore");
+      return getRelationshipNames(ctx, (IdentityObjectSearchCriteria)null);
    }
 
    public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectSearchCriteria criteria) throws IdentityException, OperationNotSupportedException
    {
       throw new OperationNotSupportedException("Named relationships are not supported by this implementation of LDAP IdentityStore");
       
+
    }
 
    public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx, IdentityObject identity) throws IdentityException, OperationNotSupportedException
@@ -2727,10 +2975,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    }
 
    //TODO: dummy and inefficient temporary workaround. Need to be implemented with ldap request control
-   private List<IdentityObject> cutPageFromResults(List<IdentityObject> objects, IdentityObjectSearchCriteria criteria)
+   private <T> List<T> cutPageFromResults(List<T> objects, IdentityObjectSearchCriteria criteria)
    {
 
-      List<IdentityObject> results = new LinkedList<IdentityObject>();
+      List<T> results = new LinkedList<T>();
 
       if (criteria.getMaxResults() == 0)
       {
