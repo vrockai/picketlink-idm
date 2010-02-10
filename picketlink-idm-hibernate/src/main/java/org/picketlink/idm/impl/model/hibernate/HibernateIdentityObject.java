@@ -290,4 +290,38 @@ public class HibernateIdentityObject implements IdentityObject
    {
       return "IdentityObject[id=" + getId() + "; name="  + getName() + "; type=" + getIdentityType().getName() + "]";
    }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+      {
+         return true;
+      }
+      if (!(o instanceof IdentityObject))
+      {
+         return false;
+      }
+
+      IdentityObject that = (IdentityObject)o;
+
+      if (name != null ? !name.equals(that.getName()) : that.getName() != null)
+      {
+         return false;
+      }
+      if (identityType != null ? !identityType.equals(that.getIdentityType()) : that.getIdentityType() != null)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      int result = name != null ? name.hashCode() : 0;
+      result = 31 * result + (identityType != null ? identityType.hashCode() : 0);
+      return result;
+   }
 }

@@ -437,6 +437,9 @@ public class RelationshipManagerTest extends Assert
 
       // Assert
 
+      assertEquals(2, session.getRelationshipManager().findRelatedGroups(user2, null, null).size());
+      assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, (IdentitySearchCriteria)null).size());
+
       assertEquals(2, session.getRelationshipManager().findAssociatedUsers(group1, false, null).size());
       assertEquals(4, session.getRelationshipManager().findRelatedUsers(group1, null).size());
 

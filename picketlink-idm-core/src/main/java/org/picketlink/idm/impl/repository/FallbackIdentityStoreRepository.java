@@ -22,6 +22,8 @@
 
 package org.picketlink.idm.impl.repository;
 
+import org.picketlink.idm.impl.types.SimpleIdentityObject;
+import org.picketlink.idm.spi.configuration.metadata.IdentityStoreMappingMetaData;
 import org.picketlink.idm.spi.store.IdentityStore;
 import org.picketlink.idm.spi.store.AttributeStore;
 import org.picketlink.idm.spi.store.FeaturesMetaData;
@@ -56,6 +58,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>In FallbackIdentityStoreRepository one IdentityStore plays the role of default store. Any operation that cannot be
@@ -74,6 +78,10 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    //TODO: - filter out criteria based on features MD before passing
    //TODO: - configuration option to store not mapped attributes in default store
    //TODO: - configuration option to fallback named relationships to default store when not supported in mapped one
+
+   private static Logger log = Logger.getLogger(FallbackIdentityStoreRepository.class.getName());
+
+   public static final String OPTION_READ_ONLY = "readOnly";
 
    private final String id;
 
@@ -382,14 +390,75 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       IdentityStore targetStore = resolveIdentityStore(identityObjectType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
-      return targetStore.createIdentityObject(targetCtx, name, identityObjectType);
+      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+      // If object is present in default store then ignore
+      IdentityObject mock = new SimpleIdentityObject(name, identityObjectType);
+      if (targetStore != defaultIdentityStore && hasIdentityObject(defaultCtx, defaultIdentityStore, mock))
+      {
+         return mock;
+      }
+
+      if (isIdentityStoreReadOnly(targetStore))
+      {
+         targetStore = defaultIdentityStore;
+         targetCtx = defaultCtx;
+
+      }
+
+      IdentityObject result = null;
+
+      try
+      {
+         result = targetStore.createIdentityObject(targetCtx, name, identityObjectType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to create IdentityObject: " + e);
+         }
+      }
+
+      return result;
    }
 
    public IdentityObject createIdentityObject(IdentityStoreInvocationContext invocationCtx, String name, IdentityObjectType identityObjectType, Map<String, String[]> attributes) throws IdentityException
    {
       IdentityStore targetStore = resolveIdentityStore(identityObjectType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
-      return targetStore.createIdentityObject(targetCtx, name, identityObjectType, attributes);
+      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+
+      // If object is present in default store then ignore
+      IdentityObject mock = new SimpleIdentityObject(name, identityObjectType);
+      if (targetStore != defaultIdentityStore && hasIdentityObject(defaultCtx, defaultIdentityStore, mock))
+      {
+         return mock;
+      }
+
+      if (isIdentityStoreReadOnly(targetStore))
+      {
+         targetStore = defaultIdentityStore;
+         targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+      }
+
+      IdentityObject result = null;
+
+      try
+      {
+         result = targetStore.createIdentityObject(targetCtx, name, identityObjectType, attributes);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to create IdentityObject: " + e);
+         }
+      }
+
+      return result;
    }
 
    public void removeIdentityObject(IdentityStoreInvocationContext invocationCtx, IdentityObject identity) throws IdentityException
@@ -397,7 +466,24 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore targetStore = resolveIdentityStore(identity);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
 
-      targetStore.removeIdentityObject(targetCtx, identity);
+      if (isIdentityStoreReadOnly(targetStore))
+      {
+         targetStore = defaultIdentityStore;
+         targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+      }
+
+      try
+      {
+         targetStore.removeIdentityObject(targetCtx, identity);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to remove IdentityObject: " + e);
+         }
+      }
    }
 
    public int getIdentityObjectsCount(IdentityStoreInvocationContext invocationCtx, IdentityObjectType identityType) throws IdentityException
@@ -405,7 +491,23 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore targetStore = resolveIdentityStore(identityType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
 
-      return targetStore.getIdentityObjectsCount(targetCtx, identityType);
+      //TODO: Result may be inaccurate - at least try to check if both stores don't match and return bigger count;
+
+      int result = 0;
+
+      try
+      {
+         result = targetStore.getIdentityObjectsCount(targetCtx, identityType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to obtain IdentityObject count: " + e);
+         }
+      }
+
+      return result;
    }
 
    public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationContext, String name, IdentityObjectType identityObjectType) throws IdentityException
@@ -413,7 +515,44 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore targetStore = resolveIdentityStore(identityObjectType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
 
-      return targetStore.findIdentityObject(targetCtx, name, identityObjectType);
+
+      IdentityObject io = null;
+
+      try
+      {
+         io = targetStore.findIdentityObject(targetCtx, name, identityObjectType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to create IdentityObject: " + e);
+         }
+      }
+
+      if (io != null)
+      {
+         return io;
+      }
+      else
+      {
+         targetStore = defaultIdentityStore;
+         targetCtx = resolveInvocationContext(defaultIdentityStore, invocationContext);
+      }
+
+      try
+      {
+         io = targetStore.findIdentityObject(targetCtx, name, identityObjectType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to create IdentityObject: " + e);
+         }
+      }
+
+      return io;
    }
 
    public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationContext, String id) throws IdentityException
@@ -439,7 +578,51 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore targetStore = resolveIdentityStore(identityType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
 
-      return targetStore.findIdentityObject(targetCtx, identityType, criteria);
+      Collection<IdentityObject> results = targetStore.findIdentityObject(targetCtx, identityType, criteria);
+
+
+
+      targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+      Collection<IdentityObject> defaultIOs = defaultIdentityStore.findIdentityObject(targetCtx, identityType, criteria);
+
+      if (defaultIOs.size() == 0)
+      {
+         return results;
+      }
+
+      // Filter out duplicates
+      HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
+      merged.addAll(results);
+      merged.addAll(defaultIOs);
+
+
+      if (criteria != null)
+      {
+
+         LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
+
+         //TODO: hardcoded - expects List
+         if (criteria.isPaged())
+         {
+            results = cutPageFromResults(processed, criteria);
+         }
+
+         //TODO: hardcoded - expects List
+         if (criteria.isSorted())
+         {
+            sortByName(processed, criteria.isAscending());
+         }
+
+         results = processed;
+      }
+      else
+      {
+         results = merged;
+      }
+
+      return results;
+
+
    }
 
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
@@ -464,8 +647,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       Collection<IdentityObject> results = new LinkedList<IdentityObject>();
 
-      if (relationshipType == null || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName()) ||
-          mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
+      if (hasIdentityObject(mappedCtx, mappedStore, identity)
+          && (relationshipType == null
+              || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName())
+              || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         )
       {
          results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
       }
@@ -489,18 +675,34 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          if (objects != null && objects.size() != 0)
          {
 
-            results.addAll(objects);
+            // Filter out duplicates
+            HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
+            merged.addAll(results);
+            merged.addAll(objects);
 
-            //TODO: hardcoded - expects List
-            if (criteria != null && criteria.isPaged() && results instanceof List)
+
+            if (criteria != null)
             {
-               results = cutPageFromResults((List<IdentityObject>)results, criteria);
+
+               LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
+
+               //TODO: hardcoded - expects List
+               if (criteria.isPaged())
+               {
+                  results = cutPageFromResults(processed, criteria);
+               }
+
+               //TODO: hardcoded - expects List
+               if (criteria.isSorted())
+               {
+                  sortByName(processed, criteria.isAscending());
+               }
+
+               results = processed;
             }
-
-            //TODO: hardcoded - expects List
-            if (criteria != null && criteria.isSorted() && results instanceof List)
+            else
             {
-               sortByName((List<IdentityObject>)results, criteria.isAscending());
+               results = merged;
             }
          }
       }
@@ -518,8 +720,10 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-      if (fromStore == toStore)
-      {
+      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+          && hasIdentityObject(toTargetCtx, fromStore, fromIdentity)
+          && hasIdentityObject(toTargetCtx, fromStore, toIdentity))
+         {
          // If relationship is named and target store doesn't support named relationships it need to be put in default store anyway
          if (relationshipName == null ||
             (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
@@ -551,7 +755,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-      if (fromStore == toStore)
+      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+         && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
+         && hasIdentityObject(toTargetCtx, toStore, toIdentity))
       {
          if (relationshipName == null ||
             (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
@@ -585,7 +791,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
 
 
-      if (fromStore == toStore)
+      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+         && hasIdentityObject(toTargetCtx, toStore, identity1)
+         && hasIdentityObject(toTargetCtx, toStore, identity2))
       {
          fromStore.removeRelationships(toTargetCtx, identity1, identity2, named);
          return;
@@ -620,7 +828,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       if (fromStore == toStore &&
          (!RoleManagerImpl.ROLE.getName().equals(relationshipType.getName()) ||
-          fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+          fromStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
+         && hasIdentityObject(toTargetCtx, toStore, toIdentity))
       {
          return fromStore.resolveRelationships(toTargetCtx, fromIdentity, toIdentity, relationshipType);
 
@@ -652,9 +862,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             continue;
          }
 
-         if (!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+         IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+
+         if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+            && hasIdentityObject(storeCtx, identityStore, identity))
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
             relationships.addAll(identityStore.resolveRelationships(storeCtx, identity, relationshipType, parent, named, name));
          }
       }
@@ -667,7 +879,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       // For any IdentityStore that supports named relationships...
       for (IdentityStore identityStore : configuredIdentityStores)
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
          {
             IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
             identityStore.createRelationshipName(storeCtx, name);
@@ -684,7 +896,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       // For any IdentityStore that supports named relationships...
       for (IdentityStore identityStore : configuredIdentityStores)
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
          {
             IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
             identityStore.removeRelationshipName(storeCtx, name);
@@ -756,7 +968,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       // For any IdentityStore that supports named relationships...
       for (IdentityStore identityStore : configuredIdentityStores)
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
          {
             IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
 
@@ -771,7 +983,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       // For any IdentityStore that supports named relationships...
       for (IdentityStore identityStore : configuredIdentityStores)
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
          {
             IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
 
@@ -800,7 +1012,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
       IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
 
-      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
       {
          fromStore.setRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
          return;
@@ -814,7 +1026,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
       IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
 
-      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
       {
          fromStore.removeRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
          return;
@@ -828,7 +1040,19 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore toStore = resolveIdentityStore(identityObject);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
 
-      return toStore.validateCredential(targetCtx, identityObject, credential);
+      if (hasIdentityObject(targetCtx, toStore, identityObject))
+      {
+         return toStore.validateCredential(targetCtx, identityObject, credential);
+      }
+
+      targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+
+      if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+      {
+         return defaultIdentityStore.validateCredential(targetCtx, identityObject, credential);
+      }
+
+      return false;
    }
 
    public void updateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
@@ -836,7 +1060,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore toStore = resolveIdentityStore(identityObject);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
 
-      toStore.updateCredential(targetCtx, identityObject, credential);
+      if (hasIdentityObject(targetCtx, toStore, identityObject))
+      {
+         toStore.updateCredential(targetCtx, identityObject, credential);
+         return;
+      }
+
+      targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+
+      if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+      {
+         defaultIdentityStore.updateCredential(targetCtx, identityObject, credential);
+      }
    }
 
 
@@ -894,12 +1129,15 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
    public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext, IdentityObject identity, String name) throws IdentityException
    {
-      IdentityObjectAttribute result;
+      IdentityObjectAttribute result = null;
 
       IdentityStore toStore = resolveIdentityStore(identity);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
 
-      result = toStore.getAttribute(targetCtx, identity, name);
+      if (hasIdentityObject(targetCtx, toStore, identity))
+      {
+         result = toStore.getAttribute(targetCtx, identity, name);
+      }
 
       if (result == null && toStore != defaultAttributeStore)
       {
@@ -913,13 +1151,17 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
    public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext invocationContext, IdentityObject identity) throws IdentityException
    {
-      Map<String, IdentityObjectAttribute> results;
+      Map<String, IdentityObjectAttribute> results = new HashMap<String, IdentityObjectAttribute>();
 
       IdentityStore toStore = resolveIdentityStore(identity);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
 
-      results = toStore.getAttributes(targetCtx, identity);
 
+      if (hasIdentityObject(targetCtx, toStore, identity))
+      {
+         results = toStore.getAttributes(targetCtx, identity);
+      }
+      
       if (toStore != defaultAttributeStore)
       {
          IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
@@ -950,7 +1192,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
 
       // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore)
+      if (toStore != defaultAttributeStore
+         && !isIdentityStoreReadOnly(toStore)
+         && hasIdentityObject(targetCtx, toStore, identity))
       {
          Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
@@ -1015,7 +1259,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
 
       // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore)
+      if (toStore != defaultAttributeStore
+         && !isIdentityStoreReadOnly(toStore)
+         && hasIdentityObject(targetCtx, toStore, identity))
       {
          Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
@@ -1082,7 +1328,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
 
       // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore)
+      if (toStore != defaultAttributeStore
+         && !isIdentityStoreReadOnly(toStore)
+         && hasIdentityObject(targetCtx, toStore, identity))
       {
          Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
@@ -1142,6 +1390,8 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore toStore = resolveIdentityStore(identityObjectType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
 
+      IdentityObject result = null;
+
       // Put supported attrs to the main store
       if (toStore != defaultAttributeStore)
       {
@@ -1149,15 +1399,20 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
          if (supportedAttrs.contains(attribute.getName()))
          {
-            return toStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
+            result = toStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
          }
+      }
+
+      if (result != null)
+      {
+         return result;
       }
 
       IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
 
       if (isAllowNotDefinedAttributes())
       {
-         defaultAttributeStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
+         return defaultAttributeStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
       }
       else
       {
@@ -1222,6 +1477,25 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       return allowNotDefinedAttributes;
    }
 
+   public boolean isIdentityStoreReadOnly(IdentityStore store)
+   {
+      List<IdentityStoreMappingMetaData> mappingMDs =
+         configurationContext.getRepositoryConfigurationMetaData().getIdentityStoreToIdentityObjectTypeMappings();
+
+      for (IdentityStoreMappingMetaData mappingMD : mappingMDs)
+      {
+         if (mappingMD.getIdentityStoreId().equals(store.getId()))
+         {
+            String value = mappingMD.getOptionSingleValue(OPTION_READ_ONLY);
+            if (value != null && value.equalsIgnoreCase("true"))
+            {
+               return true;
+            }
+         }
+      }
+
+      return false;
+   }
 
 
 }

@@ -84,4 +84,38 @@ public class LDAPIdentityObjectImpl implements IdentityObject, Serializable
    {
       return "IdentityObject[id=" + getId() + "; name="  + getName() + "; type=" + getIdentityType().getName() + "]";
    }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+      {
+         return true;
+      }
+      if (!(o instanceof IdentityObject))
+      {
+         return false;
+      }
+
+      IdentityObject that = (IdentityObject)o;
+
+      if (id != null ? !id.equals(that.getName()) : that.getName() != null)
+      {
+         return false;
+      }
+      if (type != null ? !type.equals(that.getIdentityType()) : that.getIdentityType() != null)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      int result = id != null ? id.hashCode() : 0;
+      result = 31 * result + (type != null ? type.hashCode() : 0);
+      return result;
+   }
 }

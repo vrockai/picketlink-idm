@@ -160,7 +160,7 @@
                <options>
                   <option>
                      <name>cache</name>
-                     <value>true</value>
+                     <value>false</value>
                   </option>
                   <option>
                      <name>cache.providerClass</name>
