@@ -541,6 +541,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          //Recognize the type by ctx DN
 
          IdentityObjectType[] possibleTypes = getConfiguration(ctx).getConfiguredTypes();
+         Set<IdentityObjectType> matches = new HashSet<IdentityObjectType>();
 
          for (IdentityObjectType possibleType : possibleTypes)
          {
@@ -550,15 +551,35 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             {
                if (dn.toLowerCase().endsWith(typeCtx.toLowerCase()))
                {
-                  type = possibleType;
+                  matches.add(possibleType);
                   break;
                }
             }
-            if (type != null)
+         }
+
+         if (matches.size() == 1)
+         {
+            type = matches.iterator().next();
+         }
+         else if (matches.size() > 1)
+         {
+            // Several identity types are mapped with the same LDAP Context DN. Will use the first one that have same DN from
+            // name/type search
+
+            String name = Tools.stripDnToName(dn);
+
+            for (IdentityObjectType match : matches)
             {
-               break;
+               LDAPIdentityObjectImpl entry = (LDAPIdentityObjectImpl)this.findIdentityObject(ctx, name, match);
+               if (entry.getDn().equalsIgnoreCase(dn))
+               {
+                  type = match;
+                  break;
+               }
             }
          }
+
+
 
          if (type == null)
          {
@@ -669,12 +690,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          if (filter != null && filter.length() > 0)
          {
+                     
+            // Wildcards will be escabed by filterArgs
+            filter = filter.replaceAll("\\{0\\}", nameFilter);
 
-            Object[] filterArgs = {nameFilter};
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
-               filterArgs,
+               null,
                new String[]{typeConfiguration.getIdAttributeName()},
                scope,
                requestControls);
@@ -1067,11 +1090,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          if (filter != null && filter.length() > 0)
          {
 
-            Object[] filterArgs = {nameFilter};
+            filter = filter.replaceAll("\\{0\\}", nameFilter);
             sr = searchIdentityObjects(ctx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
-               filterArgs,
+               null,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
                scope,
                requestControls);
@@ -1354,11 +1377,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          if (filter != null && filter.length() > 0)
          {
 
-            Object[] filterArgs = {nameFilter};
+            filter = filter.replaceAll("\\{0\\}", nameFilter);
             sr = searchIdentityObjects(ctx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
-               filterArgs,
+               null,
                new String[]{checkedTypeConfiguration.getIdAttributeName()},
                scope,
                requestControls);
@@ -1933,11 +1956,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          if (filter != null && filter.length() > 0)
          {
 
-            Object[] filterArgs = {nameFilter};
+            filter = filter.replaceAll("\\{0\\}", nameFilter);
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
-               filterArgs,
+               null,
                new String[]{config.getRelationshipNameAttributeName()},
                scope,
                requestControls);
@@ -2695,11 +2718,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          if (filter != null && filter.length() > 0)
          {
 
-            Object[] filterArgs = {nameFilter};
+            filter = filter.replaceAll("\\{0\\}", nameFilter);
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
-               filterArgs,
+               null,
                new String[]{typeConfiguration.getIdAttributeName()},
                scope,
                requestControls);

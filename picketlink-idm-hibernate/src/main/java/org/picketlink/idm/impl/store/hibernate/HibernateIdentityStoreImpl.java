@@ -771,7 +771,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             }
             if (orderByName)
             {
-               hqlString.append(" orderBy ior.toIdentityObject.name");
+               hqlString.append(" order by ior.toIdentityObject.name");
                if (ascending)
                {
                   hqlString.append(" asc");
@@ -793,7 +793,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
             if (orderByName)
             {
-               hqlString.append(" orderBy ior.toIdentityObject.name");
+               hqlString.append(" order by ior.toIdentityObject.name");
                if (ascending)
                {
                   hqlString.append(" asc");

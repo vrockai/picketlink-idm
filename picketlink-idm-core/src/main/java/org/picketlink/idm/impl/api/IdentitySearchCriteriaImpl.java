@@ -62,75 +62,6 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
 
    private int firstResult;
 
-   @Override
-   public boolean equals(Object o)
-   {
-      if (this == o)
-      {
-         return true;
-      }
-      if (o == null || getClass() != o.getClass())
-      {
-         return false;
-      }
-
-      IdentitySearchCriteriaImpl that = (IdentitySearchCriteriaImpl)o;
-
-      if (ascending != that.ascending)
-      {
-         return false;
-      }
-      if (filtered != that.filtered)
-      {
-         return false;
-      }
-      if (firstResult != that.firstResult)
-      {
-         return false;
-      }
-      if (maxResults != that.maxResults)
-      {
-         return false;
-      }
-      if (paged != that.paged)
-      {
-         return false;
-      }
-      if (sorted != that.sorted)
-      {
-         return false;
-      }
-      if (attributes != null ? !attributes.equals(that.attributes) : that.attributes != null)
-      {
-         return false;
-      }
-      if (filter != null ? !filter.equals(that.filter) : that.filter != null)
-      {
-         return false;
-      }
-      if (sortByName != null ? !sortByName.equals(that.sortByName) : that.sortByName != null)
-      {
-         return false;
-      }
-
-      return true;
-   }
-
-   @Override
-   public int hashCode()
-   {
-      int result = (sorted ? 1 : 0);
-      result = 31 * result + (sortByName != null ? sortByName.hashCode() : 0);
-      result = 31 * result + (ascending ? 1 : 0);
-      result = 31 * result + (paged ? 1 : 0);
-      result = 31 * result + firstResult;
-      result = 31 * result + maxResults;
-      result = 31 * result + (filtered ? 1 : 0);
-      result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
-      result = 31 * result + (filter != null ? filter.hashCode() : 0);
-      return result;
-   }
-
    private int maxResults;
 
    private boolean filtered = false;
@@ -143,6 +74,20 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
    {
 
    }
+
+   public IdentitySearchCriteriaImpl(IdentityObjectSearchCriteria criteria)
+   {
+      sorted = criteria.isSorted();
+      sortByName = criteria.getSortAttributeName();
+      ascending = criteria.isAscending();
+      filtered = criteria.isFiltered();
+      filter = criteria.getFilter();
+      attributes.putAll(criteria.getValues());
+      paged = criteria.isPaged();
+      firstResult = criteria.getFirstResult();
+      maxResults = criteria.getMaxResults();
+   }
+
 
    public IdentitySearchCriteria sort(SortOrder order) throws UnsupportedCriterium
    {
@@ -253,6 +198,11 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
    public Map<String, String[]> getValues()
    {
       return attributes;
+   }
+
+   public void setPaged(boolean paged)
+   {
+      this.paged = paged;
    }
 
 
@@ -510,5 +460,74 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
          }
       }
       return results;
+   }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+      {
+         return true;
+      }
+      if (o == null || getClass() != o.getClass())
+      {
+         return false;
+      }
+
+      IdentitySearchCriteriaImpl that = (IdentitySearchCriteriaImpl)o;
+
+      if (ascending != that.ascending)
+      {
+         return false;
+      }
+      if (filtered != that.filtered)
+      {
+         return false;
+      }
+      if (firstResult != that.firstResult)
+      {
+         return false;
+      }
+      if (maxResults != that.maxResults)
+      {
+         return false;
+      }
+      if (paged != that.paged)
+      {
+         return false;
+      }
+      if (sorted != that.sorted)
+      {
+         return false;
+      }
+      if (attributes != null ? !attributes.equals(that.attributes) : that.attributes != null)
+      {
+         return false;
+      }
+      if (filter != null ? !filter.equals(that.filter) : that.filter != null)
+      {
+         return false;
+      }
+      if (sortByName != null ? !sortByName.equals(that.sortByName) : that.sortByName != null)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      int result = (sorted ? 1 : 0);
+      result = 31 * result + (sortByName != null ? sortByName.hashCode() : 0);
+      result = 31 * result + (ascending ? 1 : 0);
+      result = 31 * result + (paged ? 1 : 0);
+      result = 31 * result + firstResult;
+      result = 31 * result + maxResults;
+      result = 31 * result + (filtered ? 1 : 0);
+      result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
+      result = 31 * result + (filter != null ? filter.hashCode() : 0);
+      return result;
    }
 }

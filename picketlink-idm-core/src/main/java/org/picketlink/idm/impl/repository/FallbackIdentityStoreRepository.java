@@ -22,6 +22,7 @@
 
 package org.picketlink.idm.impl.repository;
 
+import org.picketlink.idm.impl.api.IdentitySearchCriteriaImpl;
 import org.picketlink.idm.impl.types.SimpleIdentityObject;
 import org.picketlink.idm.spi.configuration.metadata.IdentityStoreMappingMetaData;
 import org.picketlink.idm.spi.store.IdentityStore;
@@ -578,16 +579,38 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       IdentityStore targetStore = resolveIdentityStore(identityType);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
 
-      Collection<IdentityObject> results = targetStore.findIdentityObject(targetCtx, identityType, criteria);
+      Collection<IdentityObject> results = new LinkedList<IdentityObject>();
+      Collection<IdentityObject> defaultIOs = new LinkedList<IdentityObject>();
 
-
-
-      targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
-      Collection<IdentityObject> defaultIOs = defaultIdentityStore.findIdentityObject(targetCtx, identityType, criteria);
-
-      if (defaultIOs.size() == 0)
+      if (targetStore == defaultIdentityStore)
       {
-         return results;
+         return targetStore.findIdentityObject(targetCtx, identityType, criteria);
+      }
+      else
+      {
+         IdentitySearchCriteriaImpl c = null;
+         if (criteria != null)
+         {
+            c = new IdentitySearchCriteriaImpl(criteria);
+            c.setPaged(false);
+         }
+
+         // Get results from default store with not paged criteria
+         defaultIOs = defaultIdentityStore.
+            findIdentityObject(resolveInvocationContext(defaultIdentityStore, invocationCtx), identityType, c);
+
+         // if default store results are not present then apply criteria. Otherwise apply criteria without page
+         // as result need to be merged
+         if (defaultIOs.size() == 0)
+         {
+            return targetStore.findIdentityObject(targetCtx, identityType, criteria);
+         }
+         else
+         {
+
+            results = targetStore.findIdentityObject(targetCtx, identityType, c);
+         }
+
       }
 
       // Filter out duplicates
@@ -595,17 +618,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       merged.addAll(results);
       merged.addAll(defaultIOs);
 
-
+      //Apply criteria not applied at store level (sort/page)
       if (criteria != null)
       {
 
          LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
-
-         //TODO: hardcoded - expects List
-         if (criteria.isPaged())
-         {
-            results = cutPageFromResults(processed, criteria);
-         }
 
          //TODO: hardcoded - expects List
          if (criteria.isSorted())
@@ -614,6 +631,14 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
 
          results = processed;
+
+         //TODO: hardcoded - expects List
+         if (criteria.isPaged())
+         {
+            results = cutPageFromResults(processed, criteria);
+
+         }
+         
       }
       else
       {
@@ -645,6 +670,14 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
       }
 
+      IdentitySearchCriteriaImpl c = null;
+
+      if (criteria != null)
+      {
+         c = new IdentitySearchCriteriaImpl(criteria);
+         c.setPaged(false);
+      }
+
       Collection<IdentityObject> results = new LinkedList<IdentityObject>();
 
       if (hasIdentityObject(mappedCtx, mappedStore, identity)
@@ -653,59 +686,61 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
               || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
          )
       {
-         results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
-      }
-
-      IdentityObject defaultStoreIdentityObject = null;
-
-      try
-      {
-         defaultStoreIdentityObject = defaultIdentityStore.findIdentityObject(defaultCtx, identity.getName(), identity.getIdentityType());
-      }
-      catch (IdentityException e)
-      {
-         return results;
-      }
-
-      if (defaultStoreIdentityObject != null)
-      {
-         Collection<IdentityObject> objects = defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
-
-         // If default store contain related relationships merge and sort/page once more
-         if (objects != null && objects.size() != 0)
+         // If object present in identity store then don't apply page in criteria
+         if (hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
          {
+            results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, c);
+         }
 
-            // Filter out duplicates
-            HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
-            merged.addAll(results);
-            merged.addAll(objects);
-
-
-            if (criteria != null)
-            {
-
-               LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
-
-               //TODO: hardcoded - expects List
-               if (criteria.isPaged())
-               {
-                  results = cutPageFromResults(processed, criteria);
-               }
-
-               //TODO: hardcoded - expects List
-               if (criteria.isSorted())
-               {
-                  sortByName(processed, criteria.isAscending());
-               }
-
-               results = processed;
-            }
-            else
-            {
-               results = merged;
-            }
+         // Otherwise simply return results
+         else
+         {
+            return mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
          }
       }
+
+
+      Collection<IdentityObject> objects = defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, c);
+
+      // If default store contain related relationships merge and sort/page once more
+      if (objects != null && objects.size() != 0)
+      {
+
+         // Filter out duplicates
+         HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
+         merged.addAll(results);
+         merged.addAll(objects);
+
+
+         if (criteria != null)
+         {
+
+            LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
+
+
+
+            //TODO: hardcoded - expects List
+            if (criteria.isSorted())
+            {
+               sortByName(processed, criteria.isAscending());
+            }
+
+            results = processed;
+
+            //TODO: hardcoded - expects List
+            if (criteria.isPaged())
+            {
+               results = cutPageFromResults(processed, criteria);
+            }
+
+
+         }
+         else
+         {
+            results = merged;
+         }
+      }
+
       return results;
 
    }
