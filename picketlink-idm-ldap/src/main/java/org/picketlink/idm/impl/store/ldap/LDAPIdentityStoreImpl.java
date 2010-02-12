@@ -29,6 +29,7 @@ import org.picketlink.idm.impl.helper.Tools;
 import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
 import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
 import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
+import org.picketlink.idm.impl.types.SimpleIdentityObject;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
@@ -252,6 +253,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       LdapContext ldapContext = getLDAPContext(invocationCtx);
 
+      String dn = null;
+
       try
       {
          //  If there are many contexts specified in the configuration the first one is used
@@ -312,7 +315,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          LdapName validLDAPName = new LdapName(getTypeConfiguration(invocationCtx, type).getIdAttributeName().concat("=").concat(name));
 
          log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
-         ctx.createSubcontext(validLDAPName, attrs);
+         DirContext entry = ctx.createSubcontext(validLDAPName, attrs);
+         if (entry != null)
+         {
+            dn = entry.getNameInNamespace();
+         }
       }
       catch (Exception e)
       {
@@ -330,7 +337,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }                                                                  
 
-      return findIdentityObject(invocationCtx, name, type);
+      return new SimpleIdentityObject(name, dn, type);
 
    }
 
@@ -571,7 +578,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             for (IdentityObjectType match : matches)
             {
                LDAPIdentityObjectImpl entry = (LDAPIdentityObjectImpl)this.findIdentityObject(ctx, name, match);
-               if (entry.getDn().equalsIgnoreCase(dn))
+               if (entry != null && entry.getDn().equalsIgnoreCase(dn))
                {
                   type = match;
                   break;
