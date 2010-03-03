@@ -678,8 +678,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             {
                for (String value : stringEntry.getValue())
                {
+                  String attributeName = getTypeConfiguration(invocationCtx, type).getAttributeMapping(stringEntry.getKey());
+
+                  if (attributeName == null)
+                  {
+                     attributeName = stringEntry.getKey();
+                  }
+
                   af.append("(")
-                     .append(stringEntry.getKey())
+                     .append(attributeName)
                      .append("=")
                      .append(value)
                      .append(")");

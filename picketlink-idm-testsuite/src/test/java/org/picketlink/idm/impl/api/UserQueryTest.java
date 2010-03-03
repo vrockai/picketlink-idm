@@ -208,6 +208,23 @@ public class UserQueryTest extends Assert
       assertEquals(user2, results.get(0));
       assertEquals(user3, results.get(1));
 
+      ids.getAttributesManager().addAttribute(user4, "lastName", "gtn");
+      ids.getAttributesManager().addAttribute(user3, "email", "user3@localhost");
+
+      //
+      qb.reset();
+      qb.attributeValuesFilter("lastName", new String[] {"*gtn*"});
+      results = ids.list(qb.createQuery());
+      assertEquals(1, results.size());
+      assertEquals(user4, results.get(0));
+
+      //
+      qb.reset();
+      qb.attributeValuesFilter("email", new String[] {"*user3*"});
+      results = ids.list(qb.createQuery());
+      assertEquals(1, results.size());
+      assertEquals(user3, results.get(0));
+
 
 
       ctx.commit();

@@ -23,6 +23,7 @@
 package org.picketlink.idm.impl.store.hibernate;
 
 import org.picketlink.idm.common.exception.IdentityException;
+import org.picketlink.idm.impl.helper.Tools;
 import org.picketlink.idm.impl.model.hibernate.*;
 import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
@@ -678,7 +679,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             }
          }
 
-         if (criteria != null && criteria.isPaged())
+         if (criteria != null && criteria.isPaged() && !criteria.isFiltered())
          {
             if (criteria.getMaxResults() > 0)
             {
@@ -711,6 +712,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       if (criteria != null && criteria.isFiltered())
       {
          filterByAttributesValues(results, criteria.getValues());
+         if (criteria.isPaged())
+         {
+            results = (LinkedList)cutPageFromResults(results, criteria);
+         }
       }
 
       return results;
@@ -821,7 +826,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
 
 
-         if (criteria != null && criteria.isPaged())
+         if (criteria != null && criteria.isPaged() && !criteria.isFiltered())
          {
             q.setFirstResult(criteria.getFirstResult());
             if (criteria.getMaxResults() > 0)
@@ -845,6 +850,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       if (criteria != null && criteria.isFiltered())
       {
          filterByAttributesValues(results, criteria.getValues());
+         if (criteria.isPaged())
+         {
+            results = (LinkedList)cutPageFromResults(results, criteria);
+         }
       }
 
       return results;
@@ -2696,14 +2705,44 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          Map<String, Collection> presentAttrs = ((HibernateIdentityObject)object).getAttributesAsMap();
          for (Map.Entry<String, String[]> entry : attrs.entrySet())
          {
-            if (presentAttrs.containsKey(entry.getKey()))
+            // Resolve attribute name from the store attribute mapping
+            String mappedAttributeName = null;
+            try
+            {
+               mappedAttributeName = resolveAttributeStoreMapping(object.getIdentityType(), entry.getKey());
+            }
+            catch (IdentityException e)
+            {
+               //Nothing
+            }
+
+            if (mappedAttributeName == null)
+            {
+               toRemove.add(object);
+               break;
+            }
+
+            if (presentAttrs.containsKey(mappedAttributeName))
             {
                Set<String> given = new HashSet<String>(Arrays.asList(entry.getValue()));
-               Collection present = presentAttrs.get(entry.getKey());
+
+               Collection present = presentAttrs.get(mappedAttributeName);
 
                for (String s : given)
                {
-                  if (!present.contains(s))
+                  String regex = Tools.wildcardToRegex(s);
+
+                  boolean matches = false;
+
+                  for (Object o : present)
+                  {
+                     if (o.toString().matches(regex))
+                     {
+                        matches = true;
+                     }
+                  }
+                  
+                  if (!matches)
                   {
                      toRemove.add(object);
                      break;
@@ -2724,6 +2763,35 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          objects.remove(identityObject);
       }
+   }
+
+   //TODO: need to be implemented at HQL level
+   private <T> List<T> cutPageFromResults(List<T> objects, IdentityObjectSearchCriteria criteria)
+   {
+
+      List<T> results = new LinkedList<T>();
+
+      if (criteria.getMaxResults() == 0)
+      {
+         for (int i = criteria.getFirstResult(); i < objects.size(); i++)
+         {
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
+         }
+      }
+      else
+      {
+         for (int i = criteria.getFirstResult(); i < criteria.getFirstResult() + criteria.getMaxResults(); i++)
+         {
+            if (i < objects.size())
+            {
+               results.add(objects.get(i));
+            }
+         }
+      }
+      return results;
    }
 
    protected boolean isAllowNotDefinedIdentityObjectTypes()
