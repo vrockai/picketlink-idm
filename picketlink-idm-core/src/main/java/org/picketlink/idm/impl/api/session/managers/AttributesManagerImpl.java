@@ -200,14 +200,9 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
 
       if (cache != null)
       {
-         Map<String, Attribute> attrMap = new HashMap<String, Attribute>();
-
-         for (Attribute attribute : attributes)
-         {
-            attrMap.put(attribute.getName(), attribute);
-         }
-
-         cache.putAttributes(cacheNS, identity.getKey(), attrMap);
+         // Grab the new profile and persist in cache
+         cache.invalidateAttributes(cacheNS, identity.getKey());
+         this.getAttributes(identity);
       }
 
       postAttributesUpdate(identity, attributes);
@@ -318,7 +313,7 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
       {
          // Grab the new profile and persist in cache
          cache.invalidateAttributes(cacheNS, identityType.getKey());
-         cache.putAttributes(cacheNS, identityType.getKey(), this.getAttributes(identityType));
+         this.getAttributes(identityType);
       }
 
       postAttributesAdd(identityType, attributes);
@@ -339,7 +334,7 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
       {
          // Grab the new profile and persist in cache
          cache.invalidateAttributes(cacheNS, identityType.getKey());
-         cache.putAttributes(cacheNS, identityType.getKey(), this.getAttributes(identityType));
+         this.getAttributes(identityType);
       }
 
       postAttributesRemove(identityType, attributeNames);

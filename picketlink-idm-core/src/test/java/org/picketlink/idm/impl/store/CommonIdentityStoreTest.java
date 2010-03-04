@@ -119,10 +119,10 @@ public class CommonIdentityStoreTest extends Assert
       testContext.flush();
 
       IdentityObject xx = testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam", IdentityTypeEnum.USER);
-      assertEquals(xx.getId(), user1.getId());
+      assertEquals(xx.getId().toLowerCase(), user1.getId().toLowerCase());
 
       xx = testContext.getStore().findIdentityObject(testContext.getCtx(), user2.getId());
-      assertEquals(xx.getId(), user2.getId());
+      assertEquals(xx.getId().toLowerCase(), user2.getId().toLowerCase());
 
       Collection results = testContext.getStore().findIdentityObject(testContext.getCtx(), IdentityTypeEnum.USER, null);
       assertEquals(2, results.size());
