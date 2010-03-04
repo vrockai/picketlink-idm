@@ -129,6 +129,8 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
             return invocationCtx;
          }
       };
+      
+      this.apiCacheProvider = apiCacheProvider;
 
       sessionContext = new IdentitySessionContextImpl(repository, typeMapper, resolver);
 
@@ -140,7 +142,7 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
       this.groupQueryExecutor = new GroupQueryExecutorImpl(this);
       this.roleQueryExecutor = new RoleQueryExecutorImpl(this);
       
-      this.apiCacheProvider = apiCacheProvider;
+
 
 
 

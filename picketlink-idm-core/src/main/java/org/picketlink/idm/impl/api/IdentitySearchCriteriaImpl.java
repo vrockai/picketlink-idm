@@ -530,4 +530,10 @@ public class IdentitySearchCriteriaImpl implements IdentitySearchCriteria, Ident
       result = 31 * result + (filter != null ? filter.hashCode() : 0);
       return result;
    }
+
+   @Override
+   public String toString()
+   {
+      return Integer.toString(hashCode());
+   }
 }

@@ -84,17 +84,17 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
    private Fqn getNamespacedFqn(String ns)
    {
-      return Fqn.fromElements("NODE_MAIN_ROOT", ns);
+      return Fqn.fromString("/" + "NODE_MAIN_ROOT" + "/" + ns);
    }
 
    private Fqn getFqn(String ns, String node, Object o)
    {
-      return Fqn.fromElements(getNamespacedFqn(ns), node, o);
+      return Fqn.fromString(getNamespacedFqn(ns) + "/" + node + "/" + o);
    }
 
    private Fqn getFqn(String ns, String node)
    {
-      return Fqn.fromElements(getNamespacedFqn(ns), node);
+      return Fqn.fromString(getNamespacedFqn(ns) + "/" + node);
    }
 
    public void initialize(Map<String, String> properties, IdentityRepositoryConfigurationContext configurationContext)
@@ -220,7 +220,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
    public void invalidateIdentityObjectCount(String ns, String type)
    {
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_IO_COUNT, type));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_IO_COUNT + "/" + type));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating IdentityObject count. Namespace:" + ns + "; type=" + type

@@ -104,19 +104,24 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public static final String NODE_RELATIONSHIP_SEARCHES = "NODE_ROLE_TYPE_SEARCHES";
 
+   public static final String NULL_NS_NODE = "PL_COMMON_NS";
+
+   public static final String MAIN_ROOT = "NODE_MAIN_ROOT";
+
    private Fqn getNamespacedFqn(String ns)
    {
-      return Fqn.fromElements("NODE_MAIN_ROOT", ns);
+      String namespace = ns != null ? ns : NULL_NS_NODE;
+      return Fqn.fromString("/" + MAIN_ROOT + "/" + namespace);
    }
 
    private Fqn getFqn(String ns, String node, Object o)
    {
-      return Fqn.fromElements(getNamespacedFqn(ns), node, o);
+      return Fqn.fromString(getNamespacedFqn(ns) + "/" + node + "/" + o);
    }
 
    private Fqn getFqn(String ns, String node)
    {
-      return Fqn.fromElements(getNamespacedFqn(ns), node);
+      return Fqn.fromString(getNamespacedFqn(ns) + "/" + node);
    }
 
    public void initialize(Map<String, String> properties, IdentityConfigurationRegistry configurationRegistry)
@@ -164,10 +169,12 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidate(String ns)
    {
-      cache.getRoot().removeChild(getNamespacedFqn(ns));
+
+      boolean success = cache.getRoot().removeChild(getNamespacedFqn(ns));
+
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(this.toString() + "Invalidating namespace:" + ns);
+         log.finer(this.toString() + "Invalidating namespace:" + ns + "; success=" + success);
       }
    }
 
@@ -239,7 +246,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void putUsers(String ns, IdentitySearchCriteria criteria, Collection<User> users)
    {
-      Fqn nodeFqn = getFqn(ns, NODE_USERS_CRITERIA, criteria.hashCode());
+      Fqn nodeFqn = getFqn(ns, NODE_USERS_CRITERIA, criteria != null ? criteria.hashCode() : null);
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
@@ -247,14 +254,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (log.isLoggable(Level.FINER))
       {
+
          log.finer(this.toString() + "User criteria search stored in cache: users.size()=" + users.size() +
-         "; criteria.hash()=" + criteria.hashCode() + ";namespace=" + ns);
+         "; criteria.hash()=" + criteria + ";namespace=" + ns);
       }
    }
 
    public Collection<User> getUsers(String ns, IdentitySearchCriteria criteria)
    {
-      Fqn nodeFqn = getFqn(ns, NODE_USERS_CRITERIA, criteria.hashCode());
+      Fqn nodeFqn = getFqn(ns, NODE_USERS_CRITERIA, criteria != null ? criteria.hashCode() : null);
 
       Node node = getCache().getRoot().getChild(nodeFqn);
 
@@ -265,7 +273,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
          if (log.isLoggable(Level.FINER) && users != null)
          {
             log.finer(this.toString() + "User criteria search found in cache: users.size()=" + users.size() +
-         "; criteria.hash()=" + criteria.hashCode() + ";namespace=" + ns);
+         "; criteria.hash()=" + criteria + ";namespace=" + ns);
          }
 
          return users;
@@ -276,11 +284,11 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidateUsers(String ns)
    {
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS_COUNT));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS_CRITERIA));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS_QUERIES));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS_SEARCHES));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS_COUNT));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS_CRITERIA));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS_QUERIES));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS_SEARCHES));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating Users cache. Namespace:" + ns + ";namespace=" + ns);
@@ -329,7 +337,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidateUserCount(String ns)
    {
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_USERS_COUNT));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_USERS_COUNT));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating User count. Namespace:" + ns + ";namespace=" + ns);
@@ -386,7 +394,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void putGroups(String ns, IdentitySearchCriteria criteria, Collection<Group> groups)
    {
-      Fqn nodeFqn = getFqn(ns, NODE_GROUPS_CRITERIA, criteria.hashCode());
+      Fqn nodeFqn = getFqn(ns, NODE_GROUPS_CRITERIA, criteria != null ? criteria.hashCode() : null);
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
@@ -395,13 +403,13 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Group criteria search stored in cache: groups.size()=" + groups.size() +
-         "; criteria.hash()=" + criteria.hashCode() + ";namespace=" + ns);
+         "; criteria.hash()=" + criteria + ";namespace=" + ns);
       }
    }
 
    public Collection<Group> getGroups(String ns, IdentitySearchCriteria criteria)
    {
-      Fqn nodeFqn = getFqn(ns, NODE_GROUPS_CRITERIA, criteria.hashCode());
+      Fqn nodeFqn = getFqn(ns, NODE_GROUPS_CRITERIA, criteria != null ? criteria.hashCode() : null);
 
       Node node = getCache().getRoot().getChild(nodeFqn);
 
@@ -412,7 +420,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
          if (log.isLoggable(Level.FINER) && groups != null)
          {
             log.finer(this.toString() + "Group criteria search found in cache: groups.size()=" + groups.size() +
-         "; criteria.hash()=" + criteria.hashCode() + ";namespace=" + ns);
+         "; criteria.hash()=" + criteria + ";namespace=" + ns);
          }
 
          return groups;
@@ -423,11 +431,11 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidateGroups(String ns)
    {
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_GROUPS));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_GROUPS_COUNT));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_GROUPS_CRITERIA));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_GROUPS_QUERIES));
-      getCache().getRoot().removeChild(Fqn.fromElements(getNamespacedFqn(ns), NODE_GROUPS_SEARCHES));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_GROUPS));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_GROUPS_COUNT));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_GROUPS_CRITERIA));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_GROUPS_QUERIES));
+      getCache().getRoot().removeChild(Fqn.fromString(getNamespacedFqn(ns) + "/" + NODE_GROUPS_SEARCHES));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating Groups cache. Namespace:" + ns + ";namespace=" + ns);
@@ -716,7 +724,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidateRoleTypeProperties(String ns, RoleType roleType)
    {
-      cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_PROPERTIES, roleType.hashCode()));
+      cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_TYPE_PROPERTIES, roleType.hashCode()));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating RoleType properties. roleType=" + roleType + "; Namespace:" + ns);
@@ -725,7 +733,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public void invalidateRoleTypeProperties(String ns)
    {
-      cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_PROPERTIES));
+      cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_TYPE_PROPERTIES));
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating RoleType properties. Namespace:" + ns);
