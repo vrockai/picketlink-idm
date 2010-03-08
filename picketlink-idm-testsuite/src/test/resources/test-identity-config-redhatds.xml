@@ -158,7 +158,7 @@
          </options>
       </repository>
    </repositories>
-   <stores>
+   <stores>                                                   
       <attribute-stores/>
       <identity-stores>
          <identity-store>

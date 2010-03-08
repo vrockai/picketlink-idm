@@ -26,11 +26,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.picketlink.idm.impl.helper.Tools;
 import org.picketlink.idm.api.IdentitySession;
 import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.common.exception.IdentityException;
 import org.picketlink.idm.impl.api.session.IdentitySessionImpl;
 import org.picketlink.idm.impl.configuration.IdentitySessionConfigurationContext;
+import org.picketlink.idm.spi.configuration.metadata.IdentityConfigurationMetaData;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -46,9 +48,12 @@ public class IdentitySessionFactoryImpl implements IdentitySessionFactory, Seria
 
    private final Map<String, IdentitySessionConfigurationContext> sessionContextMap;
 
-   public IdentitySessionFactoryImpl(Map<String, IdentitySessionConfigurationContext> sessionContextMap)
+   private final IdentityConfigurationMetaData configMD;
+
+   public IdentitySessionFactoryImpl(IdentityConfigurationMetaData configMD, Map<String, IdentitySessionConfigurationContext> sessionContextMap)
    {
       this.sessionContextMap = sessionContextMap;
+      this.configMD = configMD;
    }
 
    public void close()
@@ -65,16 +70,44 @@ public class IdentitySessionFactoryImpl implements IdentitySessionFactory, Seria
    public IdentitySession createIdentitySession(String realmName) throws IdentityException
    {
 
-      if (!sessionContextMap.containsKey(realmName))
-      {
-         throw new IdentityException("Cannot find configured realm with a given name: " + realmName);
-      }
-
-      //IdentitySession session = new IdentitySessionImpl(realmName, repo, mapper);
       IdentitySessionConfigurationContext sessionConfigCtx = sessionContextMap.get(realmName);
 
+      // If no realm mapped then look for a template which name is a prefix of realmName
+      if (sessionConfigCtx == null)
+      {
+         for (String ctx : sessionContextMap.keySet())
+         {
+            if (realmName.startsWith(ctx))
+            {
+               // Matching realm must have proper option set
+               String isTemplate = Tools.getOptionSingleValue("template", sessionContextMap.get(ctx).getRealmOptions());
+               if (isTemplate != null && isTemplate.equalsIgnoreCase("true"))
+               {
+                  sessionConfigCtx = sessionContextMap.get(ctx);
+                  break;
+               }
+            }
+         }
+      }
+
+      // If no template with matching name was found then check if there is default template present
+      if (sessionConfigCtx == null)
+      {
+         String defaultTemplate = Tools.getOptionSingleValue("defaultTemplate", configMD.getOptions());
+         if (defaultTemplate != null && sessionContextMap.containsKey(defaultTemplate))
+         {
+            sessionConfigCtx = sessionContextMap.get(defaultTemplate);
+         }
+      }
+
+      // If still no matching realm then throw exception
+      if (sessionConfigCtx == null)
+      {
+         throw new IdentityException("Cannot find configuration realm with a given name or any matching template: " + realmName);
+      }
+
       IdentitySession newSession =
-         new IdentitySessionImpl(sessionConfigCtx.getRealmName(),
+         new IdentitySessionImpl(realmName,
             sessionConfigCtx.getRepository(),
             sessionConfigCtx.getTypeMapper(),
             sessionConfigCtx.getApiCacheProvider(),

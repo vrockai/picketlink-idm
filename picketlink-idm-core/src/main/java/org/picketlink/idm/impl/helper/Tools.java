@@ -25,6 +25,7 @@ package org.picketlink.idm.impl.helper;
 import java.util.List;
 import java.util.Enumeration;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -99,5 +100,22 @@ public class Tools
       }
 
       return parts[1];
+   }
+
+   public static String getOptionSingleValue(String optionName, Map<String, List<String>> options)
+   {
+      if (options == null || options.size() == 0)
+      {
+         return null;
+      }
+
+      List<String> values = options.get(optionName);
+
+      if (values != null && values.size() > 0)
+      {
+         return values.get(0);
+      }
+
+      return null;
    }
 }

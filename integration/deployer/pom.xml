@@ -8,12 +8,12 @@
    <groupId>org.picketlink.idm.integration</groupId>
    <artifactId>picketlink-idm-jboss5-deployer</artifactId>
    <packaging>jar</packaging>
-   <version>1.1.0.Beta9-SNAPSHOT</version>
+   <version>1.1.0.Beta9</version>
   
    <parent>
       <groupId>org.picketlink.idm</groupId>
       <artifactId>picketlink-idm-integration</artifactId>
-      <version>1.1.0.Beta9-SNAPSHOT</version>
+      <version>1.1.0.Beta9</version>
    </parent>
 
    <properties>

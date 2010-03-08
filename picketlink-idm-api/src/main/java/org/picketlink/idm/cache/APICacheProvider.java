@@ -55,6 +55,11 @@ public interface APICacheProvider
    void invalidate(String ns);
 
    /**
+    * Invalidate whole cache including all namespaces;
+    */
+   void invalidateAll();
+
+   /**
     * Generate realm namespace.
     *
     * @param realmId - if null will generate root namespace

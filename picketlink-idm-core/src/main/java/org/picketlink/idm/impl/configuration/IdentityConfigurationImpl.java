@@ -151,7 +151,7 @@ public class IdentityConfigurationImpl
          throw new IdentityConfigurationException("Failed to build IdentitySessionFactory", e);
       }
 
-      return new IdentitySessionFactoryImpl(realmMap);
+      return new IdentitySessionFactoryImpl(configMD, realmMap);
    }
 
    private Map<String, IdentitySessionConfigurationContext> createRealmMap(IdentityConfigurationMetaData configMD) throws Exception

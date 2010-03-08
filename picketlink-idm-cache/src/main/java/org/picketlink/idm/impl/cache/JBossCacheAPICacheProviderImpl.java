@@ -30,6 +30,7 @@ import org.picketlink.idm.api.query.RoleQuery;
 import org.picketlink.idm.impl.api.model.GroupKey;
 import org.jboss.cache.*;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Collections;
@@ -108,10 +109,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    public static final String MAIN_ROOT = "NODE_MAIN_ROOT";
 
+   private Fqn getRootNode()
+   {
+      return Fqn.fromString("/" + MAIN_ROOT);
+   }
+
    private Fqn getNamespacedFqn(String ns)
    {
       String namespace = ns != null ? ns : NULL_NS_NODE;
-      return Fqn.fromString("/" + MAIN_ROOT + "/" + namespace);
+      return Fqn.fromString(getRootNode() + "/" + namespace);
    }
 
    private Fqn getFqn(String ns, String node, Object o)
@@ -161,6 +167,22 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       
    }
 
+   public void initialize(InputStream jbossCacheConfiguration)
+   {
+      CacheFactory factory = new DefaultCacheFactory();
+
+      if (jbossCacheConfiguration == null)
+      {
+         throw new IllegalArgumentException("JBoss Cache configuration InputStream is null");
+      }
+
+      this.cache = factory.createCache(jbossCacheConfiguration);
+
+      this.cache.create();
+      this.cache.start();
+
+   }
+
    Cache getCache()
    {
       return cache;
@@ -175,6 +197,16 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating namespace:" + ns + "; success=" + success);
+      }
+   }
+
+   public void invalidateAll()
+   {
+      boolean success = cache.getRoot().removeChild(getRootNode());
+
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(this.toString() + "Invalidating whole cache - success=" + success);
       }
    }
 
