@@ -479,7 +479,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       HibernateRealm realm = getRealm(session, ctx);
 
-      int size = (Integer)session.createCriteria(HibernateIdentityObject.class)
+      Number boxedSize = (Integer)session.createCriteria(HibernateIdentityObject.class)
          .createAlias("identityType", "type")
          .createAlias("realm", "rm")
          .add(Restrictions.eq("name", name))
@@ -490,6 +490,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          .list().get(0);
 
 
+      int size = boxedSize.intValue();
       if (size != 0)
       {
          throw new IdentityException("IdentityObject already present in this IdentityStore:" +
