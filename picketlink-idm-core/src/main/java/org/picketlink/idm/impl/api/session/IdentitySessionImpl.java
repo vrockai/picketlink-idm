@@ -132,20 +132,6 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
       
       this.apiCacheProvider = apiCacheProvider;
 
-      sessionContext = new IdentitySessionContextImpl(repository, typeMapper, resolver);
-
-      this.persistenceManager = new PersistenceManagerImpl(this);
-      this.relationshipManager = new RelationshipManagerImpl(this);
-      this.profileManager = new AttributesManagerImpl(this);
-      this.roleManager = new RoleManagerImpl(this);
-      this.userQueryExecutor = new UserQueryExecutorImpl(this);
-      this.groupQueryExecutor = new GroupQueryExecutorImpl(this);
-      this.roleQueryExecutor = new RoleQueryExecutorImpl(this);
-      
-
-
-
-
       if (apiCacheProvider != null)
       {
          // Find cache scope
@@ -164,6 +150,22 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
       {
          cacheNS = null;
       }
+
+      sessionContext = new IdentitySessionContextImpl(repository, typeMapper, resolver);
+
+      this.persistenceManager = new PersistenceManagerImpl(this);
+      this.relationshipManager = new RelationshipManagerImpl(this);
+      this.profileManager = new AttributesManagerImpl(this);
+      this.roleManager = new RoleManagerImpl(this);
+      this.userQueryExecutor = new UserQueryExecutorImpl(this);
+      this.groupQueryExecutor = new GroupQueryExecutorImpl(this);
+      this.roleQueryExecutor = new RoleQueryExecutorImpl(this);
+      
+
+
+
+
+
 
    }
 

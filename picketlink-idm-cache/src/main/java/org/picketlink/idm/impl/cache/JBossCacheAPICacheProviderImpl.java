@@ -117,6 +117,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
    private Fqn getNamespacedFqn(String ns)
    {
       String namespace = ns != null ? ns : NULL_NS_NODE;
+      namespace = namespace.replaceAll("/", "_");
       return Fqn.fromString(getRootNode() + "/" + namespace);
    }
 
