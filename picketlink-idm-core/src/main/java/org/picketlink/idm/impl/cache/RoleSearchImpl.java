@@ -23,10 +23,12 @@
 
 package org.picketlink.idm.impl.cache;
 
+import java.io.Serializable;
+
 import org.picketlink.idm.cache.RoleSearch;
 import org.picketlink.idm.api.RoleType;
 
-public class RoleSearchImpl extends AbstractSearch implements RoleSearch
+public class RoleSearchImpl extends AbstractSearch implements RoleSearch, Serializable
 {
 
    private String identityTypeId;

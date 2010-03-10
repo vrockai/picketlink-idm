@@ -25,6 +25,7 @@ package org.picketlink.idm.impl.api;
 import org.picketlink.idm.spi.model.IdentityObjectAttribute;
 import org.picketlink.idm.api.Attribute;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.LinkedList;
@@ -34,7 +35,7 @@ import java.util.Collections;
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public class SimpleAttribute implements IdentityObjectAttribute, Attribute
+public class SimpleAttribute implements IdentityObjectAttribute, Attribute, Serializable
 {
 
    private final String name;

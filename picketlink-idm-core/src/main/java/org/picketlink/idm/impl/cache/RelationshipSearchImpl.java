@@ -29,10 +29,11 @@ import org.picketlink.idm.impl.api.model.GroupKey;
 import org.picketlink.idm.impl.api.model.SimpleGroup;
 import org.picketlink.idm.impl.api.model.SimpleUser;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class RelationshipSearchImpl extends AbstractSearch implements RelationshipSearch
+public class RelationshipSearchImpl extends AbstractSearch implements RelationshipSearch, Serializable
 {
    private Collection<IdentityType> parents = new HashSet<IdentityType>();
 

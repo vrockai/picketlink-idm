@@ -25,10 +25,11 @@ package org.picketlink.idm.impl.cache;
 
 import org.picketlink.idm.cache.GroupSearch;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class GroupSearchImpl extends AbstractSearch implements GroupSearch
+public class GroupSearchImpl extends AbstractSearch implements GroupSearch, Serializable
 {
    private String groupId;
 

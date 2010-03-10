@@ -22,13 +22,15 @@
 
 package org.picketlink.idm.impl.api.model;
 
+import java.io.Serializable;
+
 import org.picketlink.idm.api.User;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public class SimpleUser implements User
+public class SimpleUser implements User, Serializable
 {
    private final String id;
 

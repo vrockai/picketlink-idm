@@ -22,6 +22,8 @@
 
 package org.picketlink.idm.impl.api.model;
 
+import java.io.Serializable;
+
 import org.picketlink.idm.api.Role;
 import org.picketlink.idm.api.RoleType;
 import org.picketlink.idm.api.User;
@@ -31,7 +33,7 @@ import org.picketlink.idm.api.Group;
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public class SimpleRole implements Role
+public class SimpleRole implements Role, Serializable
 {
    private final RoleType type;
 

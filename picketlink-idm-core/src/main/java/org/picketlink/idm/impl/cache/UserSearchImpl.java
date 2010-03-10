@@ -25,10 +25,11 @@ package org.picketlink.idm.impl.cache;
 
 import org.picketlink.idm.cache.UserSearch;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class UserSearchImpl extends AbstractSearch implements UserSearch
+public class UserSearchImpl extends AbstractSearch implements UserSearch, Serializable
 {
 
    private String userId;
