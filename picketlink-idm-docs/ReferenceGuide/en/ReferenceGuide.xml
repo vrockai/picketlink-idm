@@ -66,7 +66,8 @@
             </itemizedlist>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/IDM-global-arch.png" format="PNG"/>
+                    <imagedata fileref="images/IDM-global-arch.png" contentwidth="6in"
+                               contentdepth="6in"/>
                 </imageobject>
                 <caption align="right">
                     <para>
@@ -253,7 +254,8 @@
             </para>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/IDM-api-spi.png" format="PNG"/>
+                    <imagedata fileref="images/IDM-api-spi.png" contentwidth="6in"
+                               contentdepth="6in"/>
                 </imageobject>
                 <caption align="right">
                     <para>
@@ -377,7 +379,7 @@
 
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/IDM-global-realm.png" format="PNG" contentwidth="6in"
+                    <imagedata fileref="images/IDM-global-realm.png" contentwidth="6in"
                                contentdepth="6in"/>
                 </imageobject>
                 <caption align="right">
@@ -430,7 +432,8 @@ Group hrDep = pm.createGroup("HR", DEPARTMENT);
             </para>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/SPI1.png" format="PNG"/>
+                    <imagedata fileref="images/SPI1.png" contentwidth="6in"
+                               contentdepth="6in"/>
                 </imageobject>
                <!--<caption align="right">-->
                <!--<para>-->
@@ -462,7 +465,8 @@ assertTrue(rm.isAssociated(parisOffice, annUser));
             </para>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/SPI2.png" format="PNG"/>
+                    <imagedata fileref="images/SPI2.png" contentwidth="6in"
+                               contentdepth="6in"/>
                 </imageobject>
                <!--<caption align="right">-->
                <!--<para>-->
@@ -502,7 +506,8 @@ assertTrue(roleManager.hasRole(stefanUser, itDep, adminRT));
             </para>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="./images/SPI3.png" format="PNG"/>
+                    <imagedata fileref="images/SPI3.png" contentwidth="6in"
+                               contentdepth="6in"/>
                 </imageobject>
                <!--<caption align="right">-->
                <!--<para>-->
@@ -1181,6 +1186,99 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
             </itemizedlist>
 
         </chapter>
+        <chapter>
+            <title>Realm Templates</title>
+            <para>Realm can be marked as a template. This means that if a different realm name is requested using the API and
+            such name contains template realm as a prefix then this realm configuration will be used </para>
+
+            <programlisting>
+                <![CDATA[
+    <realm>
+      <id>idm_realm</id>
+      <repository-id-ref>DefaultRepository</repository-id-ref>
+      <identity-type-mappings>
+        <user-mapping>USER</user-mapping>
+      </identity-type-mappings>
+      <options>
+        <option>
+          <name>template</name>
+          <value>true</value>
+        </option>
+      </options>
+    </realm>            ]]>
+
+            </programlisting>
+
+            <para>
+                In this example for "idm_realm_foo" framework will return "idm_realm" configuration. Request for "foo" realm won't return
+              valid configuration.
+            </para>
+
+          <programlisting>
+                <![CDATA[
+  <realms>
+    <realm>
+      <id>idm_realm</id>
+      <repository-id-ref>DefaultRepository</repository-id-ref>
+      <identity-type-mappings>
+        <user-mapping>USER</user-mapping>
+      </identity-type-mappings>
+
+    </realm>
+   </realms>
+   <repositories>...</repositories>
+   <stores>...</stores>
+   <options>
+      <option>
+         <name>defaultTemplate</name>
+         <value>idm_realm</value>
+      </option>
+   </options>
+
+   ]]>
+
+            </programlisting>
+        <para>The "defaultTemplate" option defines idm_realm as the one that should be used when requested realm name is not found
+        in configuration</para>
+        </chapter>
+        <chapter>
+            <title>API Cache</title>
+            <para>At the realm level IDM API cache layer can be enabled</para>
+
+            <programlisting>
+                <![CDATA[
+    <realm>
+      <id>idm_realm</id>
+      <repository-id-ref>DefaultRepository</repository-id-ref>
+      <identity-type-mappings>
+        <user-mapping>USER</user-mapping>
+      </identity-type-mappings>
+      <options>
+        <option>
+          <name>cache.providerClass</name>
+          <value>JBossCacheAPICacheProviderImpl</value>
+        </option>
+      </options>
+    </realm>            ]]>
+
+            </programlisting>
+
+            <para>
+                Cache related options :
+            </para>
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis role="bold">cache.providerClass</emphasis> - class implementing APICacheProvider interface</para>
+                </listitem>
+                <listitem>
+                    <para><emphasis role="bold">cache.providerRegistryName</emphasis> - id of instantiated APICacheProvider implementation stored in configuration registry </para>
+                </listitem>
+                <listitem>
+                    <para><emphasis role="bold">cache.scope</emphasis> - namespace used to store entities in cache. Can be "realm" (default) or "session".</para>
+                </listitem>
+            </itemizedlist>
+
+        </chapter>
     </part>
 
     <part>
@@ -1774,7 +1872,7 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
             </sect1>
             <sect1>
                 <title>Behaviour</title>
-                <pre>Simply wrapps single AttributeStore and IdentityStore and pass all method invocations</pre>
+                <para>Simply wrapps single AttributeStore and IdentityStore and pass all method invocations</para>
             </sect1>
             <sect1>
                 <title>Sample Configuration</title>
@@ -1801,10 +1899,10 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
             </sect1>
             <sect1>
                 <title>Behaviour</title>
-                <pre>Resolves proper IdentityStore from IdentityObjectType mapping and delegates method invocation.
+                <para>Resolves proper IdentityStore from IdentityObjectType mapping and delegates method invocation.
                     For relationship related methods, if both IdentityObjectTypes are not mapped in one store,
                     repository will try to sync them and associate in defaultIdentityStore. For attributes that are not
-                    mapped inside mapped IdentityStore repository will try to assign those attributes in defaultAttributeStore.</pre>
+                    mapped inside mapped IdentityStore repository will try to assign those attributes in defaultAttributeStore.</para>
             </sect1>
             <sect1>
                 <title>Configuration Options</title>
@@ -1846,7 +1944,12 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
             <identity-object-type>ORGANIZATION_UNIT</identity-object-type>
             <identity-object-type>DEPARTMENT</identity-object-type>
          </identity-object-types>
-         <options/>
+         <options>
+            <option>
+              <name>readOnly</name>
+              <value>true</value>
+            </option>
+          </options>
       </identity-store-mapping>
    </identity-store-mappings>
    <options>
@@ -1858,6 +1961,8 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
 </repository>
                   ]]>
                 </programlisting>
+              <para>The <emphasis role="bold">readOnly</emphasis> options specifies that the only write operation performed on the store
+              will be password update.</para>
             </sect1>
         </chapter>
 

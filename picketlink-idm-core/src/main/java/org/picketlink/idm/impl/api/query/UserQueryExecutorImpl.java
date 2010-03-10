@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -41,6 +43,8 @@ import java.io.Serializable;
 public class UserQueryExecutorImpl extends AbstractQueryExecutor implements Serializable
 {
    private static final long serialVersionUID = -4196998772910705233L;
+
+   private static Logger log = Logger.getLogger(UserQueryExecutorImpl.class.getName());
 
    public UserQueryExecutorImpl(IdentitySession identitySession)
    {
@@ -245,7 +249,9 @@ public class UserQueryExecutorImpl extends AbstractQueryExecutor implements Seri
          return (List<User>)results;
       }
 
+      log.info("Internal Error! Returned collection is not instanceof List");
+
       //TODO:
-      throw new NotYetImplementedException();
+      return new LinkedList(results);
    }
 }

@@ -31,9 +31,12 @@ import org.picketlink.idm.impl.api.model.GroupKey;
 import org.jboss.cache.*;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -283,7 +286,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableCollection(users));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(users));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -431,7 +434,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableCollection(groups));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(groups));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -792,7 +795,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableCollection(results));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -829,7 +832,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableCollection(results));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -899,7 +902,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY,Collections.unmodifiableCollection(results));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -934,7 +937,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableCollection(results));
+      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -1063,7 +1066,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_KEY, Collections.unmodifiableCollection(results));
+      ioNode.put(NODE_QUERY_KEY, unmodifiableCollection(results));
 
       if (log.isLoggable(Level.FINER))
       {
@@ -1218,5 +1221,23 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       {
          log.finer(this.toString() + "Invalidating Role queries. Namespace:" + ns);
       }
+   }
+
+   private Collection unmodifiableCollection(Collection collection)
+   {
+      if (collection instanceof List)
+      {
+         return Collections.unmodifiableList((List)collection);
+      }
+      if (collection instanceof SortedSet)
+      {
+         return Collections.unmodifiableSortedSet((SortedSet)collection);
+      }
+      if (collection instanceof Set)
+      {
+         return Collections.unmodifiableSet((Set)collection);
+      }
+
+      return Collections.unmodifiableCollection(collection);
    }
 }
