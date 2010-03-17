@@ -26,6 +26,7 @@ import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
 import org.picketlink.idm.spi.configuration.metadata.RelationshipMetaData;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collections;
@@ -37,7 +38,7 @@ import java.util.HashMap;
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public class SimpleLDAPIdentityObjectTypeConfiguration implements LDAPIdentityObjectTypeConfiguration
+public class SimpleLDAPIdentityObjectTypeConfiguration implements LDAPIdentityObjectTypeConfiguration, Serializable
 {
    private final String idAttributeName;
 

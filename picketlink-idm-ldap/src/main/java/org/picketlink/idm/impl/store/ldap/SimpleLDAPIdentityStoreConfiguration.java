@@ -27,6 +27,7 @@ import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationM
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
 import org.picketlink.idm.impl.types.SimpleIdentityObjectType;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.Collections;
  * @version : 0.1 $
  */
 public class SimpleLDAPIdentityStoreConfiguration
-   implements LDAPIdentityStoreConfiguration
+   implements LDAPIdentityStoreConfiguration, Serializable
 {
    private final IdentityStoreConfigurationMetaData configurationMetaData;
 
