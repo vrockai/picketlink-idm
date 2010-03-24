@@ -952,6 +952,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       HibernateIdentityObject toIO = safeGet(ctx, toIdentity);
       HibernateIdentityObjectRelationshipType type = getHibernateIdentityObjectRelationshipType(ctx, relationshipType);
 
+      HibernateRealm realm = getRealm(getHibernateSession(ctx), ctx);
+
       org.hibernate.Query query = null;
       Criteria crit = null;
 
@@ -972,7 +974,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          HibernateIdentityObjectRelationshipName relationshipName =
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx)
-               .createCriteria(HibernateIdentityObjectRelationshipName.class).add(Restrictions.eq("name", name))
+               .createCriteria(HibernateIdentityObjectRelationshipName.class)
+               .add(Restrictions.eq("name", name))
+               .createAlias("realm", "rm")
+               .add(Restrictions.eq("rm.name", getRealmName(ctx)))
                .uniqueResult();
 
          if (relationshipName == null)
