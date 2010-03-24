@@ -124,18 +124,6 @@
                   <identity-object-type>DEPARTMENT</identity-object-type>
                </identity-object-types>
                <options>
-                  <option>
-                     <name>cache</name>
-                     <value>true</value>
-                  </option>
-                  <option>
-                     <name>cache.providerClass</name>
-                     <value>org.picketlink.idm.impl.cache.JBossCacheIdentityStoreCacheProviderImpl</value>
-                  </option>
-                  <option>
-                     <name>cache.configFile</name>
-                     <value>jboss-cache.xml</value>
-                  </option>
                </options>
             </identity-store-mapping>
          </identity-store-mappings>
@@ -175,18 +163,6 @@
                   <identity-object-type>OFFICE</identity-object-type>
                </identity-object-types>
                <options>
-                  <option>
-                     <name>cache</name>
-                     <value>true</value>
-                  </option>
-                  <option>
-                     <name>cache.providerClass</name>
-                     <value>org.picketlink.idm.impl.cache.JBossCacheIdentityStoreCacheProviderImpl</value>
-                  </option>
-                  <option>
-                     <name>cache.configFile</name>
-                     <value>jboss-cache.xml</value>
-                  </option>
                </options>
             </identity-store-mapping>
          </identity-store-mappings>
@@ -901,7 +877,7 @@
             <options>
                <option>
                   <name>providerURL</name>
-                  <value>ldap://dev39.qa.atl.jboss.com:3389</value>
+                  <value>ldap://localhost:1389</value>
                </option>
                <option>
                   <name>adminDN</name>

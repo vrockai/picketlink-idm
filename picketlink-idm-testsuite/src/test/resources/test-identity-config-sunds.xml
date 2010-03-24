@@ -84,18 +84,6 @@
                   <identity-object-type>DEPARTMENT</identity-object-type>
                </identity-object-types>
                <options>
-                  <option>
-                     <name>cache</name>
-                     <value>false</value>
-                  </option>
-                  <option>
-                     <name>cache.providerClass</name>
-                     <value>org.picketlink.idm.impl.cache.JBossCacheIdentityStoreCacheProviderImpl</value>
-                  </option>
-                  <option>
-                     <name>cache.configFile</name>
-                     <value>jboss-cache-config.xml</value>
-                  </option>
                </options>
             </identity-store-mapping>
          </identity-store-mappings>
@@ -135,18 +123,6 @@
                   <identity-object-type>OFFICE</identity-object-type>
                </identity-object-types>
                <options>
-                  <option>
-                     <name>cache</name>
-                     <value>false</value>
-                  </option>
-                  <option>
-                     <name>cache.providerClass</name>
-                     <value>org.picketlink.idm.impl.cache.JBossCacheIdentityStoreCacheProviderImpl</value>
-                  </option>
-                  <option>
-                     <name>cache.configFile</name>
-                     <value>jboss-cache-config.xml</value>
-                  </option>
                </options>
             </identity-store-mapping>
          </identity-store-mappings>
