@@ -166,17 +166,17 @@ public class JBossIdentityIDMLoginModule extends UsernamePasswordLoginModule
                }
                else
                {
-                  log.info("Unexpected error while logging in");
+                  log.error("Unexpected error while logging in");
                   return false;
                }            }
             catch (Exception e)
             {
-               log.info("Error when validating password: ",e);
+               log.error("Error when validating password: ",e);
             }
          }
          catch (Exception e)
          {
-            log.info("Failed to validate password: ", e);
+            log.error("Failed to validate password: ", e);
          }
       }
       return false;

@@ -415,9 +415,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.FINER))
+         if (log.isLoggable(Level.INFO))
          {
-            log.finer("Failed to create IdentityObject: " + e);
+            log.info("Failed to create IdentityObject: " + e);
          }
       }
 
@@ -453,9 +453,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.FINER))
+         if (log.isLoggable(Level.INFO))
          {
-            log.finer("Failed to create IdentityObject: " + e);
+            log.info("Failed to create IdentityObject: " + e);
          }
       }
 
@@ -480,9 +480,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.FINER))
+         if (log.isLoggable(Level.INFO))
          {
-            log.finer("Failed to remove IdentityObject: " + e);
+            log.info("Failed to remove IdentityObject: " + e);
          }
       }
    }
@@ -525,9 +525,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.FINER))
+         if (log.isLoggable(Level.INFO))
          {
-            log.finer("Failed to create IdentityObject: " + e);
+            log.info("Failed to create IdentityObject: " + e);
          }
       }
 
@@ -547,9 +547,9 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.FINER))
+         if (log.isLoggable(Level.INFO))
          {
-            log.finer("Failed to create IdentityObject: " + e);
+            log.info("Failed to create IdentityObject: " + e);
          }
       }
 

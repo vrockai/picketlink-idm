@@ -314,7 +314,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          // Make it RFC 2253 compliant
          LdapName validLDAPName = new LdapName(getTypeConfiguration(invocationCtx, type).getIdAttributeName().concat("=").concat(name));
 
-         log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
+         }
          DirContext entry = ctx.createSubcontext(validLDAPName, attrs);
          if (entry != null)
          {
@@ -1822,7 +1825,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          // Make it RFC 2253 compliant
          LdapName validLDAPName = new LdapName(getConfiguration(invocationCtx).getRelationshipNameAttributeName().concat("=").concat(name));
 
-         log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
+         }
          ctx.createSubcontext(validLDAPName, attrs);
       }
       catch (Exception e)
@@ -2837,6 +2843,36 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                    Control[] requestControls) throws NamingException, IdentityException
    {
 
+      //Debug
+      if (log.isLoggable(Level.FINER))
+      {
+         StringBuffer sb = new StringBuffer();
+         sb.append("Prepared LDAP Search ");
+         if (entryCtxs != null)
+         {
+            sb.append("; contexts: ").append(Arrays.toString(entryCtxs));
+         }
+         if (filter != null)
+         {
+            sb.append("; filter: ").append(filter);
+         }
+         if (filterArgs != null)
+         {
+            sb.append("; filter args: ").append(Arrays.toString(filterArgs));
+         }
+         if (returningAttributes != null)
+         {
+            sb.append("; returning attributes: ").append(Arrays.toString(returningAttributes));
+         }
+         if (searchScope != null)
+         {
+            sb.append("; searchScope: ").append(searchScope);
+         }
+
+         log.finer(sb.toString());
+      }
+
+
       LdapContext ldapContext = getLDAPContext(ctx);
 
       if (ldapContext != null)
@@ -2881,7 +2917,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             {
                results = ldapContext.search(entryCtxs[0], filter, filterArgs, searchControls);
             }
-            return Tools.toList(results);
+
+            List toReturn = Tools.toList(results);
+
+            if (log.isLoggable(Level.FINER) && toReturn != null)
+            {
+               log.finer("Search in " + entryCtxs[0] + " returned " + toReturn.size() + " entries");
+            }
+
+            return toReturn;
 
 
          }
@@ -2899,9 +2943,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                {
                   results = ldapContext.search(entryCtx, filter, filterArgs, searchControls);
                }
-               merged.addAll(Tools.toList(results));
+               List singleResult = Tools.toList(results);
+
+               if (log.isLoggable(Level.FINER) && merged != null)
+               {
+                  log.finer("Search in " + entryCtx + " returned " + merged.size() + " entries");
+               }
+
+               merged.addAll(singleResult);
                results.close();
             }
+
+
 
             return merged;
          }
@@ -2937,6 +2990,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (IdentityException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.finer("Failed to find IdentityObject in LDAP: " + io);
+            }
+
             throw new IdentityException("Provided IdentityObject is not present in the store. Cannot operate on not stored objects.", e); 
          }
       }
@@ -2968,11 +3026,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to obtain LDAP connection!");
+         }
+
          throw new IdentityException("Could not obtain LDAP connection: ", e);
       }
       
       if (ldapContext == null)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Failed to obtain LDAP connection!");
+         }
+
          throw new IdentityException("IllegalState: - Could not obtain LDAP connection");
       }
 
