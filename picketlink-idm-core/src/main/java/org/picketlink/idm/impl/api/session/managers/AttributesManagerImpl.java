@@ -45,6 +45,8 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -52,6 +54,9 @@ import java.io.Serializable;
  */
 public class AttributesManagerImpl extends AbstractManager implements AttributesManager, Serializable
 {
+
+   private static Logger log = Logger.getLogger(AttributesManagerImpl.class.getName());
+
    private static final long serialVersionUID = 1285532201632609092L;
 
    public AttributesManagerImpl(IdentitySessionImpl session)
@@ -135,219 +140,390 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
 
    public Set<String> getSupportedAttributeNames(IdentityType identityType) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
+      try
+      {
+         checkNotNullArgument(identityType, "IdentityType");
 
-      return getRepository().getSupportedAttributeNames(getInvocationContext(), createIdentityObject(identityType).getIdentityType());
+         return getRepository().getSupportedAttributeNames(getInvocationContext(), createIdentityObject(identityType).getIdentityType());
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Set<String> getSupportedAttributeNames(String id) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      return getSupportedAttributeNames(identityType);
+         return getSupportedAttributeNames(identityType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Map<String, Attribute> getAttributes(IdentityType identityType) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-
-      if (cache != null)
+      try
       {
-         Map<String, Attribute> attributes = cache.getAttributes(cacheNS, identityType.getKey());
-         if (attributes != null)
+         checkNotNullArgument(identityType, "IdentityType");
+
+         if (cache != null)
          {
-            return attributes;
+            Map<String, Attribute> attributes = cache.getAttributes(cacheNS, identityType.getKey());
+            if (attributes != null)
+            {
+               return attributes;
+            }
          }
+
+         Map<String, IdentityObjectAttribute> map = getRepository().getAttributes(getInvocationContext(), createIdentityObject(identityType));
+
+         Map<String, Attribute> newMap = new HashMap<String, Attribute>();
+
+         for (Map.Entry<String, IdentityObjectAttribute> entry : map.entrySet())
+         {
+            newMap.put(entry.getKey(), convertAttribute(entry.getValue()));
+         }
+
+         if (cache != null)
+         {
+            cache.putAttributes(cacheNS, identityType.getKey(), newMap);
+         }
+         return newMap;
       }
-
-      Map<String, IdentityObjectAttribute> map = getRepository().getAttributes(getInvocationContext(), createIdentityObject(identityType));
-
-      Map<String, Attribute> newMap = new HashMap<String, Attribute>();
-
-      for (Map.Entry<String, IdentityObjectAttribute> entry : map.entrySet())
+      catch (IdentityException e)
       {
-         newMap.put(entry.getKey(), convertAttribute(entry.getValue()));
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (cache != null)
-      {
-         cache.putAttributes(cacheNS, identityType.getKey(), newMap);
-      }
-      return newMap;
    }
 
    public Map<String, Attribute> getAttributes(String id) throws IdentityException
    {
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
 
-      checkNotNullArgument(id, "Id (Group) or name (User)");
 
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      IdentityType identityType = createIdentityTypeFromId(id);
-
-      return getAttributes(identityType);
+         return getAttributes(identityType);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void updateAttributes(IdentityType identity, Attribute[] attributes) throws IdentityException
    {
-      checkNotNullArgument(identity, "IdentityType");
-      checkNotNullArgument(attributes, "Attributes");
-
-      preAttributesUpdate(identity, attributes);
-
-      getRepository().updateAttributes(getInvocationContext(), createIdentityObject(identity), convertAttributes(attributes));
-
-      if (cache != null)
+      try
       {
-         // Grab the new profile and persist in cache
-         cache.invalidateAttributes(cacheNS, identity.getKey());
-         this.getAttributes(identity);
-      }
+         checkNotNullArgument(identity, "IdentityType");
+         checkNotNullArgument(attributes, "Attributes");
 
-      postAttributesUpdate(identity, attributes);
+         preAttributesUpdate(identity, attributes);
+
+         getRepository().updateAttributes(getInvocationContext(), createIdentityObject(identity), convertAttributes(attributes));
+
+         if (cache != null)
+         {
+            // Grab the new profile and persist in cache
+            cache.invalidateAttributes(cacheNS, identity.getKey());
+            this.getAttributes(identity);
+         }
+
+         postAttributesUpdate(identity, attributes);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void updateAttributes(String id, Attribute[] attributes) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributes, "Attributes");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributes, "Attributes");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      updateAttributes(identityType, attributes);
+         updateAttributes(identityType, attributes);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public Attribute getAttribute(IdentityType identityType, String attributeName) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-      checkNotNullArgument(attributeName, "Attribute name");
+      try
+      {
+         checkNotNullArgument(identityType, "IdentityType");
+         checkNotNullArgument(attributeName, "Attribute name");
 
-      return getAttributes(identityType).get(attributeName);
+         return getAttributes(identityType).get(attributeName);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Attribute getAttribute(String id, String attributeName) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributeName, "Attribute name");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributeName, "Attribute name");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      return getAttribute(identityType, attributeName);
+         return getAttribute(identityType, attributeName);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void addAttribute(IdentityType identityType, String attributeName, Object[] values) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(values, "Attribute values");
+      try
+      {
+         checkNotNullArgument(identityType, "IdentityType");
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(values, "Attribute values");
 
-      Attribute[] attrs = new Attribute[]{new SimpleAttribute(attributeName, values)};
+         Attribute[] attrs = new Attribute[]{new SimpleAttribute(attributeName, values)};
 
 
-      addAttributes(identityType, attrs);
+         addAttributes(identityType, attrs);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void addAttributes(String id, Attribute[] attributes) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributes, "Attributes");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributes, "Attributes");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      addAttributes(identityType, attributes);
+         addAttributes(identityType, attributes);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void addAttribute(IdentityType identityType, String attributeName, Object value) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(value, "Attribute value");
+      try
+      {
+         checkNotNullArgument(identityType, "IdentityType");
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(value, "Attribute value");
 
-      Attribute[] attrs = new Attribute[]{new SimpleAttribute(attributeName, value)};
+         Attribute[] attrs = new Attribute[]{new SimpleAttribute(attributeName, value)};
 
 
-      addAttributes(identityType, attrs);
+         addAttributes(identityType, attrs);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void addAttribute(String id, String attributeName, Object[] values) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(values, "Attribute values");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(values, "Attribute values");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      addAttribute(identityType, attributeName, values);
+         addAttribute(identityType, attributeName, values);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void addAttribute(String id, String attributeName, Object value) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(value, "Attribute value");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(value, "Attribute value");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      addAttribute(identityType, attributeName, value);
+         addAttribute(identityType, attributeName, value);
+      }
+      catch (IdentityException e)
+      {
+         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
 
    }
 
    public void addAttributes(IdentityType identityType, Attribute[] attributes) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-      checkNotNullArgument(attributes, "Attributes");
-
-
-      preAttributesAdd(identityType, attributes);
-
-      getRepository().addAttributes(getInvocationContext(), createIdentityObject(identityType), convertAttributes(attributes));
-
-      if (cache != null)
+      try
       {
-         // Grab the new profile and persist in cache
-         cache.invalidateAttributes(cacheNS, identityType.getKey());
-         this.getAttributes(identityType);
-      }
+         checkNotNullArgument(identityType, "IdentityType");
+         checkNotNullArgument(attributes, "Attributes");
 
-      postAttributesAdd(identityType, attributes);
+
+         preAttributesAdd(identityType, attributes);
+
+         getRepository().addAttributes(getInvocationContext(), createIdentityObject(identityType), convertAttributes(attributes));
+
+         if (cache != null)
+         {
+            // Grab the new profile and persist in cache
+            cache.invalidateAttributes(cacheNS, identityType.getKey());
+            this.getAttributes(identityType);
+         }
+
+         postAttributesAdd(identityType, attributes);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
 
 
    public void removeAttributes(IdentityType identityType, String[] attributeNames) throws IdentityException
    {
-      checkNotNullArgument(identityType, "IdentityType");
-      checkNotNullArgument(attributeNames, "Attribute names");
-
-      preAttributesRemove(identityType, attributeNames);
-
-      getRepository().removeAttributes(getInvocationContext(), createIdentityObject(identityType), attributeNames);
-
-      if (cache != null)
+      try
       {
-         // Grab the new profile and persist in cache
-         cache.invalidateAttributes(cacheNS, identityType.getKey());
-         this.getAttributes(identityType);
-      }
+         checkNotNullArgument(identityType, "IdentityType");
+         checkNotNullArgument(attributeNames, "Attribute names");
 
-      postAttributesRemove(identityType, attributeNames);
+         preAttributesRemove(identityType, attributeNames);
+
+         getRepository().removeAttributes(getInvocationContext(), createIdentityObject(identityType), attributeNames);
+
+         if (cache != null)
+         {
+            // Grab the new profile and persist in cache
+            cache.invalidateAttributes(cacheNS, identityType.getKey());
+            this.getAttributes(identityType);
+         }
+
+         postAttributesRemove(identityType, attributeNames);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void removeAttributes(String id, String[] attributeNames) throws IdentityException
    {
-      checkNotNullArgument(id, "Id (Group) or name (User)");
-      checkNotNullArgument(attributeNames, "Attribute names");
+      try
+      {
+         checkNotNullArgument(id, "Id (Group) or name (User)");
+         checkNotNullArgument(attributeNames, "Attribute names");
 
-      IdentityType identityType = createIdentityTypeFromId(id);
+         IdentityType identityType = createIdentityTypeFromId(id);
 
-      removeAttributes(identityType, attributeNames);
+         removeAttributes(identityType, attributeNames);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
@@ -359,21 +535,43 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
 
    public boolean validatePassword(User user, String password) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-      checkNotNullArgument(password, "Password");
-      return getRepository().validateCredential(getInvocationContext(), createIdentityObject(user), new PasswordCredential(password));
+      try
+      {
+         checkNotNullArgument(user, "User");
+         checkNotNullArgument(password, "Password");
+         return getRepository().validateCredential(getInvocationContext(), createIdentityObject(user), new PasswordCredential(password));
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void updatePassword(User user, String password) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-      checkNotNullArgument(password, "Password");
+      try
+      {
+         checkNotNullArgument(user, "User");
+         checkNotNullArgument(password, "Password");
 
-      preCredentialUpdate(user, new PasswordCredential(password));
+         preCredentialUpdate(user, new PasswordCredential(password));
 
-      getRepository().updateCredential(getInvocationContext(), createIdentityObject(user), new PasswordCredential(password));
+         getRepository().updateCredential(getInvocationContext(), createIdentityObject(user), new PasswordCredential(password));
 
-      postCredentialUpdate(user, new PasswordCredential(password));
+         postCredentialUpdate(user, new PasswordCredential(password));
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
@@ -386,86 +584,130 @@ public class AttributesManagerImpl extends AbstractManager implements Attributes
 
    public boolean validateCredentials(User user, Credential[] credentials) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-      checkNotNullArgument(credentials, "Credentials");
-
-      for (Credential credential : credentials)
+      try
       {
-         IdentityObjectCredential ioc = null;
+         checkNotNullArgument(user, "User");
+         checkNotNullArgument(credentials, "Credentials");
 
-         //Handle only those credentials that implement SPI
-
-         if (!(credential instanceof IdentityObjectCredential))
+         for (Credential credential : credentials)
          {
-            throw new IdentityException("Unsupported Credential implementation: " + credential.getClass());
+            IdentityObjectCredential ioc = null;
+
+            //Handle only those credentials that implement SPI
+
+            if (!(credential instanceof IdentityObjectCredential))
+            {
+               throw new IdentityException("Unsupported Credential implementation: " + credential.getClass());
+            }
+
+            ioc = (IdentityObjectCredential)credential;
+
+            // All credentials must pass
+
+            if (!getRepository().validateCredential(getInvocationContext(), createIdentityObject(user), ioc))
+            {
+               return false;
+            }
          }
 
-         ioc = (IdentityObjectCredential)credential;
-
-         // All credentials must pass
-
-         if (!getRepository().validateCredential(getInvocationContext(), createIdentityObject(user), ioc))
-         {
-            return false;
-         }
+         return true;
       }
-
-      return true;
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void updateCredential(User user, Credential credential) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-      checkNotNullArgument(credential, "Credential");
-
-      if (credential instanceof IdentityObjectCredential)
+      try
       {
-         preCredentialUpdate(user, credential);
+         checkNotNullArgument(user, "User");
+         checkNotNullArgument(credential, "Credential");
 
-         getRepository().updateCredential(getInvocationContext(), createIdentityObject(user), (IdentityObjectCredential)credential);
+         if (credential instanceof IdentityObjectCredential)
+         {
+            preCredentialUpdate(user, credential);
 
-         postCredentialUpdate(user, credential);
+            getRepository().updateCredential(getInvocationContext(), createIdentityObject(user), (IdentityObjectCredential)credential);
+
+            postCredentialUpdate(user, credential);
+         }
+         else
+         {
+            throw new IdentityException("Unsupported Credential implementation: " + credential.getClass());
+         }
       }
-      else
+      catch (IdentityException e)
       {
-         throw new IdentityException("Unsupported Credential implementation: " + credential.getClass());
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
    public User findUserByUniqueAttribute(String attributeName, Object value) throws IdentityException
    {
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(value, "Attribute value");
-
-      //TODO: cache
-
-      IdentityObject io = getRepository().findIdentityObjectByUniqueAttribute(getInvocationContext(), getUserObjectType(), new SimpleAttribute(attributeName, value));
-
-      if (io == null)
+      try
       {
-         return null;
-      }
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(value, "Attribute value");
 
-      return createUser(io);
+         //TODO: cache
+
+         IdentityObject io = getRepository().findIdentityObjectByUniqueAttribute(getInvocationContext(), getUserObjectType(), new SimpleAttribute(attributeName, value));
+
+         if (io == null)
+         {
+            return null;
+         }
+
+         return createUser(io);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Group findGroupByUniqueAttribute(String groupType, String attributeName, Object value) throws IdentityException
    {
-      checkNotNullArgument(groupType, "GroupType");
-      checkNotNullArgument(attributeName, "Attribute name");
-      checkNotNullArgument(value, "Attribute value");
-
-      //TODO: cache
-
-      IdentityObject io = getRepository().findIdentityObjectByUniqueAttribute(getInvocationContext(),
-         getIdentityObjectType(groupType),
-         new SimpleAttribute(attributeName, value));
-
-      if (io == null)
+      try
       {
-         return null;
-      }
+         checkNotNullArgument(groupType, "GroupType");
+         checkNotNullArgument(attributeName, "Attribute name");
+         checkNotNullArgument(value, "Attribute value");
 
-      return createGroup(io);
+         //TODO: cache
+
+         IdentityObject io = getRepository().findIdentityObjectByUniqueAttribute(getInvocationContext(),
+            getIdentityObjectType(groupType),
+            new SimpleAttribute(attributeName, value));
+
+         if (io == null)
+         {
+            return null;
+         }
+
+         return createGroup(io);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 }

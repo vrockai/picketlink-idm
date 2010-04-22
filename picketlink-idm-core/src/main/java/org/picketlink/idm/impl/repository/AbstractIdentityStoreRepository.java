@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -51,6 +53,8 @@ import java.lang.reflect.Constructor;
  */
 public abstract class AbstractIdentityStoreRepository implements IdentityStoreRepository, Serializable
 {
+
+   private static Logger log = Logger.getLogger(AbstractIdentityStoreRepository.class.getName());
 
    protected Map<String, IdentityStore> identityStoreMappings = new HashMap<String, IdentityStore>();
 
@@ -143,6 +147,12 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
                }
                catch (IdentityException e)
                {
+
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot find IdentityStoreCacheProvider cache provider instance" +
                      "with provided name:" + cacheRegistryName, e);
                }
@@ -163,6 +173,11 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
                }
                catch (Exception e)
                {
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot instantiate cache provider:" + cacheSupportClass, e);
                }
             }
@@ -220,6 +235,12 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
                }
                catch (IdentityException e)
                {
+
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot find IdentityStoreCacheProvider cache provider instance" +
                      "with provided name:" + cacheRegistryName, e);
                }
@@ -240,6 +261,11 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
                }
                catch (Exception e)
                {
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot instantiate cache provider:" + cacheSupportClass, e);
                }
             }

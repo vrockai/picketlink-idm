@@ -53,6 +53,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -60,6 +62,10 @@ import java.io.Serializable;
  */
 public class RelationshipManagerImpl extends AbstractManager implements RelationshipManager, Serializable
 {
+
+   private static Logger log = Logger.getLogger(RelationshipManagerImpl.class.getName());
+
+
    RelationshipManagerFeaturesDescription featuresDescription;
 
    public static final IdentityObjectRelationshipType MEMBER = new IdentityObjectRelationshipType()
@@ -204,45 +210,67 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void associateGroups(Group parent, Group member) throws IdentityException
    {
-      checkNotNullArgument(parent, "Parent group");
-      checkNotNullArgument(member, "Member group");
-
-      preGroupAssociationCreate(parent, member);
-
-      getRepository().createRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null, true);
-
-      if (cache != null)
+      try
       {
-         cache.invalidateAllQueries(cacheNS);
-         cache.invalidateAllSearches(cacheNS);
-      }
+         checkNotNullArgument(parent, "Parent group");
+         checkNotNullArgument(member, "Member group");
 
-      postGroupAssociationCreate(parent, member);
+         preGroupAssociationCreate(parent, member);
+
+         getRepository().createRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null, true);
+
+         if (cache != null)
+         {
+            cache.invalidateAllQueries(cacheNS);
+            cache.invalidateAllSearches(cacheNS);
+         }
+
+         postGroupAssociationCreate(parent, member);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
                            
 
    public void associateGroupsByKeys(String parentId, String memberId) throws IdentityException
    {
-      checkNotNullArgument(parentId, "Parent Id");
-      checkNotNullArgument(memberId, "Member Id");
-
-      Group parent = new SimpleGroup(new GroupKey(parentId));
-      Group member = new SimpleGroup(new GroupKey(memberId));
-
-
-      preGroupAssociationCreate(parent, member);
-
-      getRepository().createRelationship(getInvocationContext(), createIdentityObjectForGroupId(parentId), createIdentityObjectForGroupId(memberId), MEMBER, null, true);
-
-      if (cache != null)
+      try
       {
-         cache.invalidateAllQueries(cacheNS);
-         cache.invalidateAllSearches(cacheNS);
+         checkNotNullArgument(parentId, "Parent Id");
+         checkNotNullArgument(memberId, "Member Id");
+
+         Group parent = new SimpleGroup(new GroupKey(parentId));
+         Group member = new SimpleGroup(new GroupKey(memberId));
+
+
+         preGroupAssociationCreate(parent, member);
+
+         getRepository().createRelationship(getInvocationContext(), createIdentityObjectForGroupId(parentId), createIdentityObjectForGroupId(memberId), MEMBER, null, true);
+
+         if (cache != null)
+         {
+            cache.invalidateAllQueries(cacheNS);
+            cache.invalidateAllSearches(cacheNS);
+         }
+
+
+         postGroupAssociationCreate(parent, member);
       }
-
-
-      postGroupAssociationCreate(parent, member);
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
@@ -302,45 +330,67 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void associateUser(Group parent, User member) throws IdentityException
    {
-      checkNotNullArgument(parent, "Parent group");
-      checkNotNullArgument(member, "Member user");
-
-      preUserAssociationCreate(parent, member);
-
-      getRepository().createRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null, true);
-
-      if (cache != null)
+      try
       {
-         cache.invalidateAllQueries(cacheNS);
-         cache.invalidateAllSearches(cacheNS);
+         checkNotNullArgument(parent, "Parent group");
+         checkNotNullArgument(member, "Member user");
+
+         preUserAssociationCreate(parent, member);
+
+         getRepository().createRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null, true);
+
+         if (cache != null)
+         {
+            cache.invalidateAllQueries(cacheNS);
+            cache.invalidateAllSearches(cacheNS);
+         }
+
+
+         postUserAssociationCreate(parent, member);
       }
-
-
-      postUserAssociationCreate(parent, member);
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
 
    public void associateUserByKeys(String parentId, String memberId) throws IdentityException
    {
-      checkNotNullArgument(parentId, "Parent group Id");
-      checkNotNullArgument(memberId, "Member user Id");
-
-      Group parent = new SimpleGroup(new GroupKey(parentId));
-      User member = new SimpleUser(memberId);
-
-      preUserAssociationCreate(parent, member);
-
-      getRepository().createRelationship(getInvocationContext(), createIdentityObjectForGroupId(parentId), createIdentityObjectForUserName(memberId), MEMBER, null, true);
-
-      if (cache != null)
+      try
       {
-         cache.invalidateAllQueries(cacheNS);
-         cache.invalidateAllSearches(cacheNS);
+         checkNotNullArgument(parentId, "Parent group Id");
+         checkNotNullArgument(memberId, "Member user Id");
+
+         Group parent = new SimpleGroup(new GroupKey(parentId));
+         User member = new SimpleUser(memberId);
+
+         preUserAssociationCreate(parent, member);
+
+         getRepository().createRelationship(getInvocationContext(), createIdentityObjectForGroupId(parentId), createIdentityObjectForUserName(memberId), MEMBER, null, true);
+
+         if (cache != null)
+         {
+            cache.invalidateAllQueries(cacheNS);
+            cache.invalidateAllSearches(cacheNS);
+         }
+
+
+         postUserAssociationCreate(parent, member);
       }
-
-
-      postUserAssociationCreate(parent, member);
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
@@ -365,32 +415,42 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void disassociateGroups(Collection<Group> parents, Collection<Group> members) throws IdentityException
    {
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-
-
-      for (Iterator<Group> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+      try
       {
-         Group parent = parentsIterator.next();
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
 
-         for (Iterator<Group> membersIterator = members.iterator(); membersIterator.hasNext();)
+
+         for (Iterator<Group> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
          {
-            Group member = membersIterator.next();
+            Group parent = parentsIterator.next();
 
-            preGroupAssociationRemove(parent, member);
-
-            getRepository().removeRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null);
-
-            if (cache != null)
+            for (Iterator<Group> membersIterator = members.iterator(); membersIterator.hasNext();)
             {
-               cache.invalidateAllQueries(cacheNS);
-               cache.invalidateAllSearches(cacheNS);
+               Group member = membersIterator.next();
+
+               preGroupAssociationRemove(parent, member);
+
+               getRepository().removeRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null);
+
+               if (cache != null)
+               {
+                  cache.invalidateAllQueries(cacheNS);
+                  cache.invalidateAllSearches(cacheNS);
+               }
+
+               postGroupAssociationRemove(parent, member);
+
             }
-
-            postGroupAssociationRemove(parent, member);
-
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
 
 
@@ -405,34 +465,45 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void disassociateGroupsByKeys(Collection<String> parents, Collection<String> members) throws IdentityException
    {
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-      for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+      try
       {
-         String parent = parentsIterator.next();
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
 
-         for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
+         for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
          {
-            String member = membersIterator.next();
+            String parent = parentsIterator.next();
 
-            Group parentGroup = new SimpleGroup(new GroupKey(parent));
-            Group memberGroup = new SimpleGroup(new GroupKey(member));
-
-            preGroupAssociationRemove(parentGroup, memberGroup);
-
-            getRepository().removeRelationship(getInvocationContext(), createIdentityObjectForGroupId(parent), createIdentityObjectForGroupId(member), MEMBER, null);
-
-            if (cache != null)
+            for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
             {
-               cache.invalidateAllQueries(cacheNS);
-               cache.invalidateAllSearches(cacheNS);
+               String member = membersIterator.next();
+
+               Group parentGroup = new SimpleGroup(new GroupKey(parent));
+               Group memberGroup = new SimpleGroup(new GroupKey(member));
+
+               preGroupAssociationRemove(parentGroup, memberGroup);
+
+               getRepository().removeRelationship(getInvocationContext(), createIdentityObjectForGroupId(parent), createIdentityObjectForGroupId(member), MEMBER, null);
+
+               if (cache != null)
+               {
+                  cache.invalidateAllQueries(cacheNS);
+                  cache.invalidateAllSearches(cacheNS);
+               }
+
+
+               postGroupAssociationRemove(parentGroup, memberGroup);
+
             }
-
-
-            postGroupAssociationRemove(parentGroup, memberGroup);
-
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
@@ -445,30 +516,41 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void disassociateUsers(Collection<Group> parents, Collection<User> members) throws IdentityException
    {
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-      for (Iterator<Group> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+      try
       {
-         Group parent = parentsIterator.next();
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
 
-         for (Iterator<User> membersIterator = members.iterator(); membersIterator.hasNext();)
+         for (Iterator<Group> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
          {
-            User member = membersIterator.next();
+            Group parent = parentsIterator.next();
 
-            preUserAssociationRemove(parent, member);
-
-            getRepository().removeRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null);
-
-            if (cache != null)
+            for (Iterator<User> membersIterator = members.iterator(); membersIterator.hasNext();)
             {
-               cache.invalidateAllQueries(cacheNS);
-               cache.invalidateAllSearches(cacheNS);
+               User member = membersIterator.next();
+
+               preUserAssociationRemove(parent, member);
+
+               getRepository().removeRelationship(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER, null);
+
+               if (cache != null)
+               {
+                  cache.invalidateAllQueries(cacheNS);
+                  cache.invalidateAllSearches(cacheNS);
+               }
+
+
+               postUserAssociationRemove(parent, member);
             }
-
-
-            postUserAssociationRemove(parent, member);
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
 
    }
@@ -482,35 +564,46 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public void disassociateUsersByKeys(Collection<String> parents, Collection<String> members) throws IdentityException
    {
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-
-      for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+      try
       {
-         String parent = parentsIterator.next();
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
 
-         for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
+
+         for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
          {
-            String member = membersIterator.next();
+            String parent = parentsIterator.next();
 
-            Group parentGroup = new SimpleGroup(new GroupKey(parent));
-            User memberUser = new SimpleUser(member);
-
-            preUserAssociationRemove(parentGroup, memberUser);
-
-            getRepository().removeRelationship(getInvocationContext(), createIdentityObjectForGroupId(parent), createIdentityObjectForUserName(member), MEMBER, null);
-
-            if (cache != null)
+            for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
             {
-               cache.invalidateAllQueries(cacheNS);
-               cache.invalidateAllSearches(cacheNS);
+               String member = membersIterator.next();
+
+               Group parentGroup = new SimpleGroup(new GroupKey(parent));
+               User memberUser = new SimpleUser(member);
+
+               preUserAssociationRemove(parentGroup, memberUser);
+
+               getRepository().removeRelationship(getInvocationContext(), createIdentityObjectForGroupId(parent), createIdentityObjectForUserName(member), MEMBER, null);
+
+               if (cache != null)
+               {
+                  cache.invalidateAllQueries(cacheNS);
+                  cache.invalidateAllSearches(cacheNS);
+               }
+
+
+               postUserAssociationRemove(parentGroup, memberUser);
+
             }
-
-
-            postUserAssociationRemove(parentGroup, memberUser);
-
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
@@ -524,155 +617,177 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public <G extends IdentityType, I extends IdentityType> boolean isAssociated(Collection<G> parents, Collection<I> members) throws IdentityException
    {
-      //TODO: maybe IdentityStore should have isRelationshipPresent method to improve this?
-
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-      if (cache != null)
+      try
       {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         for (G parent : parents)
+//TODO: maybe IdentityStore should have isRelationshipPresent method to improve this?
+
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
+
+         if (cache != null)
          {
-            search.addParent(parent);
-         }
-         for (I member : members)
-         {
-            search.addMember(member);
-         }
-
-         Boolean result = cache.getRelationshipSearch(cacheNS, search);
-
-         if (result != null)
-         {
-            return result;
-         }
-      }
-
-
-      for (Iterator<G> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
-      {
-         IdentityType parent = parentsIterator.next();
-
-         for (Iterator<I> membersIterator = members.iterator(); membersIterator.hasNext();)
-         {
-            IdentityType member = membersIterator.next();
-
-            Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
-
-            if (relationships.size() == 0)
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            for (G parent : parents)
             {
-               if (cache != null)
-               {
-                  RelationshipSearchImpl search = new RelationshipSearchImpl();
-                  for (G p : parents)
-                  {
-                     search.addParent(p);
-                  }
-                  for (I m : members)
-                  {
-                     search.addMember(m);
-                  }
-                  cache.putRelationshipSearch(cacheNS, search, false);
+               search.addParent(parent);
+            }
+            for (I member : members)
+            {
+               search.addMember(member);
+            }
 
-               }
+            Boolean result = cache.getRelationshipSearch(cacheNS, search);
 
-               return false;
+            if (result != null)
+            {
+               return result;
             }
          }
-      }
 
-      if (cache != null)
+
+         for (Iterator<G> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+         {
+            IdentityType parent = parentsIterator.next();
+
+            for (Iterator<I> membersIterator = members.iterator(); membersIterator.hasNext();)
+            {
+               IdentityType member = membersIterator.next();
+
+               Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
+
+               if (relationships.size() == 0)
+               {
+                  if (cache != null)
+                  {
+                     RelationshipSearchImpl search = new RelationshipSearchImpl();
+                     for (G p : parents)
+                     {
+                        search.addParent(p);
+                     }
+                     for (I m : members)
+                     {
+                        search.addMember(m);
+                     }
+                     cache.putRelationshipSearch(cacheNS, search, false);
+
+                  }
+
+                  return false;
+               }
+            }
+         }
+
+         if (cache != null)
+         {
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            for (G p : parents)
+            {
+               search.addParent(p);
+            }
+            for (I m : members)
+            {
+               search.addMember(m);
+            }
+            cache.putRelationshipSearch(cacheNS, search, true);
+
+         }
+
+         return true;
+      }
+      catch (IdentityException e)
       {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         for (G p : parents)
+         if (log.isLoggable(Level.FINER))
          {
-            search.addParent(p);
+            log.log(Level.FINER, "Exception occurred: ", e);
          }
-         for (I m : members)
-         {
-            search.addMember(m);
-         }
-         cache.putRelationshipSearch(cacheNS, search, true);
-
+         throw e;
       }
-
-      return true;
    }
 
    public boolean isAssociatedByKeys(Collection<String> parents, Collection<String> members) throws IdentityException
    {
-      checkNotNullArgument(parents, "parents");
-      checkNotNullArgument(members, "members");
-
-      if (cache != null)
+      try
       {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         for (String parent : parents)
+         checkNotNullArgument(parents, "parents");
+         checkNotNullArgument(members, "members");
+
+         if (cache != null)
          {
-            search.addParent(parent);
-         }
-         for (String member : members)
-         {
-            search.addMember(member);
-         }
-
-         Boolean result = cache.getRelationshipSearch(cacheNS, search);
-
-         if (result != null)
-         {
-            return result;
-         }
-      }
-
-      for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
-      {
-         String parent = parentsIterator.next();
-
-         for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
-         {
-            String member = membersIterator.next();
-
-            Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
-
-            if (relationships.size() == 0)
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            for (String parent : parents)
             {
-               if (cache != null)
-               {
-                  RelationshipSearchImpl search = new RelationshipSearchImpl();
-                  for (String p : parents)
-                  {
-                     search.addParent(p);
-                  }
-                  for (String m : members)
-                  {
-                     search.addMember(m);
-                  }
-                  cache.putRelationshipSearch(cacheNS, search, false);
+               search.addParent(parent);
+            }
+            for (String member : members)
+            {
+               search.addMember(member);
+            }
 
-               }
+            Boolean result = cache.getRelationshipSearch(cacheNS, search);
 
-               return false;
+            if (result != null)
+            {
+               return result;
             }
          }
-      }
 
-      if (cache != null)
+         for (Iterator<String> parentsIterator = parents.iterator(); parentsIterator.hasNext();)
+         {
+            String parent = parentsIterator.next();
+
+            for (Iterator<String> membersIterator = members.iterator(); membersIterator.hasNext();)
+            {
+               String member = membersIterator.next();
+
+               Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
+
+               if (relationships.size() == 0)
+               {
+                  if (cache != null)
+                  {
+                     RelationshipSearchImpl search = new RelationshipSearchImpl();
+                     for (String p : parents)
+                     {
+                        search.addParent(p);
+                     }
+                     for (String m : members)
+                     {
+                        search.addMember(m);
+                     }
+                     cache.putRelationshipSearch(cacheNS, search, false);
+
+                  }
+
+                  return false;
+               }
+            }
+         }
+
+         if (cache != null)
+         {
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            for (String p : parents)
+            {
+               search.addParent(p);
+            }
+            for (String m : members)
+            {
+               search.addMember(m);
+            }
+            cache.putRelationshipSearch(cacheNS, search, true);
+
+         }
+
+         return true;
+      }
+      catch (IdentityException e)
       {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         for (String p : parents)
+         if (log.isLoggable(Level.FINER))
          {
-            search.addParent(p);
+            log.log(Level.FINER, "Exception occurred: ", e);
          }
-         for (String m : members)
-         {
-            search.addMember(m);
-         }
-         cache.putRelationshipSearch(cacheNS, search, true);
-
+         throw e;
       }
-
-      return true;
    }
 
    public <G extends IdentityType, I extends IdentityType> boolean isAssociated(G parent, I member) throws IdentityException
@@ -691,41 +806,52 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public boolean isAssociatedByKeys(String parent, String member) throws IdentityException
    {
-      checkNotNullArgument(parent, "Parent Id");
-      checkNotNullArgument(member, "Member Id");
-
-      if (cache != null)
+      try
       {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         search.addParent(parent);
-         search.addMember(member);
+         checkNotNullArgument(parent, "Parent Id");
+         checkNotNullArgument(member, "Member Id");
 
-         Boolean result = cache.getRelationshipSearch(cacheNS, search);
-
-         if (result != null)
+         if (cache != null)
          {
-            return result;
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            search.addParent(parent);
+            search.addMember(member);
+
+            Boolean result = cache.getRelationshipSearch(cacheNS, search);
+
+            if (result != null)
+            {
+               return result;
+            }
          }
+
+         Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
+
+         boolean result = true;
+
+         if (relationships.size() == 0)
+         {
+            result = false;
+         }
+
+         if (cache != null)
+         {
+            RelationshipSearchImpl search = new RelationshipSearchImpl();
+            search.addParent(parent);
+            search.addMember(member);
+            cache.putRelationshipSearch(cacheNS, search, result);
+         }
+
+         return result;
       }
-
-      Collection<IdentityObjectRelationship> relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(parent), createIdentityObject(member), MEMBER);
-
-      boolean result = true;
-
-      if (relationships.size() == 0)
+      catch (IdentityException e)
       {
-         result = false;
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (cache != null)
-      {
-         RelationshipSearchImpl search = new RelationshipSearchImpl();
-         search.addParent(parent);
-         search.addMember(member);
-         cache.putRelationshipSearch(cacheNS, search, result);
-      }
-
-      return result;
    }
 
    private Collection<Group> findAssociatedGroupsCascaded(Collection<Group> previous, Group group, String groupType, boolean parent, IdentitySearchCriteria criteria) throws IdentityException
@@ -753,80 +879,90 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
    public Collection<Group> findAssociatedGroups(Group group, String groupType, boolean parent, boolean cascade, IdentitySearchCriteria criteria) throws IdentityException
    {
 
-      checkNotNullArgument(group, "Group");
-
-      if (cache != null)
+      try
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedGroupId(group.getKey());
-         search.setGroupType(groupType);
-         search.setParent(parent);
-         search.setCascade(cascade);
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(group, "Group");
 
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
-         }
-      }
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addAssociatedGroupId(group.getKey());
+            search.setGroupType(groupType);
+            search.setParent(parent);
+            search.setCascade(cascade);
+            search.setSearchCriteria(criteria);
 
-      List<Group> identities = new LinkedList<Group>();
-
-      IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
-
-
-
-      if (cascade)
-      {
-         Set<Group> prev = new HashSet<Group>();
-         prev.add(group);
-         identities = (List<Group>)findAssociatedGroupsCascaded(prev, group, groupType, parent, criteria);
-
-         try
-         {
-            //TODO: don't perform when only one repository call was made 
-            if (criteria != null)
+            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+            if (results != null)
             {
-               IdentitySearchCriteriaImpl.applyCriteria(identitySession, convertSearchControls(criteria), identities);
+               return results;
             }
          }
-         catch (Exception e)
+
+         List<Group> identities = new LinkedList<Group>();
+
+         IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
+
+
+         if (cascade)
          {
-            throw new IdentityException("Failed to apply criteria", e);
-         }
+            Set<Group> prev = new HashSet<Group>();
+            prev.add(group);
+            identities = (List<Group>)findAssociatedGroupsCascaded(prev, group, groupType, parent, criteria);
 
-
-      }
-      else
-      {
-
-         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), MEMBER, parent, convertSearchControls(criteria));
-
-         for (IdentityObject io : ios)
-         {
-            if ((iot == null && !io.getIdentityType().getName().equals(getUserObjectType().getName())) ||
-               (iot != null && io.getIdentityType().getName().equals(iot.getName())))
+            try
             {
-               identities.add(createGroup(io));
+               //TODO: don't perform when only one repository call was made
+               if (criteria != null)
+               {
+                  IdentitySearchCriteriaImpl.applyCriteria(identitySession, convertSearchControls(criteria), identities);
+               }
+            }
+            catch (Exception e)
+            {
+               throw new IdentityException("Failed to apply criteria", e);
+            }
+
+
+         }
+         else
+         {
+
+            Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), MEMBER, parent, convertSearchControls(criteria));
+
+            for (IdentityObject io : ios)
+            {
+               if ((iot == null && !io.getIdentityType().getName().equals(getUserObjectType().getName())) ||
+                  (iot != null && io.getIdentityType().getName().equals(iot.getName())))
+               {
+                  identities.add(createGroup(io));
+               }
             }
          }
-      }
 
-      if (cache != null)
+         if (cache != null)
+         {
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addAssociatedGroupId(group.getKey());
+            search.setGroupType(groupType);
+            search.setParent(parent);
+            search.setCascade(cascade);
+            search.setSearchCriteria(criteria);
+
+            cache.putGroupSearch(cacheNS, search, identities);
+
+         }
+
+         return identities;
+      }
+      catch (IdentityException e)
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedGroupId(group.getKey());
-         search.setGroupType(groupType);
-         search.setParent(parent);
-         search.setCascade(cascade);
-         search.setSearchCriteria(criteria);
-
-         cache.putGroupSearch(cacheNS, search, identities);
-         
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return identities;
 
    }
 
@@ -850,51 +986,61 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public Collection<Group> findAssociatedGroups(User user, String groupType, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-      //checkNotNullArgument(groupType, "Group type");
-
-       if (cache != null)
+      try
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedUserId(user.getKey());
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(user, "User");
+         //checkNotNullArgument(groupType, "Group type");
 
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
+        {
+           GroupSearchImpl search = new GroupSearchImpl();
+           search.addAssociatedUserId(user.getKey());
+           search.setGroupType(groupType);
+           search.setSearchCriteria(criteria);
+
+           Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+           if (results != null)
+           {
+              return results;
+           }
+        }
+
+         List<Group> identities = new LinkedList<Group>();
+
+         IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
+
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
+
+         for (IdentityObject io : ios)
          {
-            return results;
+            if (iot == null || io.getIdentityType().getName().equals(iot.getName()))
+            {
+               identities.add(createGroup(io));
+            }
          }
-      }
 
-      List<Group> identities = new LinkedList<Group>();
-
-      IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
-
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
-
-      for (IdentityObject io : ios)
-      {
-         if (iot == null || io.getIdentityType().getName().equals(iot.getName()))
+         if (cache != null)
          {
-            identities.add(createGroup(io));
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addAssociatedUserId(user.getKey());
+            search.setGroupType(groupType);
+            search.setSearchCriteria(criteria);
+
+            cache.putGroupSearch(cacheNS, search, identities);
+
          }
-      }
 
-      if (cache != null)
+
+         return identities;
+      }
+      catch (IdentityException e)
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedUserId(user.getKey());
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
-
-         cache.putGroupSearch(cacheNS, search, identities);
-
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-
-
-      return identities;
    }
 
    public Collection<Group> findAssociatedGroups(String userName, String groupType, IdentitySearchCriteria criteria) throws IdentityException
@@ -917,46 +1063,57 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public Collection<Group> findAssociatedGroups(User user, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-
-      if (cache != null)
+      try
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedUserId(user.getKey());
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(user, "User");
 
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addAssociatedUserId(user.getKey());
+            search.setSearchCriteria(criteria);
+
+            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+            if (results != null)
+            {
+               return results;
+            }
          }
+
+         List<Group> identities = new LinkedList<Group>();
+
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
+
+
+         String userTypeName = getUserObjectType().getName();
+
+         for (IdentityObject io : ios)
+         {
+
+            // Filter out users
+            if (!io.getIdentityType().getName().equals(userTypeName))
+               identities.add(createGroup(io));
+         }
+
+         if (cache != null)
+         {
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addAssociatedUserId(user.getKey());
+            search.setSearchCriteria(criteria);
+
+            cache.putGroupSearch(cacheNS, search, identities);
+         }
+
+         return identities;
       }
-
-      List<Group> identities = new LinkedList<Group>();
-
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
-
-
-      String userTypeName = getUserObjectType().getName();
-
-      for (IdentityObject io : ios)
+      catch (IdentityException e)
       {
-
-         // Filter out users
-         if (!io.getIdentityType().getName().equals(userTypeName))
-            identities.add(createGroup(io));
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (cache != null)
-      {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addAssociatedUserId(user.getKey());
-         search.setSearchCriteria(criteria);
-
-         cache.putGroupSearch(cacheNS, search, identities);
-      }
-
-      return identities;
    }
 
    public Collection<Group> findAssociatedGroups(String userName, IdentitySearchCriteria criteria) throws IdentityException
@@ -977,82 +1134,93 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public Collection<User> findAssociatedUsers(Group group, boolean cascade, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(group, "Group");
-
-      if (cache != null)
+      try
       {
-         UserSearchImpl search = new UserSearchImpl();
-         search.addAssociatedGroupId(group.getKey());
-         search.setCascade(cascade);
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(group, "Group");
 
-         Collection<User> results = cache.getUserSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
-         }
-      }
+            UserSearchImpl search = new UserSearchImpl();
+            search.addAssociatedGroupId(group.getKey());
+            search.setCascade(cascade);
+            search.setSearchCriteria(criteria);
 
-      List<User> identities = new LinkedList<User>();
-
-      if (cascade)
-      {
-         // Do non cascaded call
-
-         identities.addAll(findAssociatedUsers(group, false, criteria));
-
-         // Find all associated groups (cascaded)
-         Collection<Group> groups = findAssociatedGroups(group, null, true, true, criteria);
-
-
-         for (Group asociatedGroup : groups)
-         {
-            identities.addAll(findAssociatedUsers(asociatedGroup, false, criteria));
-         }
-
-         try
-         {
-
-            //TODO: don't perform when only one repository call was made 
-            if (criteria != null)
+            Collection<User> results = cache.getUserSearch(cacheNS, search);
+            if (results != null)
             {
-               IdentitySearchCriteriaImpl.applyCriteria(identitySession, convertSearchControls(criteria), identities);
+               return results;
             }
          }
-         catch (Exception e)
+
+         List<User> identities = new LinkedList<User>();
+
+         if (cascade)
          {
-            throw new IdentityException("Failed to apply criteria", e);
-         }
+            // Do non cascaded call
 
-      }
-      else
-      {
+            identities.addAll(findAssociatedUsers(group, false, criteria));
 
-         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), MEMBER, true, convertSearchControls(criteria));
+            // Find all associated groups (cascaded)
+            Collection<Group> groups = findAssociatedGroups(group, null, true, true, criteria);
 
-         String userTypeName = getUserObjectType().getName();
 
-         for (IdentityObject io : ios)
-         {
-            //Filter out groups
-            if (io.getIdentityType().getName().equals(userTypeName))
+            for (Group asociatedGroup : groups)
             {
-               identities.add(createUser(io));
+               identities.addAll(findAssociatedUsers(asociatedGroup, false, criteria));
+            }
+
+            try
+            {
+
+               //TODO: don't perform when only one repository call was made
+               if (criteria != null)
+               {
+                  IdentitySearchCriteriaImpl.applyCriteria(identitySession, convertSearchControls(criteria), identities);
+               }
+            }
+            catch (Exception e)
+            {
+               throw new IdentityException("Failed to apply criteria", e);
+            }
+
+         }
+         else
+         {
+
+            Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), MEMBER, true, convertSearchControls(criteria));
+
+            String userTypeName = getUserObjectType().getName();
+
+            for (IdentityObject io : ios)
+            {
+               //Filter out groups
+               if (io.getIdentityType().getName().equals(userTypeName))
+               {
+                  identities.add(createUser(io));
+               }
             }
          }
-      }
 
-      if (cache != null)
+         if (cache != null)
+         {
+            UserSearchImpl search = new UserSearchImpl();
+            search.addAssociatedGroupId(group.getKey());
+            search.setCascade(cascade);
+            search.setSearchCriteria(criteria);
+
+            cache.putUserSearch(cacheNS, search, identities);
+         }
+
+         return identities;
+      }
+      catch (IdentityException e)
       {
-         UserSearchImpl search = new UserSearchImpl();
-         search.addAssociatedGroupId(group.getKey());
-         search.setCascade(cascade);
-         search.setSearchCriteria(criteria);
-
-         cache.putUserSearch(cacheNS, search, identities);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return identities;
    }
 
    public Collection<User> findAssociatedUsers(String groupId, boolean cascade, IdentitySearchCriteria criteria) throws IdentityException
@@ -1073,51 +1241,62 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public Collection<Group> findRelatedGroups(User user, String groupType, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-
-      if (cache != null)
+      try
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addRelatedUserId(user.getKey());
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(user, "User");
 
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addRelatedUserId(user.getKey());
+            search.setGroupType(groupType);
+            search.setSearchCriteria(criteria);
+
+            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+            if (results != null)
+            {
+               return results;
+            }
          }
-      }
 
-      List<Group> identities = new LinkedList<Group>();
+         List<Group> identities = new LinkedList<Group>();
 
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), null, false, convertSearchControls(criteria));
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), null, false, convertSearchControls(criteria));
 
 
-      String userTypeName = getUserObjectType().getName();
+         String userTypeName = getUserObjectType().getName();
 
-      for (IdentityObject io : ios)
-      {
-         // Filter out users
-         if (!io.getIdentityType().getName().equals(userTypeName))
-            identities.add(createGroup(io));
-      }
-
-      if (cache != null)
-      {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.addRelatedUserId(user.getKey());
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
-
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         for (IdentityObject io : ios)
          {
-            return results;
+            // Filter out users
+            if (!io.getIdentityType().getName().equals(userTypeName))
+               identities.add(createGroup(io));
          }
-      }
 
-      return identities;
+         if (cache != null)
+         {
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.addRelatedUserId(user.getKey());
+            search.setGroupType(groupType);
+            search.setSearchCriteria(criteria);
+
+            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+            if (results != null)
+            {
+               return results;
+            }
+         }
+
+         return identities;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Collection<Group> findRelatedGroups(String userName, String groupType, IdentitySearchCriteria criteria) throws IdentityException
@@ -1131,51 +1310,62 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    public Collection<User> findRelatedUsers(Group group, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(group, "Group");
-
-      if (cache != null)
+      try
       {
-         UserSearchImpl search = new UserSearchImpl();
-         search.addRelatedGroupId(group.getKey());
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(group, "Group");
 
-         Collection<User> results = cache.getUserSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
-         }
-      }
+            UserSearchImpl search = new UserSearchImpl();
+            search.addRelatedGroupId(group.getKey());
+            search.setSearchCriteria(criteria);
 
-      List<User> identities = new LinkedList<User>();
-
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), null, true, convertSearchControls(criteria));
-
-      String userTypeName = getUserObjectType().getName();
-
-      for (IdentityObject io : ios)
-      {
-         if (io.getIdentityType().getName().equals(userTypeName))
-         {
-            User user = createUser(io);
-
-            if (!identities.contains(user))
+            Collection<User> results = cache.getUserSearch(cacheNS, search);
+            if (results != null)
             {
-               identities.add(createUser(io));
+               return results;
             }
          }
-      }
 
-      if (cache != null)
+         List<User> identities = new LinkedList<User>();
+
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), null, true, convertSearchControls(criteria));
+
+         String userTypeName = getUserObjectType().getName();
+
+         for (IdentityObject io : ios)
+         {
+            if (io.getIdentityType().getName().equals(userTypeName))
+            {
+               User user = createUser(io);
+
+               if (!identities.contains(user))
+               {
+                  identities.add(createUser(io));
+               }
+            }
+         }
+
+         if (cache != null)
+         {
+            UserSearchImpl search = new UserSearchImpl();
+            search.addRelatedGroupId(group.getKey());
+            search.setSearchCriteria(criteria);
+
+            cache.putUserSearch(cacheNS, search, identities);
+
+         }
+
+         return identities;
+      }
+      catch (IdentityException e)
       {
-         UserSearchImpl search = new UserSearchImpl();
-         search.addRelatedGroupId(group.getKey());
-         search.setSearchCriteria(criteria);
-
-         cache.putUserSearch(cacheNS, search, identities);
-
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return identities;
    }
 
    public Collection<User> findRelatedUsers(String groupId, IdentitySearchCriteria criteria) throws IdentityException

@@ -195,6 +195,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (Exception e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Cannot create entries in LDAP during store initialization: " + e);
          }
          finally
@@ -205,6 +210,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             catch (NamingException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Cannot close LDAP connection: ", e);
             }
          }
@@ -326,6 +336,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to create identity object", e);
       }
       finally
@@ -336,6 +351,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }                                                                  
@@ -369,6 +389,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to remove identity: ", e);
       }
       finally
@@ -379,6 +404,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -431,6 +461,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
          throw new IdentityException("User search failed.", e);
       }
       return 0;
@@ -508,6 +542,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObject search failed.", e);
       }
       finally
@@ -521,6 +560,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -614,6 +658,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Identity object search failed.", e);
       }
       finally
@@ -624,6 +673,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -765,6 +819,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObject search failed.", e);
       }
       finally
@@ -778,6 +837,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -949,6 +1013,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to resolve relationship", e);
       }
       finally
@@ -959,6 +1028,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1272,6 +1346,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to resolve relationship", e);
       }
       finally
@@ -1282,6 +1361,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1539,6 +1623,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to create relationship", e);
       }
       finally
@@ -1549,6 +1638,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1639,6 +1733,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to remove relationship", e);
       }
       finally
@@ -1649,6 +1748,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1761,6 +1865,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to resolve relationship", e);
       }
       finally
@@ -1771,6 +1880,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1833,6 +1947,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to create relationship name object", e);
       }
       finally
@@ -1843,6 +1962,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -1920,6 +2044,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("relationship name remove failed.", e);
       }
       finally
@@ -1933,6 +2062,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2017,6 +2151,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("relationship names search failed.", e);
       }
       finally
@@ -2030,6 +2169,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2161,6 +2305,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             catch (NamingException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Failed to close LDAP connection", e);
             }
          }
@@ -2226,6 +2375,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             catch (UnsupportedEncodingException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Error while encoding password with configured setting: " + typeConfig.getPasswordEncoding(),
                   e);
             }
@@ -2278,6 +2432,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Cannot set identity password value.", e);
          }
          finally
@@ -2288,6 +2447,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             catch (NamingException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Failed to close LDAP connection", e);
             }
          }
@@ -2383,6 +2547,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (NamingException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot get attributes value.", e);
       }
       finally
@@ -2393,6 +2562,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2491,6 +2665,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
                catch (NamingException e)
                {
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot add attribute", e);
                }
             }
@@ -2505,6 +2684,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2602,6 +2786,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
                catch (NamingException e)
                {
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
+
                   throw new IdentityException("Cannot add attribute", e);
                }
             }
@@ -2616,6 +2805,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2681,6 +2875,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             catch (NamingException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Cannot remove attribute", e);
             }
 
@@ -2694,6 +2893,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2777,6 +2981,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObject search failed.", e);
       }
       finally
@@ -2790,6 +2999,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
@@ -2828,6 +3042,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       catch (Exception e)
       {
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Couldn't create LDAPIdentityObjectImpl object from ldap entry (SearchResult)", e);
       }
 

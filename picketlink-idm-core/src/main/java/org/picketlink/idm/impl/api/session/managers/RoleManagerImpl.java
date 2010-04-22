@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -63,6 +64,9 @@ import java.io.Serializable;
  */
 public class RoleManagerImpl extends AbstractManager implements RoleManager, Serializable
 {
+
+   private static Logger log = Logger.getLogger(RoleManagerImpl.class.getName());
+
    public static final IdentityObjectRelationshipType ROLE = new IdentityObjectRelationshipType()
    {
       public String getName()

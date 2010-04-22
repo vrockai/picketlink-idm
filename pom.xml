@@ -3,7 +3,7 @@
    <parent>
       <groupId>org.picketlink.idm</groupId>
       <artifactId>picketlink-idm-parent</artifactId>
-      <version>1.1.2.CR01</version>
+      <version>1.1.2.GA-SNAPSHOT</version>
       <relativePath>parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
@@ -39,6 +39,14 @@
          </modules>
       </profile>
       <profile>
+         <id>examples</id>
+         <modules>
+            <module>example/simple</module>
+            <module>example/auth</module>
+            <module>example/auth-simple</module>
+         </modules>
+      </profile>
+      <profile>
          <id>distro</id>
          <modules>
             <module>parent</module>
@@ -51,8 +59,8 @@
             <module>picketlink-idm-cache</module>
             <module>picketlink-idm-auth</module>
             <module>picketlink-idm-testsuite</module>
-            <module>picketlink-idm-docs</module>
             <module>integration</module>
+            <module>picketlink-idm-docs</module>
             <module>assembly</module>
          </modules>
          <properties>

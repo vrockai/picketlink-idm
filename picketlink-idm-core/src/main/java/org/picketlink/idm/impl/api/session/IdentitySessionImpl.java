@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.picketlink.idm.api.IdentitySession;
 import org.picketlink.idm.api.Transaction;
@@ -81,6 +83,8 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
 
    private static final long serialVersionUID = 7615238887627699243L;
 
+   private static Logger log = Logger.getLogger(IdentitySessionImpl.class.getName());
+   
    private final String realmName;
 
    private final IdentitySessionContext sessionContext;
@@ -262,192 +266,291 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
 
    public Collection<User> execute(UserQuery userQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<User> results = apiCacheProvider.getUserQuery(cacheNS, userQuery);
-         if (results != null)
+         if (apiCacheProvider != null)
          {
-            return results;
+            Collection<User> results = apiCacheProvider.getUserQuery(cacheNS, userQuery);
+            if (results != null)
+            {
+               return results;
+            }
          }
+
+         Collection<User> results = userQueryExecutor.execute((UserQueryImpl)userQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putUserQuery(cacheNS, userQuery, results);
+         }
+
+         return results;
       }
-
-      Collection<User> results = userQueryExecutor.execute((UserQueryImpl)userQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putUserQuery(cacheNS, userQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public User uniqueResult(UserQuery userQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         User result = apiCacheProvider.getUserQueryUnique(cacheNS, userQuery);
-         if (result != null)
+         if (apiCacheProvider != null)
          {
-            return result;
+            User result = apiCacheProvider.getUserQueryUnique(cacheNS, userQuery);
+            if (result != null)
+            {
+               return result;
+            }
          }
+
+         User result = userQueryExecutor.uniqueResult((UserQueryImpl)userQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putUserQueryUnique(cacheNS, userQuery, result);
+         }
+
+         return result;
       }
-
-      User result = userQueryExecutor.uniqueResult((UserQueryImpl)userQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putUserQueryUnique(cacheNS, userQuery, result);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return result;
    }
 
    public List<User> list(UserQuery userQuery) throws QueryException
    {
 
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<User> results = apiCacheProvider.getUserQuery(cacheNS, userQuery);
-         if (results != null && results instanceof List)
+         if (apiCacheProvider != null)
          {
-            return (List<User>)results;
+            Collection<User> results = apiCacheProvider.getUserQuery(cacheNS, userQuery);
+            if (results != null && results instanceof List)
+            {
+               return (List<User>)results;
+            }
          }
+
+         List<User> results = userQueryExecutor.list((UserQueryImpl)userQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putUserQuery(cacheNS, userQuery, results);
+         }
+
+         return results;
       }
-
-      List<User> results = userQueryExecutor.list((UserQueryImpl)userQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putUserQuery(cacheNS, userQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public Collection<Group> execute(GroupQuery groupQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<Group> results = apiCacheProvider.getGroupQuery(cacheNS, groupQuery);
-         if (results != null)
+         if (apiCacheProvider != null)
          {
-            return results;
+            Collection<Group> results = apiCacheProvider.getGroupQuery(cacheNS, groupQuery);
+            if (results != null)
+            {
+               return results;
+            }
          }
+
+         Collection<Group> results = groupQueryExecutor.execute((GroupQueryImpl)groupQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putGroupQuery(cacheNS, groupQuery, results);
+         }
+
+         return results;
       }
-
-      Collection<Group> results = groupQueryExecutor.execute((GroupQueryImpl)groupQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putGroupQuery(cacheNS, groupQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public Group uniqueResult(GroupQuery groupQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Group result = apiCacheProvider.getGroupQueryUnique(cacheNS, groupQuery);
-         if (result != null)
+         if (apiCacheProvider != null)
          {
-            return result;
+            Group result = apiCacheProvider.getGroupQueryUnique(cacheNS, groupQuery);
+            if (result != null)
+            {
+               return result;
+            }
          }
+
+         Group group = groupQueryExecutor.uniqueResult((GroupQueryImpl)groupQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putGroupQueryUnique(cacheNS, groupQuery, group);
+         }
+
+         return group;
       }
-
-      Group group = groupQueryExecutor.uniqueResult((GroupQueryImpl)groupQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putGroupQueryUnique(cacheNS, groupQuery, group);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return group;
    }
 
    public List<Group> list(GroupQuery groupQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<Group> results = apiCacheProvider.getGroupQuery(cacheNS, groupQuery);
-         if (results != null && results instanceof List)
+         if (apiCacheProvider != null)
          {
-            return (List<Group>)results;
+            Collection<Group> results = apiCacheProvider.getGroupQuery(cacheNS, groupQuery);
+            if (results != null && results instanceof List)
+            {
+               return (List<Group>)results;
+            }
          }
+
+         List<Group> results = groupQueryExecutor.list((GroupQueryImpl)groupQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putGroupQuery(cacheNS, groupQuery, results);
+         }
+
+         return results;
       }
-
-      List<Group> results = groupQueryExecutor.list((GroupQueryImpl)groupQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putGroupQuery(cacheNS, groupQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public Collection<Role> execute(RoleQuery roleQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<Role> results = apiCacheProvider.getRoleQuery(cacheNS, roleQuery);
-         if (results != null)
+         if (apiCacheProvider != null)
          {
-            return results;
+            Collection<Role> results = apiCacheProvider.getRoleQuery(cacheNS, roleQuery);
+            if (results != null)
+            {
+               return results;
+            }
          }
+
+         Collection<Role> results = roleQueryExecutor.execute((RoleQueryImpl)roleQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putRoleQuery(cacheNS, roleQuery, results);
+         }
+
+         return results;
       }
-
-      Collection<Role> results = roleQueryExecutor.execute((RoleQueryImpl)roleQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putRoleQuery(cacheNS, roleQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public Role uniqueResult(RoleQuery roleQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Role result = apiCacheProvider.getRoleQueryUnique(cacheNS, roleQuery);
-         if (result != null)
+         if (apiCacheProvider != null)
          {
-            return result;
+            Role result = apiCacheProvider.getRoleQueryUnique(cacheNS, roleQuery);
+            if (result != null)
+            {
+               return result;
+            }
          }
+
+         Role result = roleQueryExecutor.uniqueResult((RoleQueryImpl)roleQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putRoleQueryUnique(cacheNS, roleQuery, result);
+         }
+
+         return result;
       }
-
-      Role result = roleQueryExecutor.uniqueResult((RoleQueryImpl)roleQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putRoleQueryUnique(cacheNS, roleQuery, result);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return result;
    }
 
    public List<Role> list(RoleQuery roleQuery) throws QueryException
    {
-      if (apiCacheProvider != null)
+      try
       {
-         Collection<Role> results = apiCacheProvider.getRoleQuery(cacheNS, roleQuery);
-         if (results != null && results instanceof List)
+         if (apiCacheProvider != null)
          {
-            return (List<Role>)results;
+            Collection<Role> results = apiCacheProvider.getRoleQuery(cacheNS, roleQuery);
+            if (results != null && results instanceof List)
+            {
+               return (List<Role>)results;
+            }
          }
+
+         List<Role> results = roleQueryExecutor.list((RoleQueryImpl)roleQuery);
+
+         if (apiCacheProvider != null)
+         {
+            apiCacheProvider.putRoleQuery(cacheNS, roleQuery, results);
+         }
+
+         return results;
       }
-
-      List<Role> results = roleQueryExecutor.list((RoleQueryImpl)roleQuery);
-
-      if (apiCacheProvider != null)
+      catch (QueryException e)
       {
-         apiCacheProvider.putRoleQuery(cacheNS, roleQuery, results);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return results;
    }
 
    public void registerListener(EventListener listener)

@@ -57,6 +57,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -74,7 +76,7 @@ import org.hibernate.criterion.Projections;
 public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 {
 
-   //TODO: logging
+   private static Logger log = Logger.getLogger(HibernateIdentityStoreImpl.class.getName());
 
    public static final String HIBERNATE_SESSION_FACTORY_REGISTRY_NAME = "hibernateSessionFactoryRegistryName";
 
@@ -224,6 +226,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          catch (Exception e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to populate relationship types", e);
          }
 
@@ -245,6 +252,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          catch (Exception e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to populate identity object types", e);
          }
 
@@ -258,6 +270,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          catch (Exception e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Failed to populated credential types");
          }
       }
@@ -365,6 +382,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          catch (NamingException e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Cannot obtain hibernate SessionFactory from provided JNDI name: " + sfJNDIName, e);
          }
       }
@@ -419,6 +441,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          catch (Exception e)
          {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
             throw new IdentityException("Cannot obtain hibernate SessionFactory using provided hibernate configuration: "+ hibernateConfiguration, e);
          }
 
@@ -438,6 +465,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
          throw new IdentityException("Failed to obtain Hibernate SessionFactory",e);
       }
    }
@@ -515,6 +547,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot persist new IdentityObject" + io, e);
       }
 
@@ -558,6 +595,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot remove IdentityObject" + identity, e);
       }
    }
@@ -582,6 +624,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot count stored IdentityObjects with type: " + identityType.getName(), e);
       }
 
@@ -616,6 +663,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot find IdentityObject with name '" + name + "' and type '" + type.getName() + "'", e);
       }
 
@@ -637,6 +689,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch(Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot find IdentityObject with id: " + id, e);
       }
 
@@ -707,6 +764,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot find IdentityObjects with type '" + identityType.getName() + "'", e);
       }
 
@@ -845,6 +907,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot find IdentityObjects", e);
       }
 
@@ -931,6 +998,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot create relationship: ", e);
       }
 
@@ -1013,6 +1085,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot remove relationship");
       }
 
@@ -1059,6 +1136,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             }
             catch (HibernateException e)
             {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+
                throw new IdentityException("Cannot remove relationship");
             }
          }
@@ -1171,6 +1253,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot create new relationship name: " + name, e);
       }
 
@@ -1222,6 +1309,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot remove new relationship name: " + name, e);
       }
 
@@ -1289,6 +1381,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot get relationship names. ", e);
       }
 
@@ -1351,6 +1448,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot get relationship names. ", e);
       }
 
@@ -1395,6 +1497,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot get relationship name properties: " + name, e);
       }
    }
@@ -1429,6 +1536,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot set relationship name properties: " + name, e);
       }
    }
@@ -1469,6 +1581,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot remove relationship name properties: " + name, e);
       }
    }
@@ -1514,6 +1631,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot obtain relationship properties: ", e);
       }
    }
@@ -1559,6 +1681,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot update relationship properties: ", e);
       }
    }
@@ -1607,6 +1734,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot update relationship properties: ", e);
       }
    }
@@ -2335,6 +2467,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Cannot obtain Hibernate Session", e);
       }
    }
@@ -2413,6 +2550,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObjectType[" + type.getName() + "] not present in the store.", e);
       }
 
@@ -2446,6 +2588,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObject[ " + io.getName() + " | " + io.getIdentityType().getName() + "] not present in the store.", e);
       }
 
@@ -2470,6 +2617,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObjectRelationshipType[ " + iot.getName() + "] not present in the store.");
       }
 
@@ -2492,6 +2644,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (HibernateException e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("IdentityObjectCredentialType[ " + credentialType.getName() + "] not present in the store.");
       }
 
@@ -2576,6 +2733,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
       catch (Exception e)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IdentityException("Failed to create store realm", e);
       }
    }

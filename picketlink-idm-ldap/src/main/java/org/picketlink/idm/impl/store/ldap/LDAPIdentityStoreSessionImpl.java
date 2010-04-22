@@ -27,6 +27,8 @@ import org.picketlink.idm.spi.store.IdentityStoreSession;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -41,6 +43,8 @@ import javax.naming.ldap.LdapContext;
  */
 public class LDAPIdentityStoreSessionImpl implements IdentityStoreSession
 {
+   private static Logger log = Logger.getLogger(LDAPIdentityStoreSessionImpl.class.getName());
+
    private final LDAPIdentityStoreConfiguration storeConfig;
 
    public LDAPIdentityStoreSessionImpl(LDAPIdentityStoreConfiguration storeConfig)
@@ -125,6 +129,12 @@ public class LDAPIdentityStoreSessionImpl implements IdentityStoreSession
       }
       catch (Exception e)
       {
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occured: ", e);
+         }
+
          throw new IdentityException("Could not create LdapContext", e);
       }
    }

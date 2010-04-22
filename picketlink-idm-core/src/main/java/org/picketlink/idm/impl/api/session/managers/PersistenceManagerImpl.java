@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -46,6 +48,8 @@ import java.io.Serializable;
  */
 public class PersistenceManagerImpl extends AbstractManager implements PersistenceManager, Serializable
 {
+
+   private static Logger log = Logger.getLogger(PersistenceManagerImpl.class.getName());
 
    private final PersistenceManagerFeaturesDescription featuresDescription;
    
@@ -116,67 +120,89 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
 
    public User createUser(String identityName) throws IdentityException
    {
-      checkNotNullArgument(identityName, "Identity name");
-      checkObjectName(identityName);
-
-      IdentityObjectType iot = getUserObjectType();
-
-      preCreate(new SimpleUser(identityName));
-
-      IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), identityName, iot);
-
-      User user = null;
-
-      if (identityObject != null)
+      try
       {
-         user = new SimpleUser(identityName);
-      }
+         checkNotNullArgument(identityName, "Identity name");
+         checkObjectName(identityName);
 
-      //Cache
-      if (cache != null)
+         IdentityObjectType iot = getUserObjectType();
+
+         preCreate(new SimpleUser(identityName));
+
+         IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), identityName, iot);
+
+         User user = null;
+
+         if (identityObject != null)
+         {
+            user = new SimpleUser(identityName);
+         }
+
+         //Cache
+         if (cache != null)
+         {
+            //TODO: maybe invalidate only part
+            cache.invalidate(cacheNS);
+            cache.putUser(cacheNS, user);
+         }
+
+         postCreate(user);
+
+
+         return user;
+      }
+      catch (IdentityException e)
       {
-         //TODO: maybe invalidate only part
-         cache.invalidate(cacheNS);
-         cache.putUser(cacheNS, user);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      postCreate(user);
-
-
-      return user;
    }
 
    public Group createGroup(String groupName, String groupType) throws IdentityException
    {
-      checkNotNullArgument(groupName, "Group name");
-      checkNotNullArgument(groupType, "Group type");
-      checkObjectName(groupName);
-      checkObjectName(groupType);
-
-      IdentityObjectType iot = getIdentityObjectType(groupType);
-
-      preCreate(new SimpleGroup(groupName, groupType));
-
-      IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), groupName, iot);
-
-
-      Group group = null;
-
-      if (identityObject != null)
+      try
       {
-         group = new SimpleGroup(groupName, groupType);
-      }
+         checkNotNullArgument(groupName, "Group name");
+         checkNotNullArgument(groupType, "Group type");
+         checkObjectName(groupName);
+         checkObjectName(groupType);
 
-      if (cache != null)
+         IdentityObjectType iot = getIdentityObjectType(groupType);
+
+         preCreate(new SimpleGroup(groupName, groupType));
+
+         IdentityObject identityObject = getRepository().createIdentityObject(getInvocationContext(), groupName, iot);
+
+
+         Group group = null;
+
+         if (identityObject != null)
+         {
+            group = new SimpleGroup(groupName, groupType);
+         }
+
+         if (cache != null)
+         {
+            //TODO: maybe invalidate only part
+            cache.invalidate(cacheNS);
+            cache.putGroup(cacheNS, group);
+         }
+
+         postCreate(new SimpleGroup(groupName, groupType));
+
+         return group;
+      }
+      catch (IdentityException e)
       {
-         //TODO: maybe invalidate only part
-         cache.invalidate(cacheNS);
-         cache.putGroup(cacheNS, group);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      postCreate(new SimpleGroup(groupName, groupType));
-
-      return group;
    }
 
    public String createGroupKey(String groupName, String groupType)
@@ -196,214 +222,312 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
 
    public void removeUser(User user, boolean force) throws IdentityException
    {
-      checkNotNullArgument(user, "User");
-
-      preRemove(user);
-
-      getRepository().removeIdentityObject(getInvocationContext(), createIdentityObject(user));
-
-      if (cache != null)
+      try
       {
-         //TODO: maybe invalidate only part
-         cache.invalidate(cacheNS);
-      }
+         checkNotNullArgument(user, "User");
 
-      postRemove(user);
+         preRemove(user);
+
+         getRepository().removeIdentityObject(getInvocationContext(), createIdentityObject(user));
+
+         if (cache != null)
+         {
+            //TODO: maybe invalidate only part
+            cache.invalidate(cacheNS);
+         }
+
+         postRemove(user);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
 
    }
 
    public void removeUser(String userName, boolean force) throws IdentityException
    {
-      checkNotNullArgument(userName, "User name");
-
-      preRemove(new SimpleUser(userName));
-
-      getRepository().removeIdentityObject(getInvocationContext(), createIdentityObjectForUserName(userName));
-
-      if (cache != null)
+      try
       {
-         //TODO: maybe invalidate only part
-         cache.invalidate(cacheNS);
-      }
+         checkNotNullArgument(userName, "User name");
 
-      postRemove(new SimpleUser(userName));
+         preRemove(new SimpleUser(userName));
+
+         getRepository().removeIdentityObject(getInvocationContext(), createIdentityObjectForUserName(userName));
+
+         if (cache != null)
+         {
+            //TODO: maybe invalidate only part
+            cache.invalidate(cacheNS);
+         }
+
+         postRemove(new SimpleUser(userName));
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public void removeGroup(Group group, boolean force) throws IdentityException
    {
-      checkNotNullArgument(group, "Group");
-
-      //TODO: force
-
-      preRemove(group);
-
-      getRepository().removeIdentityObject(getInvocationContext(), createIdentityObject(group));
-
-      if (cache != null)
+      try
       {
-         cache.invalidate(cacheNS);
-      }
+         checkNotNullArgument(group, "Group");
 
-      postRemove(group);
+         //TODO: force
+
+         preRemove(group);
+
+         getRepository().removeIdentityObject(getInvocationContext(), createIdentityObject(group));
+
+         if (cache != null)
+         {
+            cache.invalidate(cacheNS);
+         }
+
+         postRemove(group);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void removeGroup(String groupId, boolean force) throws IdentityException
    {
-      checkNotNullArgument(groupId, "Group Id");
-
-      //TODO: force
-
-      preRemove(new SimpleGroup(new GroupKey(groupId)));
-
-      getRepository().removeIdentityObject(getInvocationContext(), createIdentityObjectForGroupId(groupId));
-
-      if (cache != null)
+      try
       {
-         cache.invalidate(cacheNS);
-      }
+         checkNotNullArgument(groupId, "Group Id");
 
-      postRemove(new SimpleGroup(new GroupKey(groupId)));
+         //TODO: force
+
+         preRemove(new SimpleGroup(new GroupKey(groupId)));
+
+         getRepository().removeIdentityObject(getInvocationContext(), createIdentityObjectForGroupId(groupId));
+
+         if (cache != null)
+         {
+            cache.invalidate(cacheNS);
+         }
+
+         postRemove(new SimpleGroup(new GroupKey(groupId)));
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
 
    }
 
    public int getUserCount() throws IdentityException
    {
-      if (cache != null)
+      try
       {
-         int count = cache.getUserCount(cacheNS);
-         if (count != -1)
+         if (cache != null)
          {
-            return count;
+            int count = cache.getUserCount(cacheNS);
+            if (count != -1)
+            {
+               return count;
+            }
          }
+
+         IdentityObjectType iot = getUserObjectType();
+
+         int count = getRepository().getIdentityObjectsCount(getInvocationContext(), iot);
+
+         if (cache != null)
+         {
+            cache.putUserCount(cacheNS, count);
+         }
+
+         return count;
       }
-
-      IdentityObjectType iot = getUserObjectType();
-
-      int count = getRepository().getIdentityObjectsCount(getInvocationContext(), iot);
-
-      if (cache != null)
+      catch (IdentityException e)
       {
-         cache.putUserCount(cacheNS, count);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return count;
    }
 
    public int getGroupTypeCount(String groupType) throws IdentityException
    {
-      checkNotNullArgument(groupType, "Group type");
-
-      if (cache != null)
+      try
       {
-         int count = cache.getGroupCount(cacheNS, groupType);
-         if (count != -1)
+         checkNotNullArgument(groupType, "Group type");
+
+         if (cache != null)
          {
-            return count;
+            int count = cache.getGroupCount(cacheNS, groupType);
+            if (count != -1)
+            {
+               return count;
+            }
          }
+
+         IdentityObjectType iot = getIdentityObjectType(groupType);
+
+         int count = getRepository().getIdentityObjectsCount(getInvocationContext(), iot);
+
+         if (cache != null)
+         {
+            cache.putGroupCount(cacheNS, groupType, count);
+         }
+
+         return count;
       }
-
-      IdentityObjectType iot = getIdentityObjectType(groupType);
-
-      int count = getRepository().getIdentityObjectsCount(getInvocationContext(), iot);
-
-      if (cache != null)
+      catch (IdentityException e)
       {
-         cache.putGroupCount(cacheNS, groupType, count);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return count;
    }
 
    public User findUser(String name) throws IdentityException
    {
-      checkNotNullArgument(name, "User name");
-
-      if (cache != null)
+      try
       {
-         User user = cache.getUser(cacheNS, name);
-         if (user != null)
-         {
-            return user;
-         }
-      }
-
-      IdentityObject io = getRepository().findIdentityObject(getInvocationContext(), name, getUserObjectType());
-
-      if (io != null)
-      {
-         User user = createUser(io);
+         checkNotNullArgument(name, "User name");
 
          if (cache != null)
          {
-            cache.putUser(cacheNS, user);
+            User user = cache.getUser(cacheNS, name);
+            if (user != null)
+            {
+               return user;
+            }
          }
 
-         return user;
+         IdentityObject io = getRepository().findIdentityObject(getInvocationContext(), name, getUserObjectType());
+
+         if (io != null)
+         {
+            User user = createUser(io);
+
+            if (cache != null)
+            {
+               cache.putUser(cacheNS, user);
+            }
+
+            return user;
+         }
+         return null;
       }
-      return null;
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Collection<User> findUser(IdentitySearchCriteria criteria) throws IdentityException
    {
-
-      if (cache != null)
+      try
       {
-         Collection<User> users = cache.getUsers(cacheNS, criteria);
-         if (users != null)
+         if (cache != null)
          {
-            return users;
+            Collection<User> users = cache.getUsers(cacheNS, criteria);
+            if (users != null)
+            {
+               return users;
+            }
          }
+
+
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), getUserObjectType(), convertSearchControls(criteria));
+         List<User> identities = new LinkedList<User>();
+
+         for (Iterator<IdentityObject> iterator = ios.iterator(); iterator.hasNext();)
+         {
+            IdentityObject identityObject = iterator.next();
+            identities.add(createUser(identityObject));
+         }
+
+
+         if (cache != null)
+         {
+            cache.putUsers(cacheNS, criteria, identities);
+         }
+
+         return identities;
       }
-
-
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), getUserObjectType(), convertSearchControls(criteria));
-      List<User> identities = new LinkedList<User>();
-
-      for (Iterator<IdentityObject> iterator = ios.iterator(); iterator.hasNext();)
+      catch (IdentityException e)
       {
-         IdentityObject identityObject = iterator.next();
-         identities.add(createUser(identityObject));
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-
-      if (cache != null)
-      {
-         cache.putUsers(cacheNS, criteria, identities);
-      }
-
-      return identities;
    }
 
    public Group findGroup(String name, String groupType) throws IdentityException
    {
-      checkNotNullArgument(name, "Group name");
-      checkNotNullArgument(groupType, "Group type");
-
-      if (cache != null)
+      try
       {
-         Group group = cache.getGroup(cacheNS, groupType, name);
-         if (group != null)
-         {
-            return group;
-         }
-      }
-
-      IdentityObject io = getRepository().findIdentityObject(getInvocationContext(), name, getIdentityObjectType(groupType));
-
-      if (io != null)
-      {
-         Group group = createGroup(io);
+         checkNotNullArgument(name, "Group name");
+         checkNotNullArgument(groupType, "Group type");
 
          if (cache != null)
          {
-            cache.putGroup(cacheNS, group);
+            Group group = cache.getGroup(cacheNS, groupType, name);
+            if (group != null)
+            {
+               return group;
+            }
          }
 
-         return group;
+         IdentityObject io = getRepository().findIdentityObject(getInvocationContext(), name, getIdentityObjectType(groupType));
+
+         if (io != null)
+         {
+            Group group = createGroup(io);
+
+            if (cache != null)
+            {
+               cache.putGroup(cacheNS, group);
+            }
+
+            return group;
+         }
+         return null;
       }
-      return null; 
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Group findGroupByKey(String id) throws IdentityException
@@ -424,41 +548,52 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
 
    public Collection<Group> findGroup(String groupType, IdentitySearchCriteria criteria) throws IdentityException
    {
-      checkNotNullArgument(groupType, "Group type");
-
-      if (cache != null)
+      try
       {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
+         checkNotNullArgument(groupType, "Group type");
 
-         Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-         if (results != null)
+         if (cache != null)
          {
-            return results;
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.setGroupType(groupType);
+            search.setSearchCriteria(criteria);
+
+            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
+            if (results != null)
+            {
+               return results;
+            }
          }
+
+         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), getIdentityObjectType(groupType), convertSearchControls(criteria));
+         List<Group> groups = new LinkedList<Group>();
+
+         for (Iterator<IdentityObject> iterator = ios.iterator(); iterator.hasNext();)
+         {
+            IdentityObject identityObject = iterator.next();
+            groups.add(createGroup(identityObject));
+         }
+
+         if (cache != null)
+         {
+            GroupSearchImpl search = new GroupSearchImpl();
+            search.setGroupType(groupType);
+            search.setSearchCriteria(criteria);
+
+            cache.putGroupSearch(cacheNS, search, groups);
+
+         }
+
+         return groups;
       }
-
-      Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), getIdentityObjectType(groupType), convertSearchControls(criteria));
-      List<Group> groups = new LinkedList<Group>();
-
-      for (Iterator<IdentityObject> iterator = ios.iterator(); iterator.hasNext();)
+      catch (IdentityException e)
       {
-         IdentityObject identityObject = iterator.next();
-         groups.add(createGroup(identityObject));
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (cache != null)
-      {
-         GroupSearchImpl search = new GroupSearchImpl();
-         search.setGroupType(groupType);
-         search.setSearchCriteria(criteria);
-
-         cache.putGroupSearch(cacheNS, search, groups);
-
-      }
-
-      return groups;
    }
 
    public Collection<Group> findGroup(String groupType) throws IdentityException

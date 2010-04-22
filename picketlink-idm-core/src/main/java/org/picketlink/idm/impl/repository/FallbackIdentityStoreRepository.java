@@ -330,6 +330,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             return defaultIdentityStore;
          }
 
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
          throw new IllegalStateException("Used IdentityObjectType not mapped. Consider using " + ALLOW_NOT_DEFINED_IDENTITY_OBJECT_TYPES_OPTION +
             " repository option switch: " + iot );
       }
@@ -353,6 +358,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          if (isAllowNotDefinedAttributes())
          {
             return defaultAttributeStore;
+         }
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
          }
 
          throw new IllegalStateException("Used IdentityObjectType not mapped. Consider using " + ALLOW_NOT_DEFINED_IDENTITY_OBJECT_TYPES_OPTION +
@@ -417,7 +427,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.info("Failed to create IdentityObject: " + e);
+            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
          }
       }
 
@@ -455,7 +465,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.info("Failed to create IdentityObject: " + e);
+            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
          }
       }
 
@@ -482,7 +492,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.info("Failed to remove IdentityObject: " + e);
+            log.log(Level.INFO, "Failed to remove IdentityObject: ", e);
          }
       }
    }
@@ -504,7 +514,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.FINER))
          {
-            log.finer("Failed to obtain IdentityObject count: " + e);
+            log.log(Level.INFO, "Failed to obtain IdentityObject count: ", e);
          }
       }
 
@@ -527,7 +537,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.info("Failed to create IdentityObject: " + e);
+            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
          }
       }
 
@@ -549,7 +559,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.info("Failed to create IdentityObject: " + e);
+            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
          }
       }
 
@@ -584,7 +594,21 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       if (targetStore == defaultIdentityStore)
       {
-         return targetStore.findIdentityObject(targetCtx, identityType, criteria);
+         Collection<IdentityObject> resx = new LinkedList<IdentityObject>();
+
+         try
+         {
+            resx = targetStore.findIdentityObject(targetCtx, identityType, criteria);
+         }
+         catch (IdentityException e)
+         {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+         }
+
+         return resx;
       }
       else
       {
@@ -603,12 +627,36 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          // as result need to be merged
          if (defaultIOs.size() == 0)
          {
-            return targetStore.findIdentityObject(targetCtx, identityType, criteria);
+            Collection<IdentityObject> resx = new LinkedList<IdentityObject>();
+
+            try
+            {
+               resx =  targetStore.findIdentityObject(targetCtx, identityType, criteria);
+            }
+            catch (IdentityException e)
+            {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+            }
+
+            return resx;
          }
          else
          {
 
-            results = targetStore.findIdentityObject(targetCtx, identityType, c);
+            try
+            {
+               results = targetStore.findIdentityObject(targetCtx, identityType, c);
+            }
+            catch (IdentityException e)
+            {
+               if (log.isLoggable(Level.FINER))
+               {
+                  log.log(Level.FINER, "Exception occurred: ", e);
+               }
+            }
          }
 
       }
@@ -658,193 +706,239 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       // Check in the mapped store and merge with default
 
-      IdentityStore mappedStore = resolveIdentityStore(identity);
-
-      IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
-
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
-
-
-      if (mappedStore == defaultIdentityStore)
+      try
       {
-         return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
-      }
+         IdentityStore mappedStore = resolveIdentityStore(identity);
 
-      IdentitySearchCriteriaImpl c = null;
+         IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
 
-      if (criteria != null)
-      {
-         c = new IdentitySearchCriteriaImpl(criteria);
-         c.setPaged(false);
-      }
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-      Collection<IdentityObject> results = new LinkedList<IdentityObject>();
 
-      if (hasIdentityObject(mappedCtx, mappedStore, identity)
-          && (relationshipType == null
-              || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName())
-              || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
-         )
-      {
-         // If object present in identity store then don't apply page in criteria
-         if (hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+         if (mappedStore == defaultIdentityStore)
          {
-            results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, c);
+            return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
          }
 
-         // Otherwise simply return results
-         else
-         {
-            return mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
-         }
-      }
-
-
-      Collection<IdentityObject> objects = defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, c);
-
-      // If default store contain related relationships merge and sort/page once more
-      if (objects != null && objects.size() != 0)
-      {
-
-         // Filter out duplicates
-         HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
-         merged.addAll(results);
-         merged.addAll(objects);
-
+         IdentitySearchCriteriaImpl c = null;
 
          if (criteria != null)
          {
-
-            LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
-
-
-
-            //TODO: hardcoded - expects List
-            if (criteria.isSorted())
-            {
-               sortByName(processed, criteria.isAscending());
-            }
-
-            results = processed;
-
-            //TODO: hardcoded - expects List
-            if (criteria.isPaged())
-            {
-               results = cutPageFromResults(processed, criteria);
-            }
-
-
+            c = new IdentitySearchCriteriaImpl(criteria);
+            c.setPaged(false);
          }
-         else
+
+         Collection<IdentityObject> results = new LinkedList<IdentityObject>();
+
+         if (hasIdentityObject(mappedCtx, mappedStore, identity)
+             && (relationshipType == null
+                 || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName())
+                 || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
+            )
          {
-            results = merged;
-         }
-      }
+            // If object present in identity store then don't apply page in criteria
+            if (hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+            {
+               results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, c);
+            }
 
-      return results;
+            // Otherwise simply return results
+            else
+            {
+               return mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
+            }
+         }
+
+
+         Collection<IdentityObject> objects = defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, c);
+
+         // If default store contain related relationships merge and sort/page once more
+         if (objects != null && objects.size() != 0)
+         {
+
+            // Filter out duplicates
+            HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
+            merged.addAll(results);
+            merged.addAll(objects);
+
+
+            if (criteria != null)
+            {
+
+               LinkedList<IdentityObject> processed = new LinkedList<IdentityObject>(merged);
+
+
+
+               //TODO: hardcoded - expects List
+               if (criteria.isSorted())
+               {
+                  sortByName(processed, criteria.isAscending());
+               }
+
+               results = processed;
+
+               //TODO: hardcoded - expects List
+               if (criteria.isPaged())
+               {
+                  results = cutPageFromResults(processed, criteria);
+               }
+
+
+            }
+            else
+            {
+               results = merged;
+            }
+         }
+
+         return results;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
+         throw e;
+      }
 
    }
 
    public IdentityObjectRelationship createRelationship(IdentityStoreInvocationContext invocationCxt, IdentityObject fromIdentity, IdentityObject toIdentity, IdentityObjectRelationshipType relationshipType, String relationshipName, boolean createNames) throws IdentityException
    {
-      IdentityStore fromStore = resolveIdentityStore(fromIdentity);
+      try
+      {
+         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
 
-      IdentityStore toStore = resolveIdentityStore(toIdentity);
+         IdentityStore toStore = resolveIdentityStore(toIdentity);
 
-      IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
 
-      IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
+         IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-          && hasIdentityObject(toTargetCtx, fromStore, fromIdentity)
-          && hasIdentityObject(toTargetCtx, fromStore, toIdentity))
-         {
-         // If relationship is named and target store doesn't support named relationships it need to be put in default store anyway
-         if (relationshipName == null ||
-            (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
-         {
-            return fromStore.createRelationship(toTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName, createNames);
+         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+             && hasIdentityObject(toTargetCtx, fromStore, fromIdentity)
+             && hasIdentityObject(toTargetCtx, fromStore, toIdentity))
+            {
+            // If relationship is named and target store doesn't support named relationships it need to be put in default store anyway
+            if (relationshipName == null ||
+               (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+            {
+               return fromStore.createRelationship(toTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName, createNames);
+            }
          }
-      }
 
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
+         }
+
+         return defaultIdentityStore.createRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName, createNames);
+      }
+      catch (IdentityException e)
       {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
-      {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
-      }
-
-      return defaultIdentityStore.createRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName, createNames);
    }
 
    public void removeRelationship(IdentityStoreInvocationContext invocationCxt, IdentityObject fromIdentity, IdentityObject toIdentity, IdentityObjectRelationshipType relationshipType, String relationshipName) throws IdentityException
    {
-      IdentityStore fromStore = resolveIdentityStore(fromIdentity);
-
-      IdentityStore toStore = resolveIdentityStore(toIdentity);
-
-      IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
-
-      IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
-
-      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-         && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
-         && hasIdentityObject(toTargetCtx, toStore, toIdentity))
+      try
       {
-         if (relationshipName == null ||
-            (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
+
+         IdentityStore toStore = resolveIdentityStore(toIdentity);
+
+         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+
+         IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
+
+         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+            && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
+            && hasIdentityObject(toTargetCtx, toStore, toIdentity))
          {
-            fromStore.removeRelationship(toTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
-            return;
+            if (relationshipName == null ||
+               (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+            {
+               fromStore.removeRelationship(toTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+               return;
+            }
          }
-      }
 
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
+         }
+
+         defaultIdentityStore.removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+      }
+      catch (IdentityException e)
       {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
-      }
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
 
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
-      {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
+         throw e;
       }
-
-      defaultIdentityStore.removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
    }
 
    public void removeRelationships(IdentityStoreInvocationContext invocationCtx, IdentityObject identity1, IdentityObject identity2, boolean named) throws IdentityException
    {
-      IdentityStore fromStore = resolveIdentityStore(identity1);
-
-      IdentityStore toStore = resolveIdentityStore(identity2);
-
-      IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCtx);
-
-      IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
-
-
-      if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-         && hasIdentityObject(toTargetCtx, toStore, identity1)
-         && hasIdentityObject(toTargetCtx, toStore, identity2))
+      try
       {
-         fromStore.removeRelationships(toTargetCtx, identity1, identity2, named);
-         return;
-      }
+         IdentityStore fromStore = resolveIdentityStore(identity1);
 
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, identity1))
+         IdentityStore toStore = resolveIdentityStore(identity2);
+
+         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+         IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+
+         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
+            && hasIdentityObject(toTargetCtx, toStore, identity1)
+            && hasIdentityObject(toTargetCtx, toStore, identity2))
+         {
+            fromStore.removeRelationships(toTargetCtx, identity1, identity2, named);
+            return;
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, identity1))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, identity1.getName(),  identity1.getIdentityType());
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, identity2))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, identity2.getName(),  identity2.getIdentityType());
+         }
+
+         defaultIdentityStore.removeRelationships(defaultTargetCtx, identity1, identity2, named);
+      }
+      catch (IdentityException e)
       {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, identity1.getName(),  identity1.getIdentityType());
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, identity2))
-      {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, identity2.getName(),  identity2.getIdentityType());
-      }
-
-      defaultIdentityStore.removeRelationships(defaultTargetCtx, identity1, identity2, named);
    }
 
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext invocationCxt,
@@ -853,432 +947,641 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
                                                                IdentityObjectRelationshipType relationshipType) throws IdentityException
    {
 
-      IdentityStore fromStore = resolveIdentityStore(fromIdentity);
-
-      IdentityStore toStore = resolveIdentityStore(toIdentity);
-
-      IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
-
-      IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
-
-      if (fromStore == toStore &&
-         (!RoleManagerImpl.ROLE.getName().equals(relationshipType.getName()) ||
-          fromStore.getSupportedFeatures().isNamedRelationshipsSupported())
-         && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
-         && hasIdentityObject(toTargetCtx, toStore, toIdentity))
+      try
       {
-         return fromStore.resolveRelationships(toTargetCtx, fromIdentity, toIdentity, relationshipType);
+         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
 
+         IdentityStore toStore = resolveIdentityStore(toIdentity);
+
+         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+
+         IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
+
+         if (fromStore == toStore &&
+            (!RoleManagerImpl.ROLE.getName().equals(relationshipType.getName()) ||
+             fromStore.getSupportedFeatures().isNamedRelationshipsSupported())
+            && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
+            && hasIdentityObject(toTargetCtx, toStore, toIdentity))
+         {
+            return fromStore.resolveRelationships(toTargetCtx, fromIdentity, toIdentity, relationshipType);
+
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
+         }
+
+         if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
+         {
+            defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
+         }
+
+         return defaultIdentityStore.resolveRelationships(defaultTargetCtx, fromIdentity, toIdentity, relationshipType);
       }
-
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, fromIdentity))
+      catch (IdentityException e)
       {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, fromIdentity.getName(),  fromIdentity.getIdentityType());
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      if (!hasIdentityObject(defaultTargetCtx, defaultIdentityStore, toIdentity))
-      {
-         defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
-      }
-
-      return defaultIdentityStore.resolveRelationships(defaultTargetCtx, fromIdentity, toIdentity, relationshipType);
    }
 
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectRelationshipType relationshipType, boolean parent, boolean named, String name) throws IdentityException
-   {  
-      Set<IdentityObjectRelationship> relationships = new HashSet<IdentityObjectRelationship>();
-
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+   {
+      try
       {
-         if (relationshipType.getName() != null &&
-            !identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
+         Set<IdentityObjectRelationship> relationships = new HashSet<IdentityObjectRelationship>();
+
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            continue;
+            if (relationshipType.getName() != null &&
+               !identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
+            {
+               continue;
+            }
+
+            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+
+            if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+               && hasIdentityObject(storeCtx, identityStore, identity))
+            {
+               relationships.addAll(identityStore.resolveRelationships(storeCtx, identity, relationshipType, parent, named, name));
+            }
          }
 
-         IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
-
-         if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
-            && hasIdentityObject(storeCtx, identityStore, identity))
-         {
-            relationships.addAll(identityStore.resolveRelationships(storeCtx, identity, relationshipType, parent, named, name));
-         }
+         return relationships;
       }
-
-      return relationships;
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public String createRelationshipName(IdentityStoreInvocationContext ctx, String name) throws IdentityException, OperationNotSupportedException
    {
       // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
-            identityStore.createRelationshipName(storeCtx, name);
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+            {
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+               identityStore.createRelationshipName(storeCtx, name);
 
+            }
          }
-      }
 
-      return name;
+         return name;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public String removeRelationshipName(IdentityStoreInvocationContext ctx, String name) throws IdentityException, OperationNotSupportedException
    {
 
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
-            identityStore.removeRelationshipName(storeCtx, name);
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+            {
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+               identityStore.removeRelationshipName(storeCtx, name);
 
+            }
          }
-      }
 
-      return name;
+         return name;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx, IdentityObjectSearchCriteria criteria) throws IdentityException, OperationNotSupportedException
    {
-      Set<String> results = new HashSet<String>();
-
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         Set<String> results = new HashSet<String>();
+
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
-            results.addAll(identityStore.getRelationshipNames(storeCtx, criteria));
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+            {
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+               results.addAll(identityStore.getRelationshipNames(storeCtx, criteria));
 
+            }
          }
-      }
 
-      return results;
+         return results;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Set<String> getRelationshipNames(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectSearchCriteria criteria) throws IdentityException, OperationNotSupportedException
    {
 
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
-
-      if (toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+      try
       {
-         return toStore.getRelationshipNames(targetCtx, identity, criteria);
-      }
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
 
-      return defaultIdentityStore.getRelationshipNames(defaultCtx, identity, criteria);
+         if (toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         {
+            return toStore.getRelationshipNames(targetCtx, identity, criteria);
+         }
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+
+         return defaultIdentityStore.getRelationshipNames(defaultCtx, identity, criteria);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Map<String, String> getRelationshipNameProperties(IdentityStoreInvocationContext ctx, String name) throws IdentityException, OperationNotSupportedException
    {
-      Map<String, String> results = new HashMap<String, String>();
-
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         Map<String, String> results = new HashMap<String, String>();
+
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
-
-            Map<String, String> props = identityStore.getRelationshipNameProperties(storeCtx, name);
-            if (props != null && props.keySet().size() > 0)
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported())
             {
-               results.putAll(props);
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+
+               Map<String, String> props = identityStore.getRelationshipNameProperties(storeCtx, name);
+               if (props != null && props.keySet().size() > 0)
+               {
+                  results.putAll(props);
+               }
+
             }
-
          }
-      }
 
-      return results;
+         return results;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void setRelationshipNameProperties(IdentityStoreInvocationContext ctx, String name, Map<String, String> properties) throws IdentityException, OperationNotSupportedException
    {
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+            {
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
 
-            identityStore.setRelationshipNameProperties(storeCtx, name, properties);
+               identityStore.setRelationshipNameProperties(storeCtx, name, properties);
 
+            }
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
    public void removeRelationshipNameProperties(IdentityStoreInvocationContext ctx, String name, Set<String> properties) throws IdentityException, OperationNotSupportedException
    {
-      // For any IdentityStore that supports named relationships...
-      for (IdentityStore identityStore : configuredIdentityStores)
+      try
       {
-         if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+         // For any IdentityStore that supports named relationships...
+         for (IdentityStore identityStore : configuredIdentityStores)
          {
-            IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
+            if (identityStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(identityStore))
+            {
+               IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
 
-            identityStore.removeRelationshipNameProperties(storeCtx, name, properties);
+               identityStore.removeRelationshipNameProperties(storeCtx, name, properties);
 
+            }
          }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
    public Map<String, String> getRelationshipProperties(IdentityStoreInvocationContext ctx, IdentityObjectRelationship relationship) throws IdentityException, OperationNotSupportedException
    {
 
-      IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
-      IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
-
-      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+      try
       {
-         return fromStore.getRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship);
-      }
+         IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
+         IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
 
-      return defaultIdentityStore.getRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship);
+         if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported())
+         {
+            return fromStore.getRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship);
+         }
+
+         return defaultIdentityStore.getRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void setRelationshipProperties(IdentityStoreInvocationContext ctx, IdentityObjectRelationship relationship, Map<String, String> properties) throws IdentityException, OperationNotSupportedException
    {
-      IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
-      IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
-
-      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+      try
       {
-         fromStore.setRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
-         return;
-      }
+         IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
+         IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
 
-      defaultIdentityStore.setRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship, properties);
+         if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+         {
+            fromStore.setRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
+            return;
+         }
+
+         defaultIdentityStore.setRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship, properties);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void removeRelationshipProperties(IdentityStoreInvocationContext ctx, IdentityObjectRelationship relationship, Set<String> properties) throws IdentityException, OperationNotSupportedException
    {
-      IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
-      IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
-
-      if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+      try
       {
-         fromStore.removeRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
-         return;
-      }
+         IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
+         IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
 
-      defaultIdentityStore.removeRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship, properties);
+         if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+         {
+            fromStore.removeRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
+            return;
+         }
+
+         defaultIdentityStore.removeRelationshipProperties(resolveInvocationContext(defaultIdentityStore, ctx), relationship, properties);
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public boolean validateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
    {
-      IdentityStore toStore = resolveIdentityStore(identityObject);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
-
-      if (hasIdentityObject(targetCtx, toStore, identityObject))
+      try
       {
-         return toStore.validateCredential(targetCtx, identityObject, credential);
+         IdentityStore toStore = resolveIdentityStore(identityObject);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+
+         if (hasIdentityObject(targetCtx, toStore, identityObject))
+         {
+            return toStore.validateCredential(targetCtx, identityObject, credential);
+         }
+
+         targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+
+         if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+         {
+            return defaultIdentityStore.validateCredential(targetCtx, identityObject, credential);
+         }
+
+         return false;
       }
-
-      targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
-
-      if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+      catch (IdentityException e)
       {
-         return defaultIdentityStore.validateCredential(targetCtx, identityObject, credential);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return false;
    }
 
    public void updateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
    {
-      IdentityStore toStore = resolveIdentityStore(identityObject);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
-
-      if (hasIdentityObject(targetCtx, toStore, identityObject))
+      try
       {
-         toStore.updateCredential(targetCtx, identityObject, credential);
-         return;
+         IdentityStore toStore = resolveIdentityStore(identityObject);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+
+         if (hasIdentityObject(targetCtx, toStore, identityObject))
+         {
+            toStore.updateCredential(targetCtx, identityObject, credential);
+            return;
+         }
+
+         targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+
+         if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+         {
+            defaultIdentityStore.updateCredential(targetCtx, identityObject, credential);
+         }
       }
-
-      targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
-
-      if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
+      catch (IdentityException e)
       {
-         defaultIdentityStore.updateCredential(targetCtx, identityObject, credential);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
 
    public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext, IdentityObjectType identityType) throws IdentityException
    {
-      Set<String> results;
-
-      IdentityStore toStore = resolveIdentityStore(identityType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
-
-      results = toStore.getSupportedAttributeNames(targetCtx, identityType);
-
-      if (toStore != defaultAttributeStore)
+      try
       {
-         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+         Set<String> results;
 
-         results.addAll(defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identityType));
+         IdentityStore toStore = resolveIdentityStore(identityType);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
+
+         results = toStore.getSupportedAttributeNames(targetCtx, identityType);
+
+         if (toStore != defaultAttributeStore)
+         {
+            IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+
+            results.addAll(defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identityType));
+         }
+
+         return results;
       }
-
-      return results;
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(IdentityStoreInvocationContext invocationContext,
                                                                             IdentityObjectType identityObjectType)
    {
 
-      IdentityStore targetStore = resolveIdentityStore(identityObjectType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
-
-      Map<String, IdentityObjectAttributeMetaData> mdMap = new HashMap<String, IdentityObjectAttributeMetaData>();
-      mdMap.putAll(targetStore.getAttributesMetaData(targetCtx, identityObjectType));
-
-      if (targetStore != defaultAttributeStore)
+      try
       {
-         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+         IdentityStore targetStore = resolveIdentityStore(identityObjectType);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
 
-         Map<String, IdentityObjectAttributeMetaData> defaultMDMap = defaultAttributeStore.getAttributesMetaData(defaultCtx, identityObjectType);
+         Map<String, IdentityObjectAttributeMetaData> mdMap = new HashMap<String, IdentityObjectAttributeMetaData>();
+         mdMap.putAll(targetStore.getAttributesMetaData(targetCtx, identityObjectType));
 
-
-         // put all missing attribute MD from default store
-         if (defaultMDMap != null)
+         if (targetStore != defaultAttributeStore)
          {
-            for (Map.Entry<String, IdentityObjectAttributeMetaData> entry : defaultMDMap.entrySet())
+            IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+
+            Map<String, IdentityObjectAttributeMetaData> defaultMDMap = defaultAttributeStore.getAttributesMetaData(defaultCtx, identityObjectType);
+
+
+            // put all missing attribute MD from default store
+            if (defaultMDMap != null)
             {
-               if (!mdMap.containsKey(entry.getKey()))
+               for (Map.Entry<String, IdentityObjectAttributeMetaData> entry : defaultMDMap.entrySet())
                {
-                  mdMap.put(entry.getKey(), entry.getValue());
+                  if (!mdMap.containsKey(entry.getKey()))
+                  {
+                     mdMap.put(entry.getKey(), entry.getValue());
+                  }
                }
             }
          }
-      }
 
-      return mdMap;                                                                          
+         return mdMap;
+      }
+      catch (Exception e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+      }
+      return new HashMap<String, IdentityObjectAttributeMetaData>();
    }
 
    public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext, IdentityObject identity, String name) throws IdentityException
    {
-      IdentityObjectAttribute result = null;
-
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
-
-      if (hasIdentityObject(targetCtx, toStore, identity))
+      try
       {
-         result = toStore.getAttribute(targetCtx, identity, name);
-      }
+         IdentityObjectAttribute result = null;
 
-      if (result == null && toStore != defaultAttributeStore)
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
+
+         if (hasIdentityObject(targetCtx, toStore, identity))
+         {
+            result = toStore.getAttribute(targetCtx, identity, name);
+         }
+
+         if (result == null && toStore != defaultAttributeStore)
+         {
+            IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+
+            result = defaultAttributeStore.getAttribute(defaultCtx, identity, name);
+         }
+
+         return result;
+      }
+      catch (IdentityException e)
       {
-         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
-
-         result = defaultAttributeStore.getAttribute(defaultCtx, identity, name);
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
-
-      return result;
    }
 
    public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext invocationContext, IdentityObject identity) throws IdentityException
    {
-      Map<String, IdentityObjectAttribute> results = new HashMap<String, IdentityObjectAttribute>();
-
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
-
-
-      if (hasIdentityObject(targetCtx, toStore, identity))
+      try
       {
-         results = toStore.getAttributes(targetCtx, identity);
-      }
-      
-      if (toStore != defaultAttributeStore)
-      {
-         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+         Map<String, IdentityObjectAttribute> results = new HashMap<String, IdentityObjectAttribute>();
 
-         Map<String, IdentityObjectAttribute> defaultAttrs = defaultAttributeStore.getAttributes(defaultCtx, identity);
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
 
-         // Add only those attributes which are missing - don't overwrite or merge existing values
-         for (Map.Entry<String, IdentityObjectAttribute> entry : defaultAttrs.entrySet())
+
+         if (hasIdentityObject(targetCtx, toStore, identity))
          {
-            if (!results.keySet().contains(entry.getKey()))
+            results = toStore.getAttributes(targetCtx, identity);
+         }
+
+         if (toStore != defaultAttributeStore)
+         {
+            IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
+
+            Map<String, IdentityObjectAttribute> defaultAttrs = defaultAttributeStore.getAttributes(defaultCtx, identity);
+
+            // Add only those attributes which are missing - don't overwrite or merge existing values
+            for (Map.Entry<String, IdentityObjectAttribute> entry : defaultAttrs.entrySet())
             {
-               results.put(entry.getKey(), entry.getValue());
+               if (!results.keySet().contains(entry.getKey()))
+               {
+                  results.put(entry.getKey(), entry.getValue());
+               }
             }
          }
-      }
 
-      return results;
+         return results;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    public void updateAttributes(IdentityStoreInvocationContext invocationCtx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
    {
-      ArrayList<IdentityObjectAttribute> filteredAttrs = new ArrayList<IdentityObjectAttribute>();
-      ArrayList<IdentityObjectAttribute> leftAttrs = new ArrayList<IdentityObjectAttribute>();
-
-      IdentityObjectAttribute[] attributesToAdd = null;
-
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
-
-      // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore
-         && !isIdentityStoreReadOnly(toStore)
-         && hasIdentityObject(targetCtx, toStore, identity))
+      try
       {
-         Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+         ArrayList<IdentityObjectAttribute> filteredAttrs = new ArrayList<IdentityObjectAttribute>();
+         ArrayList<IdentityObjectAttribute> leftAttrs = new ArrayList<IdentityObjectAttribute>();
 
-         // Filter out supported and not supported attributes
-         for (IdentityObjectAttribute entry : attributes)
+         IdentityObjectAttribute[] attributesToAdd = null;
+
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+         // Put supported attrs to the main store
+         if (toStore != defaultAttributeStore
+            && !isIdentityStoreReadOnly(toStore)
+            && hasIdentityObject(targetCtx, toStore, identity))
          {
-            if (supportedAttrs.contains(entry.getName()))
+            Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+
+            // Filter out supported and not supported attributes
+            for (IdentityObjectAttribute entry : attributes)
             {
-               filteredAttrs.add(entry);
+               if (supportedAttrs.contains(entry.getName()))
+               {
+                  filteredAttrs.add(entry);
+               }
+               else
+               {
+                  leftAttrs.add(entry);
+               }
             }
-            else
-            {
-               leftAttrs.add(entry);
-            }
+
+            toStore.updateAttributes(targetCtx, identity, filteredAttrs.toArray(new IdentityObjectAttribute[filteredAttrs.size()]));
+
+            attributesToAdd = leftAttrs.toArray(new IdentityObjectAttribute[leftAttrs.size()]);
+
+         }
+         else
+         {
+            attributesToAdd = attributes;
          }
 
-         toStore.updateAttributes(targetCtx, identity, filteredAttrs.toArray(new IdentityObjectAttribute[filteredAttrs.size()]));
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
 
-         attributesToAdd = leftAttrs.toArray(new IdentityObjectAttribute[leftAttrs.size()]);
-
-      }
-      else
-      {
-         attributesToAdd = attributes;
-      }
-
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
-
-      if (isAllowNotDefinedAttributes())
-      {
-          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
-          {
-              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
-          }
-          defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
-      }
-      else
-      {
-         Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
-         for (IdentityObjectAttribute entry : leftAttrs)
+         if (isAllowNotDefinedAttributes())
          {
-            if (!supportedAttrs.contains(entry.getName()))
-            {
-               throw new IdentityException("Cannot update not defined attribute. Use '"
-                  + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
-                  "Attribute name: " + entry.getName());
-            }
+             if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+             {
+                 defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+             }
+             defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
          }
-         defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
+         else
+         {
+            Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
+            for (IdentityObjectAttribute entry : leftAttrs)
+            {
+               if (!supportedAttrs.contains(entry.getName()))
+               {
+                  throw new IdentityException("Cannot update not defined attribute. Use '"
+                     + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
+                     "Attribute name: " + entry.getName());
+               }
+            }
+            defaultAttributeStore.updateAttributes(defaultCtx, identity, attributesToAdd);
+         }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
 
    }
@@ -1286,179 +1589,212 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    public void addAttributes(IdentityStoreInvocationContext invocationCtx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
    {
 
-      ArrayList<IdentityObjectAttribute> filteredAttrs = new ArrayList<IdentityObjectAttribute>();
-      ArrayList<IdentityObjectAttribute> leftAttrs = new ArrayList<IdentityObjectAttribute>();
-      IdentityObjectAttribute[] attributesToAdd = null;
-
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
-
-      // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore
-         && !isIdentityStoreReadOnly(toStore)
-         && hasIdentityObject(targetCtx, toStore, identity))
+      try
       {
-         Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+         ArrayList<IdentityObjectAttribute> filteredAttrs = new ArrayList<IdentityObjectAttribute>();
+         ArrayList<IdentityObjectAttribute> leftAttrs = new ArrayList<IdentityObjectAttribute>();
+         IdentityObjectAttribute[] attributesToAdd = null;
 
-         // Filter out supported and not supported attributes
-         for (IdentityObjectAttribute entry : attributes)
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+         // Put supported attrs to the main store
+         if (toStore != defaultAttributeStore
+            && !isIdentityStoreReadOnly(toStore)
+            && hasIdentityObject(targetCtx, toStore, identity))
          {
-            if (supportedAttrs.contains(entry.getName()))
+            Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+
+            // Filter out supported and not supported attributes
+            for (IdentityObjectAttribute entry : attributes)
             {
-               filteredAttrs.add(entry);
+               if (supportedAttrs.contains(entry.getName()))
+               {
+                  filteredAttrs.add(entry);
+               }
+               else
+               {
+                  leftAttrs.add(entry);
+               }
             }
-            else
-            {
-               leftAttrs.add(entry);
-            }
-         }
 
-         toStore.addAttributes(targetCtx, identity, filteredAttrs.toArray(new IdentityObjectAttribute[filteredAttrs.size()]));
+            toStore.addAttributes(targetCtx, identity, filteredAttrs.toArray(new IdentityObjectAttribute[filteredAttrs.size()]));
 
-         attributesToAdd = leftAttrs.toArray(new IdentityObjectAttribute[leftAttrs.size()]);
+            attributesToAdd = leftAttrs.toArray(new IdentityObjectAttribute[leftAttrs.size()]);
 
-
-      }
-      else
-      {
-         attributesToAdd = attributes;
-      }
-
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
-
-      if (isAllowNotDefinedAttributes())
-      {
-          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
-          {
-              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
-          }
-
-         defaultAttributeStore.addAttributes(defaultCtx, identity, attributesToAdd);
-      }
-      else
-      {
-         Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
-         for (IdentityObjectAttribute entry : attributesToAdd)
-         {
-            // if we hit some unsupported attribute at this stage that we cannot store...
-            if (!supportedAttrs.contains(entry.getName()))
-            {
-               throw new IdentityException("Cannot add not defined attribute. Use '"
-                  + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
-                  "Attribute name: " + entry.getName());
-            }
 
          }
-         defaultAttributeStore.addAttributes(defaultCtx, identity, attributesToAdd);
+         else
+         {
+            attributesToAdd = attributes;
+         }
+
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
+
+         if (isAllowNotDefinedAttributes())
+         {
+             if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+             {
+                 defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+             }
+
+            defaultAttributeStore.addAttributes(defaultCtx, identity, attributesToAdd);
+         }
+         else
+         {
+            Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
+            for (IdentityObjectAttribute entry : attributesToAdd)
+            {
+               // if we hit some unsupported attribute at this stage that we cannot store...
+               if (!supportedAttrs.contains(entry.getName()))
+               {
+                  throw new IdentityException("Cannot add not defined attribute. Use '"
+                     + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
+                     "Attribute name: " + entry.getName());
+               }
+
+            }
+            defaultAttributeStore.addAttributes(defaultCtx, identity, attributesToAdd);
+         }
       }
-      
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
+
    }
 
    public void removeAttributes(IdentityStoreInvocationContext invocationCtx, IdentityObject identity, String[] attributes) throws IdentityException
    {
-      List<String> filteredAttrs = new LinkedList<String>();
-      List<String> leftAttrs = new LinkedList<String>();
-
-      IdentityStore toStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
-
-      // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore
-         && !isIdentityStoreReadOnly(toStore)
-         && hasIdentityObject(targetCtx, toStore, identity))
+      try
       {
-         Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+         List<String> filteredAttrs = new LinkedList<String>();
+         List<String> leftAttrs = new LinkedList<String>();
 
-         // Filter out supported and not supported attributes
-         for (String name : attributes)
+         IdentityStore toStore = resolveIdentityStore(identity);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+         // Put supported attrs to the main store
+         if (toStore != defaultAttributeStore
+            && !isIdentityStoreReadOnly(toStore)
+            && hasIdentityObject(targetCtx, toStore, identity))
          {
-            if (supportedAttrs.contains(name))
+            Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
+
+            // Filter out supported and not supported attributes
+            for (String name : attributes)
             {
-               filteredAttrs.add(name);
+               if (supportedAttrs.contains(name))
+               {
+                  filteredAttrs.add(name);
+               }
+               else
+               {
+                  leftAttrs.add(name);
+               }
             }
-            else
-            {
-               leftAttrs.add(name);
-            }
+
+            toStore.removeAttributes(targetCtx, identity, filteredAttrs.toArray(new String[filteredAttrs.size()]));
+
+
+         }
+         else
+         {
+            leftAttrs = Arrays.asList(attributes);
          }
 
-         toStore.removeAttributes(targetCtx, identity, filteredAttrs.toArray(new String[filteredAttrs.size()]));
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
 
-
-      }
-      else
-      {
-         leftAttrs = Arrays.asList(attributes);
-      }
-
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
-
-      if (isAllowNotDefinedAttributes())
-      {
-          if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
-          {
-              defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
-          }
-         defaultAttributeStore.removeAttributes(defaultCtx, identity, leftAttrs.toArray(new String[leftAttrs.size()]));
-      }
-      else
-      {
-         Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
-         for (String name : leftAttrs)
+         if (isAllowNotDefinedAttributes())
          {
-            if (!supportedAttrs.contains(name))
-            {
-               throw new IdentityException("Cannot remove not defined attribute. Use '"
-                  + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
-                  "Attribute name: " + name);
-            }
+             if (!hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+             {
+                 defaultIdentityStore.createIdentityObject(defaultCtx, identity.getName(),  identity.getIdentityType());
+             }
+            defaultAttributeStore.removeAttributes(defaultCtx, identity, leftAttrs.toArray(new String[leftAttrs.size()]));
          }
-         defaultAttributeStore.removeAttributes(defaultCtx, identity, leftAttrs.toArray(new String[leftAttrs.size()]));
+         else
+         {
+            Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identity.getIdentityType());
+            for (String name : leftAttrs)
+            {
+               if (!supportedAttrs.contains(name))
+               {
+                  throw new IdentityException("Cannot remove not defined attribute. Use '"
+                     + ALLOW_NOT_DEFINED_ATTRIBUTES + "' option to pass such attributes to default IdentityStore anyway." +
+                     "Attribute name: " + name);
+               }
+            }
+            defaultAttributeStore.removeAttributes(defaultCtx, identity, leftAttrs.toArray(new String[leftAttrs.size()]));
+         }
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
       }
    }
 
    public IdentityObject findIdentityObjectByUniqueAttribute(IdentityStoreInvocationContext invocationCtx, IdentityObjectType identityObjectType, IdentityObjectAttribute attribute) throws IdentityException
    {
-      List<String> filteredAttrs = new LinkedList<String>();
-      List<String> leftAttrs = new LinkedList<String>();
-
-      IdentityStore toStore = resolveIdentityStore(identityObjectType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
-
-      IdentityObject result = null;
-
-      // Put supported attrs to the main store
-      if (toStore != defaultAttributeStore)
+      try
       {
-         Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identityObjectType);
+         List<String> filteredAttrs = new LinkedList<String>();
+         List<String> leftAttrs = new LinkedList<String>();
 
-         if (supportedAttrs.contains(attribute.getName()))
+         IdentityStore toStore = resolveIdentityStore(identityObjectType);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+         IdentityObject result = null;
+
+         // Put supported attrs to the main store
+         if (toStore != defaultAttributeStore)
          {
-            result = toStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
+            Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identityObjectType);
+
+            if (supportedAttrs.contains(attribute.getName()))
+            {
+               result = toStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
+            }
          }
-      }
 
-      if (result != null)
-      {
-         return result;
-      }
-
-      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
-
-      if (isAllowNotDefinedAttributes())
-      {
-         return defaultAttributeStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
-      }
-      else
-      {
-         Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identityObjectType);
-         if (supportedAttrs.contains(attribute.getName()))
+         if (result != null)
          {
-            return toStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
+            return result;
          }
-      }
 
-      return null;
+         IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
+
+         if (isAllowNotDefinedAttributes())
+         {
+            return defaultAttributeStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
+         }
+         else
+         {
+            Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identityObjectType);
+            if (supportedAttrs.contains(attribute.getName()))
+            {
+               return toStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
+            }
+         }
+
+         return null;
+      }
+      catch (IdentityException e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+         throw e;
+      }
    }
 
    private void sortByName(List<IdentityObject> objects, final boolean ascending)
