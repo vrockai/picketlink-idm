@@ -25,10 +25,6 @@ package org.picketlink.idm.impl.api;
 import org.picketlink.idm.impl.IdentityTestPOJO;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
 import org.picketlink.idm.api.IdentitySessionFactory;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Test;
-import org.jboss.unit.api.pojo.annotations.Parameter;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -52,7 +48,6 @@ public class MinimalFlexibleConfigTestCase extends IdentityTestPOJO implements A
 
    private IdentitySessionFactory identitySessionFactory;
 
-   @Create
    public void setUp() throws Exception
    {
       setIdentityConfig("minimal-flexible-identity-config.xml");
@@ -74,7 +69,6 @@ public class MinimalFlexibleConfigTestCase extends IdentityTestPOJO implements A
          configure(getIdentityConfig()).buildIdentitySessionFactory();
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
@@ -85,63 +79,53 @@ public class MinimalFlexibleConfigTestCase extends IdentityTestPOJO implements A
       return identitySessionFactory;
    }
 
-   @Test
    public void testOrganization() throws Exception
    {
 
       orgTest.testRedHatOrganization(getRealmName());
    }
 
-   @Test
    public void testSamplePortal() throws Exception
    {
 
       orgTest.testSamplePortal(getRealmName());
    }
 
-   @Test
    public void testPersistenceManager() throws Exception
    {
       persistenceManagerTest.testMethods(getRealmName());
    }
 
-   @Test
    public void testRelationshipManager() throws Exception
    {
       relationshipManagerTest.testMethods(getRealmName());
    }
 
-   @Test
    public void testRelationshipManagerCascade() throws Exception
    {
       relationshipManagerTest.testCascade(getRealmName());
    }
 
-   @Test
    public void testRelationshipManagerMergedRoleAssociations() throws Exception
    {
       relationshipManagerTest.testMergedRoleAssociations(getRealmName());
    }
 
-   @Test
    public void testRoleManager() throws Exception
    {
       roleManagerTest.testMethods(getRealmName());
    }
 
-   @Test
    public void testUserQuery() throws Exception
    {
       userQueryTest.testQuery(getRealmName());
    }
 
-   @Test
    public void testGroupQuery() throws Exception
    {
       groupQueryTest.testQuery(getRealmName());
    }
 
-   @Test
    public void testRoleQuery() throws Exception
    {
       roleQueryTest.testQuery(getRealmName());

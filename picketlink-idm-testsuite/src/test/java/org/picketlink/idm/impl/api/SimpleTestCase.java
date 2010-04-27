@@ -26,9 +26,6 @@ import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.api.IdentitySession;
 import org.picketlink.idm.impl.IdentityTestPOJO;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Test;
 
 import java.util.logging.Logger;
 
@@ -45,7 +42,6 @@ public class SimpleTestCase extends IdentityTestPOJO implements APITestContext
 
    IdentitySessionFactory identitySessionFactory;
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
@@ -61,7 +57,6 @@ public class SimpleTestCase extends IdentityTestPOJO implements APITestContext
       
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
@@ -72,7 +67,6 @@ public class SimpleTestCase extends IdentityTestPOJO implements APITestContext
       return identitySessionFactory;
    }
 
-   @Test
    public void testPersistenceManager() throws Exception
    {
       IdentitySession session = identitySessionFactory.createIdentitySession(getRealmName());

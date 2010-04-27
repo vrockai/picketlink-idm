@@ -81,12 +81,24 @@
         <artifactId>jboss-deployers-structure-spi</artifactId>
         <version>${jboss.deployers.version}</version>
         <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss.microcontainer</groupId>
+            <artifactId>jboss-dependency</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.deployers</groupId>
         <artifactId>jboss-deployers-vfs-spi</artifactId>
         <version>${jboss.deployers.version}</version>
         <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jbossxb</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
    </dependencies>

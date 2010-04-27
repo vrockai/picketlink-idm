@@ -25,10 +25,6 @@ package org.picketlink.idm.impl.api;
 import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.impl.LDAPTestPOJO;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Parameter;
-import org.jboss.unit.api.pojo.annotations.Test;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -45,7 +41,6 @@ public class OrganizationLDAPTestCase extends LDAPTestPOJO implements APITestCon
    private String sampleOrganizationRealmName = "realm://RedHat/DB_LDAP";
 
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
@@ -58,7 +53,6 @@ public class OrganizationLDAPTestCase extends LDAPTestPOJO implements APITestCon
          configure(getIdentityConfig()).buildIdentitySessionFactory();
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
@@ -69,14 +63,12 @@ public class OrganizationLDAPTestCase extends LDAPTestPOJO implements APITestCon
       return identitySessionFactory;
    }
 
-   @Test
    public void testOrganization() throws Exception
    {
 
       orgTest.testRedHatOrganization(getSampleOrganizationRealmName());
    }
 
-   @Test
    public void testSamplePortal() throws Exception
    {
 
@@ -89,7 +81,6 @@ public class OrganizationLDAPTestCase extends LDAPTestPOJO implements APITestCon
       return samplePortalRealmName;
    }
 
-   @Parameter
    public void setSamplePortalRealmName(String samplePortalRealmName)
    {
       this.samplePortalRealmName = samplePortalRealmName;
@@ -100,7 +91,6 @@ public class OrganizationLDAPTestCase extends LDAPTestPOJO implements APITestCon
       return sampleOrganizationRealmName;
    }
 
-   @Parameter
    public void setSampleOrganizationRealmName(String sampleOrganizationRealmName)
    {
       this.sampleOrganizationRealmName = sampleOrganizationRealmName;

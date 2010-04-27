@@ -24,10 +24,6 @@ package org.picketlink.idm.impl.store.hibernate;
 
 import org.picketlink.idm.impl.model.hibernate.*;
 import org.picketlink.idm.impl.IdentityTestPOJO;
-import org.picketlink.idm.impl.api.PasswordCredential;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Test;
 import org.hibernate.Session;
 import org.hibernate.Query;
 
@@ -48,19 +44,16 @@ public class HibernateModelTestCase extends IdentityTestPOJO
    }
 
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
    }
 
-   @Test
    public void testPersistence() {
 
 
@@ -121,7 +114,6 @@ public class HibernateModelTestCase extends IdentityTestPOJO
 
    }
 
-   @Test
    public void testRelationships()
    {
       begin();
@@ -190,7 +182,6 @@ public class HibernateModelTestCase extends IdentityTestPOJO
 
    }
 
-   @Test
    public void testNameTypeConstraint() throws Exception
    {
 
@@ -287,7 +278,6 @@ public class HibernateModelTestCase extends IdentityTestPOJO
 
    }
 
-   @Test
    public void testAttributes() throws Exception
    {
       begin();

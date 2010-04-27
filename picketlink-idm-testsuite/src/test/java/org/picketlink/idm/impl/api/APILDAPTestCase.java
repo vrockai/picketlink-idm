@@ -25,9 +25,7 @@ package org.picketlink.idm.impl.api;
 import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.impl.LDAPTestPOJO;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Test;
+
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -50,7 +48,6 @@ public class APILDAPTestCase extends LDAPTestPOJO implements APITestContext
 
    IdentitySessionFactory identitySessionFactory;
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
@@ -71,7 +68,6 @@ public class APILDAPTestCase extends LDAPTestPOJO implements APITestContext
          configure(getIdentityConfig()).buildIdentitySessionFactory();
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
@@ -82,31 +78,26 @@ public class APILDAPTestCase extends LDAPTestPOJO implements APITestContext
       return identitySessionFactory;
    }
 
-   @Test
    public void testPersistenceManager() throws Exception
    {
       persistenceManagerTest.testMethods(getRealmName());
    }
 
-   @Test
    public void testRelationshipManager() throws Exception
    {
       relationshipManagerTest.testMethods(getRealmName());
    }
 
-   @Test
    public void testRelationshipManagerCascade() throws Exception
    {
       relationshipManagerTest.testCascade(getRealmName());
    }
 
-   @Test
    public void testRelationshipManagerMergedRoleAssociations() throws Exception
    {
       relationshipManagerTest.testMergedRoleAssociations(getRealmName());
    }
 
-   @Test
    public void testRoleManager() throws Exception
    {
       roleManagerTest.testMethods(getRealmName());

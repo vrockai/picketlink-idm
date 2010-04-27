@@ -41,8 +41,6 @@ import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
 import org.picketlink.idm.impl.api.SimpleAttribute;
 import org.picketlink.idm.impl.IdentityTestPOJO;
 import org.picketlink.idm.common.exception.IdentityException;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Test;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -67,7 +65,6 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
 
    }
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
@@ -171,7 +168,6 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
 
    // Tests
 
-   @Test
    public void testStorePersistence() throws Exception
    {
 
@@ -179,7 +175,6 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
 
    }
 
-   @Test
    public void testFindMethods() throws Exception
    {
 
@@ -237,7 +232,6 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
       commit();
    }
 
-   @Test
    public void testAttributes() throws Exception
    {
 
@@ -350,13 +344,11 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
 
    }
 
-   @Test
    public void testRelationships() throws Exception
    {
       commonTest.testRelationships();
    }
 
-   @Test
    public void testPasswordCredentials() throws Exception
    {
       commonTest.testPasswordCredential();
@@ -367,7 +359,6 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
       commonTest.testBinaryCredential();
    }
 
-   @Test
    public void testCriteria() throws Exception
    {
       commonTest.testCriteria();

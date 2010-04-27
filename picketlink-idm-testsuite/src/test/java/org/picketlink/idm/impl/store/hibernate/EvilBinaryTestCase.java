@@ -24,9 +24,6 @@ package org.picketlink.idm.impl.store.hibernate;
 
 import org.picketlink.idm.impl.model.hibernate.*;
 import org.picketlink.idm.impl.IdentityTestPOJO;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Test;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
@@ -46,19 +43,16 @@ public class EvilBinaryTestCase extends IdentityTestPOJO
    }
 
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
    }
 
-   @Test
    public void testBinary() throws Exception
    {
       begin();

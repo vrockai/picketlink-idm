@@ -24,7 +24,6 @@ package org.picketlink.idm.impl;
 
 import org.picketlink.idm.opends.OpenDSService;
 import org.jboss.portal.test.framework.embedded.DSConfig;
-import org.jboss.unit.api.pojo.annotations.Parameter;
 
 import java.net.URL;
 import java.util.Hashtable;
@@ -124,7 +123,6 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
    }
 
-   @Parameter
    public void setDirectoryName(String directoryName)
    {
       this.directoryName = directoryName;

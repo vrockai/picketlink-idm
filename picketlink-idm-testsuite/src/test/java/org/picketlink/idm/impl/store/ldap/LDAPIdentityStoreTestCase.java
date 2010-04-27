@@ -35,9 +35,6 @@ import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationM
 import org.picketlink.idm.spi.store.IdentityStore;
 import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
 import org.picketlink.idm.spi.store.IdentityStoreSession;
-import org.jboss.unit.api.pojo.annotations.Create;
-import org.jboss.unit.api.pojo.annotations.Destroy;
-import org.jboss.unit.api.pojo.annotations.Test;
 
 import java.util.Hashtable;
 
@@ -65,7 +62,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 
    }
 
-   @Create
    public void setUp() throws Exception
    {
       super.start();
@@ -122,7 +118,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
       };
    }
 
-   @Destroy
    public void tearDown() throws Exception
    {
       super.stop();
@@ -148,7 +143,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
    // Tests
 
 //       Just test if OpenDS is running and was populated...
-   @Test
    public void testSimple() throws Exception
    {
       populateClean();
@@ -329,7 +323,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 //
 //   }
 
-   @Test
    public void testRelationships() throws Exception
    {
       populateClean();
@@ -338,7 +331,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 
    }
 
-   @Test
    public void testStorePersistence() throws Exception
    {
       populateClean();
@@ -347,7 +339,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 
    }
 
-   @Test
    public void testFindMethods() throws Exception
    {
      populateClean();
@@ -356,7 +347,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 
    }
 
-   @Test
    public void testCriteria() throws Exception
    {
       populateClean();
@@ -365,7 +355,6 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
    }
 
 
-   @Test
    public void testCredentials() throws Exception
    {
       populateClean();

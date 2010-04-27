@@ -76,14 +76,6 @@
          <scope>test</scope>
       </dependency>
 
-      <!--JBoss Unit-->
-
-      <dependency>
-         <groupId>org.jboss.unit</groupId>
-         <artifactId>jboss-unit</artifactId>
-         <version>1.2.2</version>
-         <scope>test</scope>
-      </dependency>
       <dependency>
          <groupId>org.jboss.unit</groupId>
          <artifactId>portal-test</artifactId>
@@ -94,6 +86,22 @@
             <exclusion>
                <groupId>hibernate</groupId>
                <artifactId>hibernate3</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>apache-slide</groupId>
+               <artifactId>webdavlib</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>apache-log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>apache-httpclient</groupId>
+               <artifactId>commons-httpclient</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>apache-xerces</groupId>
+               <artifactId>xml-apis</artifactId>
             </exclusion>
             <exclusion>
                <groupId>sun-opends</groupId>
@@ -116,18 +124,6 @@
       </dependency>
       <dependency>
          <groupId>jboss</groupId>
-         <artifactId>jboss-logging-spi</artifactId>
-         <version>2.0.2.GA</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>jboss</groupId>
-         <artifactId>jboss-logging-jdk</artifactId>
-         <version>2.0.2.GA</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>jboss</groupId>
          <artifactId>jboss-logging-log4j</artifactId>
          <version>2.0.2.GA</version>
          <scope>test</scope>
@@ -144,10 +140,6 @@
          <version>1.2.2</version>
          <scope>test</scope>
       </dependency>
-
-
-
-
    </dependencies>
 
 
