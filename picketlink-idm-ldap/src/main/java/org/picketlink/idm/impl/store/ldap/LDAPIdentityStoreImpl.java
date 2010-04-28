@@ -22,6 +22,7 @@
 
 package org.picketlink.idm.impl.store.ldap;
 
+import org.picketlink.idm.api.cfg.IdentityConfigurationRegistry;
 import org.picketlink.idm.common.exception.IdentityException;
 import org.picketlink.idm.impl.NotYetImplementedException;
 import org.picketlink.idm.impl.api.SimpleAttribute;
@@ -30,6 +31,7 @@ import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
 import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
 import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
 import org.picketlink.idm.impl.types.SimpleIdentityObject;
+import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
@@ -49,6 +51,8 @@ import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
 import org.picketlink.idm.spi.store.IdentityStoreSession;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -95,6 +99,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    private static Logger log = Logger.getLogger(LDAPIdentityStoreImpl.class.getName());
 
    private final String id;
+
+   private IdentityStoreCacheProvider cache;
 
    public static final String MEMBERSHIP_TYPE = "JBOSS_IDENTITY_MEMBERSHIP";
 
@@ -220,6 +226,74 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      // Cache
+
+      // Cache
+
+      Map<String, String> cacheProps = new HashMap<String, String>();
+      String cacheClassName = null;
+      String cacheRegistryName = null;
+
+      // Parse all 'cache.' prefixed options
+      for (String key : configurationMD.getOptions().keySet())
+      {
+         if (key.startsWith("cache."))
+         {
+            if (configurationMD.getOptions().get(key).size() > 0)
+            {
+               cacheProps.put(key, configurationMD.getOptions().get(key).get(0));
+            }
+            if (key.equals("cache.providerClass") && configurationMD.getOptions().get(key).size() > 0)
+            {
+               cacheClassName = configurationMD.getOptions().get(key).get(0);
+            }
+
+            if (key.equals("cache.providerRegistryName") && configurationMD.getOptions().get(key).size() > 0)
+            {
+               cacheRegistryName = configurationMD.getOptions().get(key).get(0);
+            }
+         }
+      }
+
+      IdentityStoreCacheProvider provider = null;
+
+      if (cacheRegistryName != null)
+      {
+         try
+         {
+            provider = (IdentityStoreCacheProvider)configurationContext.
+               getConfigurationRegistry().getObject(cacheRegistryName);
+         }
+         catch (Exception e)
+         {
+            throw new IdentityException("Cannot find IdentityStoreCacheProvider in ConfigurationRegistry using " +
+               "provided name:" + cacheRegistryName, e);
+         }
+
+      }
+
+      // Instantiate provider
+      if (provider == null && cacheClassName != null)
+      {
+         Class repoClass = null;
+         try
+         {
+            repoClass = Class.forName(cacheClassName);
+
+            Constructor ct = repoClass.getConstructor();
+
+            provider = (IdentityStoreCacheProvider)ct.newInstance();
+
+            provider.initialize(cacheProps, configurationContext);
+         }
+         catch (Exception e)
+         {
+            throw new IdentityException("Cannot instantiate IdentityStoreCacheProvider:" + cacheClassName, e);
+         }
+      }
+
+      cache = provider;
+
    }
 
    public IdentityStoreSession createIdentityStoreSession()
@@ -329,6 +403,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
          }
          DirContext entry = ctx.createSubcontext(validLDAPName, attrs);
+
+         invalidateCache();
+
          if (entry != null)
          {
             dn = entry.getNameInNamespace();
@@ -386,6 +463,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       {
          log.finer("removing entry: " + dn);
          ldapContext.unbind(dn);
+
+         invalidateCache();
       }
       catch (Exception e)
       {
@@ -1597,6 +1676,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             attrs.put(member);
 
             ldapContext.modifyAttributes(ldapFromIO.getDn(), DirContext.ADD_ATTRIBUTE, attrs);
+
+            invalidateCache();
          }
 
          if (toTypeConfig.getChildMembershipAttributeName() != null && !toTypeConfig.isChildMembershipAttributeVirtual())
@@ -1616,6 +1697,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             attrs.put(member);
 
             ldapContext.modifyAttributes(ldapToIO.getDn(), DirContext.ADD_ATTRIBUTE, attrs);
+
+            invalidateCache();
          }
 
          relationship = new LDAPIdentityObjectRelationshipImpl(name, ldapFromIO, ldapToIO);
@@ -1710,6 +1793,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             attrs.put(member);
 
             ldapContext.modifyAttributes(ldapFromIO.getDn(), DirContext.REMOVE_ATTRIBUTE, attrs);
+
+            invalidateCache();
          }
 
          if (toTypeConfig.getChildMembershipAttributeName() != null && !toTypeConfig.isChildMembershipAttributeVirtual())
@@ -1728,6 +1813,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             attrs.put(member);
 
             ldapContext.modifyAttributes(ldapToIO.getDn(), DirContext.REMOVE_ATTRIBUTE, attrs);
+
+            invalidateCache();
          }
 
       }
@@ -1944,6 +2031,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             log.finer("creating ldap entry for: " + validLDAPName + "; " + attrs);
          }
          ctx.createSubcontext(validLDAPName, attrs);
+
+         invalidateCache();
       }
       catch (Exception e)
       {
@@ -2033,6 +2122,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          String dn = ctx.getNameInNamespace();
 
          ctx.unbind(dn);
+
+         invalidateCache();
 
          ctx.close();
          return null;
@@ -2429,6 +2520,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
 
             ldapContext.modifyAttributes(ldapIO.getDn(), DirContext.REPLACE_ATTRIBUTE, attrs);
+
+            invalidateCache();
          }
          catch (NamingException e)
          {
@@ -2502,6 +2595,19 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          );
       }
 
+      // Cache
+
+      if (getCache() != null)
+      {
+         Map<String, IdentityObjectAttribute> cachedAttributes = getCache().
+            getIdentityObjectAttributes(getNamespace(), identity);
+
+         if (cachedAttributes != null)
+         {
+            return cachedAttributes;
+         }
+      }
+
       Map<String, IdentityObjectAttribute> attrsMap = new HashMap<String, IdentityObjectAttribute>();
 
       LDAPIdentityObjectImpl ldapIdentity = getSafeLDAPIO(ctx, identity);
@@ -2571,6 +2677,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      // Cache
+
+      if (getCache() != null)
+      {
+         getCache().putIdentityObjectAttributes(getNamespace(), identity, attrsMap);
+      }
+
       return attrsMap;
 
    }
@@ -2584,6 +2697,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             + "identity: " + identity
             + "attributes: " + attributes
          );
+      }
+
+      if (getCache() != null)
+      {
+         getCache().invalidate(getNamespace());
       }
 
       if (attributes == null)
@@ -2662,6 +2780,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                try
                {
                   ldapContext.modifyAttributes(dn, DirContext.REPLACE_ATTRIBUTE, attrs);
+
+                  invalidateCache();
                }
                catch (NamingException e)
                {
@@ -2692,6 +2812,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      // Cache new attributes
+      if (getCache() != null)
+      {
+         getAttributes(ctx, identity);
+      }
+
    }
 
    public void addAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
@@ -2705,6 +2832,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          );
       }
 
+      if (getCache() != null)
+      {
+         getCache().invalidate(getNamespace());
+      }
 
       if (attributes == null)
       {
@@ -2783,6 +2914,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                try
                {
                   ldapContext.modifyAttributes(dn, DirContext.ADD_ATTRIBUTE, attrs);
+
+                  invalidateCache();
                }
                catch (NamingException e)
                {
@@ -2813,6 +2946,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      // Cache new attributes
+      if (getCache() != null)
+      {
+         getAttributes(ctx, identity);
+      }
    }
 
    public void removeAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, String[] attributeNames) throws IdentityException
@@ -2824,6 +2963,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             + "identity: " + identity
             + "attributeNames: " + attributeNames
          );
+      }
+
+      if (getCache() != null)
+      {
+         getCache().invalidate(getNamespace());
       }
 
       if (attributeNames == null)
@@ -2872,6 +3016,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             try
             {
                ldapContext.modifyAttributes(dn, DirContext.REMOVE_ATTRIBUTE, attrs);
+
+               invalidateCache();
             }
             catch (NamingException e)
             {
@@ -2900,6 +3046,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             throw new IdentityException("Failed to close LDAP connection", e);
          }
+      }
+
+      // Cache new attributes
+      if (getCache() != null)
+      {
+         getAttributes(ctx, identity);
       }
    }
 
@@ -3033,7 +3185,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          Attribute ida = attrs.get(idAttrName);
          if (ida == null)
          {
-            throw new IdentityException("LDAP entry doesn't contain proper attribute:" + idAttrName);
+            throw new IdentityException("LDAP entry doesn't contain proper attribute: " + idAttrName + "; dn=" + dn);
          }
 
          //make DN as user ID
@@ -3092,6 +3244,27 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          log.finer(sb.toString());
       }
 
+      if (getCache() != null)
+      {
+         LDAPSearch search =
+            new LDAPSearch(entryCtxs, filter, filterArgs, returningAttributes, searchScope, requestControls);
+
+         Object results = getCache().getObject(getNamespace(), search.hashCode());
+
+         if (results != null && results instanceof List)
+         {
+
+            //Debug
+            if (log.isLoggable(Level.FINER))
+            {
+               log.finer("LDAP search results found in cache. size=" + ((List)results).size());
+            }
+
+            return (List<SearchResult>)results;
+
+         }
+      }
+
 
       LdapContext ldapContext = getLDAPContext(ctx);
 
@@ -3101,6 +3274,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
 
       NamingEnumeration results = null;
+
+      List<SearchResult> finalResults;
 
       try
       {
@@ -3145,7 +3320,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                log.finer("Search in " + entryCtxs[0] + " returned " + toReturn.size() + " entries");
             }
 
-            return toReturn;
+            finalResults = toReturn;
 
 
          }
@@ -3176,7 +3351,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
 
 
-            return merged;
+            finalResults = merged;
          }
       }
       finally
@@ -3187,6 +3362,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          ldapContext.close();
       }
+
+      if (getCache() != null && finalResults != null)
+      {
+         LDAPSearch search =
+            new LDAPSearch(entryCtxs, filter, filterArgs, returningAttributes, searchScope, requestControls);
+
+         getCache().putObject(getNamespace(), search.hashCode(), finalResults);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("LDAP search results stored in cache. size=" + finalResults.size());
+         }
+      }
+
+      return finalResults;
    }
 
    // HELPER
@@ -3485,6 +3675,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       try
       {
          subContext = ctx.createSubcontext(dn, attrs);
+
       }
       finally
       {
@@ -3493,6 +3684,24 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return subContext;
 
 
+   }
+
+   IdentityStoreCacheProvider getCache()
+   {
+      return cache;
+   }
+
+   String getNamespace()
+   {
+      return getId();
+   }
+
+   void invalidateCache()
+   {
+      if (getCache() != null)
+      {
+         getCache().invalidate(getNamespace());
+      }
    }
 
 }

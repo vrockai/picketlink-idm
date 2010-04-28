@@ -22,6 +22,7 @@
 
 package org.picketlink.idm.spi.cache;
 
+import org.picketlink.idm.spi.configuration.IdentityConfigurationContext;
 import org.picketlink.idm.spi.model.IdentityObjectAttribute;
 import org.picketlink.idm.spi.model.IdentityObjectType;
 import org.picketlink.idm.spi.model.IdentityObject;
@@ -47,7 +48,7 @@ public interface IdentityStoreCacheProvider
     * Initialize provider.
     * @param properties
     */
-   void initialize(Map<String, String> properties, IdentityRepositoryConfigurationContext configurationContext);
+   void initialize(Map<String, String> properties, IdentityConfigurationContext configurationContext);
 
 
    /**
@@ -136,5 +137,15 @@ public interface IdentityStoreCacheProvider
    void invalidateIdentityObjectAttriubtes(String ns, IdentityObject identityObject);
 
    void invalidateIdentityObjectAttriubtes(String ns);
+
+   //
+
+   void putObject(String ns, int hash, Object value);
+
+   Object getObject(String ns, int hash);
+
+   void invalidateObject(String ns, int hash);
+
+   void invalidateObjects(String ns);
 
 }

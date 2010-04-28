@@ -187,6 +187,24 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    }
 
+    public void initialize(Cache cache)
+   {
+      this.cache = cache;
+
+      CacheStatus status = cache.getCacheStatus();
+
+      if (status.createAllowed())
+      {
+         this.cache.create();
+      }
+      if (status.startAllowed())
+      {
+         this.cache.start();
+      }
+
+   }
+
+
    Cache getCache()
    {
       return cache;

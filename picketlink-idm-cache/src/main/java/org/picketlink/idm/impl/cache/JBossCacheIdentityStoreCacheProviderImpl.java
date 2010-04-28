@@ -23,6 +23,8 @@
 package org.picketlink.idm.impl.cache;
 
 import org.jboss.cache.*;
+
+import org.picketlink.idm.spi.configuration.IdentityConfigurationContext;
 import org.picketlink.idm.spi.model.IdentityObject;
 import org.picketlink.idm.spi.model.IdentityObjectAttribute;
 import org.picketlink.idm.spi.model.IdentityObjectRelationship;
@@ -37,6 +39,7 @@ import org.picketlink.idm.impl.types.SimpleIdentityObjectRelationship;
 import org.picketlink.idm.impl.types.SimpleIdentityObjectRelationshipType;
 import org.picketlink.idm.impl.api.SimpleAttribute;
 
+import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.*;
@@ -72,6 +75,8 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
    public static final String NODE_IO_ATTRIBUTES = "NODE_IO_ATTRIBUTES";
 
+   public static final String NODE_OBJECTS = "NODE_OBJECTS";
+
    public static final String NODE_REL_PROPS = "NODE_REL_PROPS";
 
    public static final String NODE_REL_NAME_PROPS = "NODE_REL_NAME_PROPS";
@@ -92,12 +97,17 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
       return Fqn.fromString(getNamespacedFqn(ns) + "/" + node + "/" + o);
    }
 
+   private Fqn getFqn(String ns, String node, int hash)
+   {
+      return Fqn.fromString(getNamespacedFqn(ns) + "/" + node + "/" + hash);
+   }
+
    private Fqn getFqn(String ns, String node)
    {
       return Fqn.fromString(getNamespacedFqn(ns) + "/" + node);
    }
 
-   public void initialize(Map<String, String> properties, IdentityRepositoryConfigurationContext configurationContext)
+   public void initialize(Map<String, String> properties, IdentityConfigurationContext configurationContext)
    {
       CacheFactory factory = new DefaultCacheFactory();
 
@@ -131,6 +141,39 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       this.cache.create();
       this.cache.start();
+
+   }
+
+   public void initialize(InputStream jbossCacheConfiguration)
+   {
+      CacheFactory factory = new DefaultCacheFactory();
+
+      if (jbossCacheConfiguration == null)
+      {
+         throw new IllegalArgumentException("JBoss Cache configuration InputStream is null");
+      }
+
+      this.cache = factory.createCache(jbossCacheConfiguration);
+
+      this.cache.create();
+      this.cache.start();
+
+   }
+
+    public void initialize(Cache cache)
+   {
+      this.cache = cache;
+
+      CacheStatus status = cache.getCacheStatus();
+
+      if (status.createAllowed())
+      {
+         this.cache.create();
+      }
+      if (status.startAllowed())
+      {
+         this.cache.start();
+      }
 
    }
 
@@ -541,6 +584,61 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating IdentityObject attributes. Namespace:" + ns);
+      }
+   }
+
+   public void putObject(String ns, int hash, Object value)
+   {
+      Fqn nodeFqn = getFqn(ns, NODE_OBJECTS, hash);
+
+      Node ioNode = getCache().getRoot().addChild(nodeFqn);
+
+      ioNode.put(NODE_OBJECT_KEY, value);
+
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(this.toString() + "Object stored in cache: hash=" + hash
+            + "; value=" + value + ";namespace=" + ns);
+      }
+   }
+
+   public Object getObject(String ns, int hash)
+   {
+      Fqn nodeFqn = getFqn(ns, NODE_OBJECTS, hash);
+
+      Node node = getCache().getRoot().getChild(nodeFqn);
+
+      if (node != null)
+      {
+         Object value = node.get(NODE_OBJECT_KEY);
+
+         if (log.isLoggable(Level.FINER) && value != null)
+         {
+            log.finer(this.toString() + "Object found in cache: hash" + hash +
+         "; value=" + value + ";namespace=" + ns);
+         }
+
+         return value;
+      }
+
+      return null;
+   }
+
+   public void invalidateObject(String ns, int hash)
+   {
+      getCache().getRoot().removeChild(getFqn(ns, NODE_OBJECTS, hash));
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(this.toString() + "Invalidating object. Namespace:" + ns + "; hash=" + hash);
+      }
+   }
+
+   public void invalidateObjects(String ns)
+   {
+      getCache().getRoot().removeChild(getFqn(ns, NODE_OBJECTS));
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(this.toString() + "Invalidating objects. Namespace:" + ns);
       }
    }
 
