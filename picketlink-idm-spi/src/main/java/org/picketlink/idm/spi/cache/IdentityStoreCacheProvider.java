@@ -80,6 +80,8 @@ public interface IdentityStoreCacheProvider
 
    void invalidate(String ns);
 
+   void invalidateAll();
+
    //
 
    void putIdentityObjectCount(String ns, String type, int count);

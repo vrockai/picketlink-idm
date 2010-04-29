@@ -87,9 +87,20 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
    public static final String NODE_IO_REL_NAME_SEARCH = "NODE_IO_REL_NAME_SEARCH";
 
+   public static final String NULL_NS_NODE = "PL_COMMON_NS";
+
+   public static final String MAIN_ROOT = "NODE_MAIN_ROOT";
+
+   private Fqn getRootNode()
+   {
+      return Fqn.fromString("/" + MAIN_ROOT);
+   }
+
    private Fqn getNamespacedFqn(String ns)
    {
-      return Fqn.fromString("/" + "NODE_MAIN_ROOT" + "/" + ns);
+      String namespace = ns != null ? ns : NULL_NS_NODE;
+      namespace = namespace.replaceAll("/", "_");
+      return Fqn.fromString(getRootNode() + "/" + ns);
    }
 
    private Fqn getFqn(String ns, String node, Object o)
@@ -192,7 +203,17 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
       }
    }
 
-  public String getNamespace(String storeId)
+   public void invalidateAll()
+   {
+      boolean success = cache.getRoot().removeChild(getRootNode());
+
+      if (log.isLoggable(Level.FINER))
+      {
+         log.finer(this.toString() + "Invalidating whole cache - success=" + success);
+      }
+   }
+
+   public String getNamespace(String storeId)
    {
       if (storeId == null)
       {
