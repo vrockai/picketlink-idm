@@ -636,7 +636,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
          if (log.isLoggable(Level.FINER) && value != null)
          {
             log.finer(this.toString() + "Object found in cache: hash" + hash +
-         "; value=" + value + ";namespace=" + ns);
+          ";namespace=" + ns);
          }
 
          return value;
