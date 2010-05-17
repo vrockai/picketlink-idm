@@ -476,6 +476,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       IdentityStore targetStore = resolveIdentityStore(identity);
       IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+      IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
 
       if (isIdentityStoreReadOnly(targetStore))
       {
@@ -492,7 +493,24 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          if (log.isLoggable(Level.INFO))
          {
-            log.log(Level.INFO, "Failed to remove IdentityObject: ", e);
+            log.log(Level.INFO, "Failed to remove IdentityObject from target store: ", e);
+         }
+      }
+
+      // Sync remove in default store
+      if (targetStore != defaultIdentityStore && hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+      {
+
+         try
+         {
+            defaultIdentityStore.removeIdentityObject(defaultCtx, identity);
+         }
+         catch (IdentityException e)
+         {
+            if (log.isLoggable(Level.INFO))
+            {
+               log.log(Level.INFO, "Failed to remove IdentityObject from default store: ", e);
+            }
          }
       }
    }
