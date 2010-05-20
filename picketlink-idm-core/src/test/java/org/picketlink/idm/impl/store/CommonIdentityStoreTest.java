@@ -99,7 +99,22 @@ public class CommonIdentityStoreTest extends Assert
       assertEquals(0, testContext.getStore().getIdentityObjectsCount(testContext.getCtx(), IdentityTypeEnum.USER));
       assertEquals(0, testContext.getStore().getIdentityObjectsCount(testContext.getCtx(), IdentityTypeEnum.ORGANIZATION));
 
+      // Check special characters:
+
+
+      user1 = testContext.getStore().createIdentityObject(testContext.getCtx(), "Adam/Ewa/Toto", IdentityTypeEnum.USER);
+
+      assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam/Ewa/Toto", IdentityTypeEnum.USER));
+
+      user1 = testContext.getStore().createIdentityObject(testContext.getCtx(), "Adam//Ewa////Toto*%.$", IdentityTypeEnum.USER);
+
+      assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam//Ewa////Toto*%.$", IdentityTypeEnum.USER));
+
+
+
       testContext.commit();
+
+
 
    }
 

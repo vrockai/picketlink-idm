@@ -29,6 +29,7 @@ import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.api.IdentitySearchCriteria;
 
 import junit.framework.Assert;
+import org.picketlink.idm.impl.api.model.GroupKey;
 
 /**
  *
@@ -81,7 +82,7 @@ public class PersistenceManagerTest extends Assert
 
       try
       {
-         session.getPersistenceManager().createUser("lol/olo");
+         session.getPersistenceManager().createUser("lol" + GroupKey.SEPARATOR + "lolo");
          fail();
       }
       catch (IllegalArgumentException e)
@@ -91,7 +92,7 @@ public class PersistenceManagerTest extends Assert
 
       try
       {
-         session.getPersistenceManager().createGroup("/toto", ORGANIZATION);
+         session.getPersistenceManager().createGroup(GroupKey.PREFIX + "toto", ORGANIZATION);
          fail();
       }
       catch (IllegalArgumentException e)

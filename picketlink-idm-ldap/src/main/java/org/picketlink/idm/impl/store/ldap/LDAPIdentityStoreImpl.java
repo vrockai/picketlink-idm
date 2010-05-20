@@ -70,8 +70,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.Name;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -342,7 +344,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       try
       {
          //  If there are many contexts specified in the configuration the first one is used
-         LdapContext ctx = (LdapContext)ldapContext.lookup(getTypeConfiguration(invocationCtx, type).getCtxDNs()[0]);
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(getTypeConfiguration(invocationCtx, type).getCtxDNs()[0]);
+
+         LdapContext ctx = (LdapContext)ldapContext.lookup(jndiName);
 
          //We store new entry using set of attributes. This should give more flexibility then
          //extending identity object from ContextDir - configure what objectClass place there
@@ -462,7 +467,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       try
       {
          log.finer("removing entry: " + dn);
-         ldapContext.unbind(dn);
+
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(dn);
+         ldapContext.unbind(jndiName);
 
          invalidateCache();
       }
@@ -721,7 +729,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          // Grab entry
 
-         Attributes attrs = ldapContext.getAttributes(dn);
+         Name jndiName = new CompositeName().add(dn);
+         Attributes attrs = ldapContext.getAttributes(jndiName);
 
          if (attrs == null)
          {
@@ -976,7 +985,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             {
 
 
-               Attributes attrs = ldapContext.getAttributes(ldapIO.getDn());
+               Name jndiName = new CompositeName().add(ldapIO.getDn());
+               Attributes attrs = ldapContext.getAttributes(jndiName);
                Attribute member = attrs.get(typeConfig.getParentMembershipAttributeName());
 
                if (member != null)
@@ -1042,7 +1052,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
             else
             {
-               Attributes attrs = ldapContext.getAttributes(ldapIO.getDn());
+               // Escape JNDI special characters
+               Name jndiName = new CompositeName().add(ldapIO.getDn());
+               Attributes attrs = ldapContext.getAttributes(jndiName);
                Attribute member = attrs.get(typeConfig.getChildMembershipAttributeName());
 
                if (member != null)
@@ -1330,7 +1342,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          // If parent simply look for all its members
          if (parent)
          {
-            Attributes attrs = ldapContext.getAttributes(ldapIO.getDn());
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapIO.getDn());
+            Attributes attrs = ldapContext.getAttributes(jndiName);
 
             if (typeConfig.getParentMembershipAttributeName() != null )
             {
@@ -1381,7 +1395,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          // if not parent then all parent entries need to be found
          else
          {
-            Attributes attrs = ldapContext.getAttributes(ldapIO.getDn());
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapIO.getDn());
+            Attributes attrs = ldapContext.getAttributes(jndiName);
 
             if (typeConfig.getChildMembershipAttributeName() != null)
             {
@@ -1675,7 +1691,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             attrs.put(member);
 
-            ldapContext.modifyAttributes(ldapFromIO.getDn(), DirContext.ADD_ATTRIBUTE, attrs);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapFromIO.getDn());
+            ldapContext.modifyAttributes(jndiName, DirContext.ADD_ATTRIBUTE, attrs);
 
             invalidateCache();
          }
@@ -1696,7 +1714,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             attrs.put(member);
 
-            ldapContext.modifyAttributes(ldapToIO.getDn(), DirContext.ADD_ATTRIBUTE, attrs);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapToIO.getDn());
+            ldapContext.modifyAttributes(jndiName, DirContext.ADD_ATTRIBUTE, attrs);
 
             invalidateCache();
          }
@@ -1792,7 +1812,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             attrs.put(member);
 
-            ldapContext.modifyAttributes(ldapFromIO.getDn(), DirContext.REMOVE_ATTRIBUTE, attrs);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapFromIO.getDn());
+            ldapContext.modifyAttributes(jndiName, DirContext.REMOVE_ATTRIBUTE, attrs);
 
             invalidateCache();
          }
@@ -1812,7 +1834,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             attrs.put(member);
 
-            ldapContext.modifyAttributes(ldapToIO.getDn(), DirContext.REMOVE_ATTRIBUTE, attrs);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapToIO.getDn());
+            ldapContext.modifyAttributes(jndiName, DirContext.REMOVE_ATTRIBUTE, attrs);
 
             invalidateCache();
          }
@@ -1905,7 +1929,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       try
       {
-         Attributes attrs = ldapContext.getAttributes(ldapFromIO.getDn());
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(ldapFromIO.getDn());
+         Attributes attrs = ldapContext.getAttributes(jndiName);
 
          if (fromTypeConfig.getParentMembershipAttributeName() != null)
          {
@@ -1995,8 +2021,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       try
       {
+
          //  If there are many contexts specified in the configuration the first one is used
-         LdapContext ctx = (LdapContext)ldapContext.lookup(getConfiguration(invocationCtx).getRelationshipNamesCtxDNs()[0]);
+         //  Escape JNDI special characters
+         Name jndiName = new CompositeName().add(getConfiguration(invocationCtx).getRelationshipNamesCtxDNs()[0]);
+         LdapContext ctx = (LdapContext)ldapContext.lookup(jndiName);
 
          Attributes attrs = new BasicAttributes(true);
 
@@ -2121,7 +2150,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          ctx = (Context)res.getObject();
          String dn = ctx.getNameInNamespace();
 
-         ctx.unbind(dn);
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(dn);
+         ctx.unbind(jndiName);
 
          invalidateCache();
 
@@ -2519,7 +2550,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             }
 
-            ldapContext.modifyAttributes(ldapIO.getDn(), DirContext.REPLACE_ATTRIBUTE, attrs);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(ldapIO.getDn());
+            ldapContext.modifyAttributes(jndiName, DirContext.REPLACE_ATTRIBUTE, attrs);
 
             invalidateCache();
          }
@@ -2623,7 +2656,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          String dn = ldapIdentity.getDn();
 
-         Attributes attrs = ldapContext.getAttributes(dn);
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(dn);
+         Attributes attrs = ldapContext.getAttributes(jndiName);
 
          for (Iterator iterator = mappedNames.iterator(); iterator.hasNext();)
          {
@@ -2779,7 +2814,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
                try
                {
-                  ldapContext.modifyAttributes(dn, DirContext.REPLACE_ATTRIBUTE, attrs);
+                  // Escape JNDI special characters
+                  Name jndiName = new CompositeName().add(dn);
+                  ldapContext.modifyAttributes(jndiName, DirContext.REPLACE_ATTRIBUTE, attrs);
 
                   invalidateCache();
                }
@@ -2913,7 +2950,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
                try
                {
-                  ldapContext.modifyAttributes(dn, DirContext.ADD_ATTRIBUTE, attrs);
+                  // Escape JNDI special characters
+                  Name jndiName = new CompositeName().add(dn);
+                  ldapContext.modifyAttributes(jndiName, DirContext.ADD_ATTRIBUTE, attrs);
 
                   invalidateCache();
                }
@@ -3015,7 +3054,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             try
             {
-               ldapContext.modifyAttributes(dn, DirContext.REMOVE_ATTRIBUTE, attrs);
+               // Escape JNDI special characters
+               Name jndiName = new CompositeName().add(dn);
+               ldapContext.modifyAttributes(jndiName, DirContext.REMOVE_ATTRIBUTE, attrs);
 
                invalidateCache();
             }
@@ -3304,13 +3345,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          if (entryCtxs.length == 1)
          {
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(entryCtxs[0]);
+
             if (filterArgs == null)
             {
-               results = ldapContext.search(entryCtxs[0], filter, searchControls);
+               results = ldapContext.search(jndiName, filter, searchControls);
             }
             else
             {
-               results = ldapContext.search(entryCtxs[0], filter, filterArgs, searchControls);
+               results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
             }
 
             List toReturn = Tools.toList(results);
@@ -3330,13 +3374,17 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             for (String entryCtx : entryCtxs)
             {
+
+               // Escape JNDI special characters
+               Name jndiName = new CompositeName().add(entryCtx);
+
                if (filterArgs == null)
                {
-                  results = ldapContext.search(entryCtx, filter, searchControls);
+                  results = ldapContext.search(jndiName, filter, searchControls);
                }
                else
                {
-                  results = ldapContext.search(entryCtx, filter, filterArgs, searchControls);
+                  results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
                }
                List singleResult = Tools.toList(results);
 
@@ -3556,7 +3604,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          try
          {
-            root = (DirContext)ctx.lookup(rootDN);
+            // Escape JNDI special characters
+            Name jndiName = new CompositeName().add(rootDN);
+            root = (DirContext)ctx.lookup(jndiName);
          }
          catch (NamingException e)
          {
@@ -3622,7 +3672,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       DirContext subContext = null;
       try
       {
-         subContext = (LdapContext)ctx.lookup(dn);
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(dn);
+         subContext = (LdapContext)ctx.lookup(jndiName);
       }
       catch (NamingException e)
       {
@@ -3674,7 +3726,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       try
       {
-         subContext = ctx.createSubcontext(dn, attrs);
+         // Escape JNDI special characters
+         Name jndiName = new CompositeName().add(dn);
+         subContext = ctx.createSubcontext(jndiName, attrs);
 
       }
       finally

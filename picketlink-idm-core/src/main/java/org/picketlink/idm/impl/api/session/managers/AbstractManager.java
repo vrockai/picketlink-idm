@@ -48,7 +48,8 @@ import java.util.Map;
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public abstract class AbstractManager 
+public abstract class
+   AbstractManager 
    implements Serializable
 {
    protected final IdentitySessionImpl identitySession;
@@ -275,9 +276,16 @@ public abstract class AbstractManager
    {
       //TODO: extract this, let to define broader set of constraints and apply also in the
       //TODO: SPI to filter what comes fromdata stores
-      if (name.contains("/"))
+
+      
+      if (name.contains(GroupKey.SEPARATOR))
       {
-         throw new IllegalArgumentException("name cannot contain '/' character");
+         throw new IllegalArgumentException("name cannot contain '" + GroupKey.SEPARATOR  + "' character sequence");
+      }
+
+      if (name.contains(GroupKey.PREFIX))
+      {
+         throw new IllegalArgumentException("name cannot contain '" + GroupKey.PREFIX  + "' character sequence");
       }
    }
 
