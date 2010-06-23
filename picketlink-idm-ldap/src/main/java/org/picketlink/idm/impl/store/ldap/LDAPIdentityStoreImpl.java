@@ -302,6 +302,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       return new LDAPIdentityStoreSessionImpl(configuration);
    }
+   
+
+   public IdentityStoreSession createIdentityStoreSession(
+         Map<String, Object> sessionOptions) throws IdentityException
+   {
+      return createIdentityStoreSession();
+   }   
 
    public String getId()
    {

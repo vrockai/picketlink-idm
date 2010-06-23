@@ -89,6 +89,22 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
 
       return new RepositoryIdentityStoreSessionImpl(sessions);
    }
+   
+
+   public IdentityStoreSession createIdentityStoreSession(
+         Map<String, Object> sessionOptions) throws IdentityException
+   {
+      Map<String, IdentityStoreSession> sessions = new HashMap<String, IdentityStoreSession>();
+
+      sessions.put(defaultAttributeStore.getId(), defaultAttributeStore.createIdentityStoreSession(sessionOptions));
+
+      if (!sessions.containsKey(defaultIdentityStore.getId()))
+      {
+         sessions.put(defaultIdentityStore.getId(), defaultIdentityStore.createIdentityStoreSession(sessionOptions));
+      }
+
+      return new RepositoryIdentityStoreSessionImpl(sessions);
+   }   
 
    IdentityStoreInvocationContext resolveIdentityStoreInvocationContext(IdentityStoreInvocationContext invocationCtx)
    {

@@ -472,7 +472,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          throw new IdentityException("Failed to obtain Hibernate SessionFactory",e);
       }
-   }
+   }   
+
+   public IdentityStoreSession createIdentityStoreSession(
+         Map<String, Object> sessionOptions) throws IdentityException
+   {
+      return createIdentityStoreSession();
+   }   
 
    public String getId()
    {
