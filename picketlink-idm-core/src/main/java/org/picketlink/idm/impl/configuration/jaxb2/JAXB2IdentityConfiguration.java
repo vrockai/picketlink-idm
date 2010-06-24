@@ -217,7 +217,7 @@ public abstract class JAXB2IdentityConfiguration
       {
          repoMD.setExternalConfig(repositoryType.getExternalConfig().getValue());
       }
-      repoMD.setDefaultAttributeStroeId(repositoryType.getDefaultAttributeStoreId());
+      repoMD.setDefaultAttributeStoreId(repositoryType.getDefaultAttributeStoreId());
       repoMD.setDefaultIdentityStoreId(repositoryType.getDefaultIdentityStoreId());
 
       List<IdentityStoreMappingMetaData> storeMappings = new LinkedList<IdentityStoreMappingMetaData>();
