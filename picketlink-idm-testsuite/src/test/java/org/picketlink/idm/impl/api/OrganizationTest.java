@@ -315,6 +315,24 @@ public class OrganizationTest extends Assert
          assertEquals(4, attributes.keySet().size());
          assertEquals("Dawidowicz", (attributes.get(P3PConstants.INFO_USER_NAME_FAMILY)).getValue());
          assertTrue(Arrays.equals((byte[])attributes.get("picture").getValue(), picture));
+
+         // Update
+
+         // 500 kilobytes
+         picture = new byte[50600];
+         random.nextBytes(picture);
+
+         userInfo = new Attribute[]
+         {
+            new SimpleAttribute("picture", new byte[][]{picture}),
+         };
+
+
+         session.getAttributesManager().updateAttributes(bdawidowUser, userInfo);
+
+         attributes = session.getAttributesManager().getAttributes(bdawidowUser);
+         assertEquals(4, attributes.keySet().size());
+         assertTrue(Arrays.equals((byte[])attributes.get("picture").getValue(), picture));
       }
 
 

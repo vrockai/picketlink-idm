@@ -1945,7 +1945,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
                   storeAttribute.setTextValues(v);
                }
-               else if (storeAttribute.equals(HibernateIdentityObjectAttribute.TYPE_BINARY))
+               else if (storeAttribute.getType().equals(HibernateIdentityObjectAttribute.TYPE_BINARY))
                {
 
                   if (!type.equals(IdentityObjectAttributeMetaData.BINARY_TYPE))
