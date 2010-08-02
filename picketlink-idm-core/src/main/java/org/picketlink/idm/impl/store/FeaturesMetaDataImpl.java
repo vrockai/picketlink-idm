@@ -60,6 +60,7 @@ public class FeaturesMetaDataImpl implements FeaturesMetaData, Serializable
    // <Relationship Type, <From IdentityType, To IdentityType>>
    private final Map<String, Map<String, Set<String>>> supportedRelationshipMappings = new HashMap<String, Map<String, Set<String>>>();
 
+   private final Set<String> supportedRelationshipTypes = new HashSet<String>();
 
    public FeaturesMetaDataImpl(IdentityStoreConfigurationMetaData configurationMD,
                                Set<IdentityObjectSearchCriteriaType> supportedCriteria,
@@ -96,6 +97,12 @@ public class FeaturesMetaDataImpl implements FeaturesMetaData, Serializable
 
 
       // Supported relationships
+
+      for (String type : configurationMD.getSupportedRelationshipTypes())
+      {
+         supportedRelationshipTypes.add(type);
+      }
+
 
       for (IdentityObjectTypeMetaData identityObjectTypeMetaData : configurationMD.getSupportedIdentityTypes())
       {
@@ -211,7 +218,7 @@ public class FeaturesMetaDataImpl implements FeaturesMetaData, Serializable
 
    public Set<String> getSupportedRelationshipTypes()
    {
-      return supportedRelationshipMappings.keySet();
+      return Collections.unmodifiableSet(supportedRelationshipTypes);
    }
 
    public boolean isCredentialSupported(IdentityObjectType identityObjectType, IdentityObjectCredentialType credentialType)
