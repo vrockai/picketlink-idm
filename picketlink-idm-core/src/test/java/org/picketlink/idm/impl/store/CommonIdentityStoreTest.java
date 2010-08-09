@@ -149,6 +149,12 @@ public class CommonIdentityStoreTest extends Assert
       assertEquals(0, results.size());
 
 
+      // Check case sensitive checks
+
+      assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "adam", IdentityTypeEnum.USER));
+      assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "ADAM", IdentityTypeEnum.USER));
+      assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "deVISIon3", IdentityTypeEnum.ORGANIZATION));
+
       testContext.commit();
 
    }

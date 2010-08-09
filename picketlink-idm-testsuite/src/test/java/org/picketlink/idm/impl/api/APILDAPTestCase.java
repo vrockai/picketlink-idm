@@ -22,8 +22,11 @@
 
 package org.picketlink.idm.impl.api;
 
+import org.picketlink.idm.api.IdentitySession;
 import org.picketlink.idm.api.IdentitySessionFactory;
+import org.picketlink.idm.api.User;
 import org.picketlink.idm.impl.LDAPTestPOJO;
+import org.picketlink.idm.impl.api.model.SimpleUser;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
 
 
@@ -116,5 +119,25 @@ public class APILDAPTestCase extends LDAPTestPOJO implements APITestContext
    public void testRoleQuery() throws Exception
    {
       roleQueryTest.testQuery(getRealmName());
+   }
+
+   public void testCaseSensitiveNames() throws Exception
+   {
+      IdentitySession session = identitySessionFactory.createIdentitySession(getRealmName());
+
+      begin();
+
+      User aaa = session.getPersistenceManager().createUser("aaa");
+      session.getAttributesManager().updatePassword(aaa, "bbb");
+
+      assertNull(session.getPersistenceManager().findUser("bbb"));
+      assertNotNull(session.getPersistenceManager().findUser("aaa"));
+      assertNull(session.getPersistenceManager().findUser("aAa"));
+
+      session.getAttributesManager().validatePassword(new SimpleUser("aAa"), "bbb");
+
+      assertNull(session.getPersistenceManager().findUser("aAa"));
+
+      commit();
    }
 }
