@@ -620,6 +620,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          String dn = ctx.getNameInNamespace();
          IdentityObject io = createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn);
          ctx.close();
+
+         // Check for case insensitive name results
+         if (!io.getName().equals(name))
+         {
+            io = null;
+         }
+
          return io;
 
       }
