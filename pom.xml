@@ -7,7 +7,6 @@
       <relativePath>parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.picketlink.idm</groupId>
    <artifactId>jboss-identity-idm-pom</artifactId>
    <packaging>pom</packaging>
    <name>PicketLink IDM - Aggregator</name>

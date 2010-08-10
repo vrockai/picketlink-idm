@@ -12,10 +12,6 @@
          <url>http://repository.jboss.com/licenses/lgpl.txt</url>
       </license>
    </licenses>
-   <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
-   </scm>
 
    <repositories>
       <repository>
