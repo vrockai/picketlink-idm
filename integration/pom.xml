@@ -4,7 +4,6 @@
 
    <name>PicketLink IDM Integration</name>
    <description>PicketLink IDM Integration</description>
-
    <groupId>org.picketlink.idm</groupId>
    <artifactId>picketlink-idm-integration</artifactId>
    <packaging>pom</packaging>
@@ -19,7 +18,7 @@
 
    <modules>
       <module>jboss5</module>
-	  <module>deployer</module>
+	    <module>deployer</module>
    </modules>
 
    <!-- Plugins -->

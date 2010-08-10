@@ -21,11 +21,7 @@
       <name>JBoss Inc.</name>
       <url>http://www.jboss.org</url>
    </organization>
-   <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossidentity/idm/trunk</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/jbossidentity/idm/trunk</developerConnection>
-      <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossidentity/idm/trunk</url>
-   </scm>
+
    <dependencies>
 
       <dependency>
