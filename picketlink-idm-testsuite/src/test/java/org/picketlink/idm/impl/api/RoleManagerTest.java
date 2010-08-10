@@ -273,7 +273,22 @@ public class RoleManagerTest extends Assert
       assertEquals(0, session.getRoleManager().findUserRoleTypes(user1).size());
       assertEquals(0, session.getRoleManager().findUserRoleTypes(user2.getKey(), null).size());
 
-      
+
+      // Create roleType and role, remove roleType and check if role was properly removed
+
+      session.getPersistenceManager().createUser("u1");
+      Group g1 = session.getPersistenceManager().createGroup("g1", ORGANIZATION);
+
+      //session.getRoleManager().createRoleType("rt1");
+
+      session.getRoleManager().createRole("rt1", "u1", g1.getKey());
+
+      assertNotNull(session.getRoleManager().getRole("rt1","u1", g1.getKey()));
+
+      session.getRoleManager().removeRoleType("rt1");
+
+      assertNull(session.getRoleManager().getRole("rt1","u1", g1.getKey()));
+
 
 
       ctx.commit();

@@ -801,6 +801,11 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       cache.getRoot().removeChild(getFqn(ns, NODE_RELATIONSHIP_SEARCHES));
       cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_SEARCHES));
       cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_TYPE_SEARCHES));
+
+      // Probably should have separate invalidate methods, but for now need to be part of search invalidation
+      cache.getRoot().removeChild(getFqn(ns, NODE_ROLES));
+      cache.getRoot().removeChild(getFqn(ns, NODE_ROLE_TYPES));
+
       if (log.isLoggable(Level.FINER))
       {
          log.finer(this.toString() + "Invalidating all searches. Namespace:" + ns);
