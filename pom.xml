@@ -44,6 +44,15 @@
          </modules>
       </profile>
       <profile>
+         <id>all</id>
+         <modules>
+            <module>example/simple</module>
+            <module>example/auth</module>
+            <module>example/auth-simple</module>
+            <module>assembly</module>
+         </modules>
+      </profile>
+      <profile>
          <id>distro</id>
          <modules>
             <module>parent</module>
