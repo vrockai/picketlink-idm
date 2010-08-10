@@ -8,7 +8,6 @@
    <groupId>org.picketlink.idm.integration</groupId>
    <artifactId>picketlink-idm-jboss5</artifactId>
    <packaging>jar</packaging>
-   <version>1.5.0.Alpha02-SNAPSHOT</version>
    <parent>
       <groupId>org.picketlink.idm</groupId>
       <artifactId>picketlink-idm-integration</artifactId>

@@ -19,7 +19,7 @@
 
    <modules>
       <module>jboss5</module>
-	  <module>deployer</module>
+	    <module>deployer</module>
    </modules>
 
    <!-- Plugins -->

@@ -23,8 +23,8 @@
       <url>http://www.jboss.org</url>
    </organization>
    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossidentity/idm/trunk</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossidentity/idm/trunk</developerConnection>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
    </scm>
   
    <build>
