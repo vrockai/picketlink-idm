@@ -22,19 +22,8 @@
       <name>JBoss Inc.</name>
       <url>http://www.jboss.org</url>
    </organization>
-   <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
-   </scm>
-  
    <build>
       <plugins>
-         <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <configuration>
-               <tagBase>https://svn.jboss.org/repos/picketlink/idm/tags</tagBase>
-            </configuration>
-         </plugin>
          <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
