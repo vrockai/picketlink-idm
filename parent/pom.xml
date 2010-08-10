@@ -32,7 +32,7 @@
          <plugin>
             <artifactId>maven-release-plugin</artifactId>
             <configuration>
-               <tagBase>https://svn.jboss.org/repos/jbossidentity/tags</tagBase>
+               <tagBase>https://svn.jboss.org/repos/picketlink/idm/tags</tagBase>
             </configuration>
          </plugin>
          <plugin>
