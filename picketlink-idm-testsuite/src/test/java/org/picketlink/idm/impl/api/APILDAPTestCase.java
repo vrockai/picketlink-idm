@@ -128,13 +128,13 @@ public class APILDAPTestCase extends LDAPTestPOJO implements APITestContext
       begin();
 
       User aaa = session.getPersistenceManager().createUser("aaa");
-      session.getAttributesManager().updatePassword(aaa, "bbb");
+      session.getAttributesManager().updatePassword(aaa, "Password2000Toto5");
 
       assertNull(session.getPersistenceManager().findUser("bbb"));
       assertNotNull(session.getPersistenceManager().findUser("aaa"));
       assertNull(session.getPersistenceManager().findUser("aAa"));
 
-      session.getAttributesManager().validatePassword(new SimpleUser("aAa"), "bbb");
+      session.getAttributesManager().validatePassword(new SimpleUser("aAa"), "Password2000Toto5");
 
       assertNull(session.getPersistenceManager().findUser("aAa"));
 
