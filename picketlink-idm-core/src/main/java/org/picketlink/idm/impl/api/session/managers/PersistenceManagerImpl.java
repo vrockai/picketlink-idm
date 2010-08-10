@@ -139,7 +139,7 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
          }
 
          //Cache
-         if (cache != null)
+         if (cache != null && user != null)
          {
             //TODO: maybe invalidate only part
             cache.invalidate(cacheNS);
@@ -184,7 +184,7 @@ public class PersistenceManagerImpl extends AbstractManager implements Persisten
             group = new SimpleGroup(groupName, groupType);
          }
 
-         if (cache != null)
+         if (cache != null && group != null)
          {
             //TODO: maybe invalidate only part
             cache.invalidate(cacheNS);
