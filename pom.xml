@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <parent>
       <groupId>org.picketlink.idm</groupId>
       <artifactId>picketlink-idm-parent</artifactId>
-      <version>1.5.0.Alpha02-SNAPSHOT</version>
+      <version>1.5.0.Alpha02</version>
       <relativePath>parent</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
@@ -11,11 +10,12 @@
    <packaging>pom</packaging>
    <name>PicketLink IDM - Aggregator</name>
    <url>http://labs.jboss.org/portal/jbosssecurity/</url>
-   <description></description>
+   <description />
    <scm>
-      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
-      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
-   </scm>
+      <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/tags/1.5.0.Alpha02</connection>
+      <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/tags/1.5.0.Alpha02</developerConnection>
+     <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/1.5.0.Alpha02</url>
+  </scm>
 
 
    <profiles>
