@@ -13,7 +13,7 @@
    <parent>
       <groupId>org.picketlink.idm</groupId>
       <artifactId>picketlink-idm-parent</artifactId>
-      <version>1.5.0.Alpha01</version>
+      <version>1.5.0.Alpha02-SNAPSHOT</version>
       <relativePath>../parent/pom.xml</relativePath>
    </parent>
 
