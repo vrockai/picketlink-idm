@@ -677,7 +677,14 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          throw new IdentityException("Cannot find IdentityObject with name '" + name + "' and type '" + type.getName() + "'", e);
       }
 
-      return hibernateObject;
+      // Check result with case sensitive compare:
+      if (hibernateObject != null && hibernateObject.getName().equals(name))
+      {
+
+         return hibernateObject;
+
+      }
+      return null;
    }
 
    public IdentityObject findIdentityObject(IdentityStoreInvocationContext ctx, String id) throws IdentityException
