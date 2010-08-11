@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.picketlink.idm.example</groupId>
-   <version>1.1.5.CR02-SNAPSHOT</version>
+   <version>1.1.5.CR02</version>
    <artifactId>example-auth</artifactId>
    <packaging>jar</packaging>
    <name>Example - JEE authentication</name>
@@ -116,7 +116,7 @@
             <groupId>org.jvnet.maven-antrun-extended-plugin</groupId>
             <artifactId>maven-antrun-extended-plugin</artifactId>
             <version>1.13</version>
-            <dependencies/>
+            <dependencies />
             <executions>
                <execution>
                   <id>install</id>
@@ -124,44 +124,38 @@
                   <configuration>
                      <tasks>
 
-                        <jar destfile="${basedir}/target/classes/simple-populator.jar"
-                             basedir="${basedir}/target/classes/"
-                             includes="**/*.class"/>
+                        <jar destfile="${basedir}/target/classes/simple-populator.jar" basedir="${basedir}/target/classes/" includes="**/*.class" />
                         
                         <!-- Exploded -->
                         <copy todir="${basedir}/target/idm-example-auth-exploded.sar">
-                           <fileset dir="${basedir}/target/classes"/>
+                           <fileset dir="${basedir}/target/classes" />
                         </copy>
 
 
 
                         <!-- Packed -->
 
-                        <jar destfile="${basedir}/target/idm-example-auth.war"
-                             basedir="${basedir}/target/classes/idm-example-auth.war"/>
+                        <jar destfile="${basedir}/target/idm-example-auth.war" basedir="${basedir}/target/classes/idm-example-auth.war" />
 
 
 
 
 
                         <jar destfile="${basedir}/target/idm-example-auth.sar">
-                           <fileset dir="${basedir}/target/classes/"
-                                    excludes="idm-example-auth.war/**"/>
-                           <fileset dir="${basedir}/target/"
-                                    includes="idm-example-auth.war"/>
+                           <fileset dir="${basedir}/target/classes/" excludes="idm-example-auth.war/**" />
+                           <fileset dir="${basedir}/target/" includes="idm-example-auth.war" />
                         </jar>
 
                         <!--<property name="artifact.to.copy"-->
-                        <!--value="${basedir}/target/idm-example-auth-exploded.sar"/>-->
+                        <!--value="${basedir}/target/idm-example-auth-exploded.sar" />-->
                         <!--<property name="toArtifact"-->
-                        <!--value="idm-example-auth.sar-exploded"/>-->
+                        <!--value="idm-example-auth.sar-exploded" />-->
 
-                        <property name="artifact.to.copy"
-                                  value="${basedir}/target/idm-example-auth.sar"/>
+                        <property name="artifact.to.copy" value="${basedir}/target/idm-example-auth.sar" />
                                 
 
                         <ant antfile="${basedir}/build-deploy.xml">
-                           <target name="deploy"/>
+                           <target name="deploy" />
                         </ant>
 
                      </tasks>
