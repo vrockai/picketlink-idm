@@ -22,37 +22,8 @@
 
 package org.picketlink.idm.impl.store.ldap;
 
-import org.picketlink.idm.api.cfg.IdentityConfigurationRegistry;
-import org.picketlink.idm.common.exception.IdentityException;
-import org.picketlink.idm.impl.NotYetImplementedException;
-import org.picketlink.idm.impl.api.SimpleAttribute;
-import org.picketlink.idm.impl.helper.Tools;
-import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
-import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
-import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
-import org.picketlink.idm.impl.types.SimpleIdentityObject;
-import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
-import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
-import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
-import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
-import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationMetaData;
-import org.picketlink.idm.spi.exception.OperationNotSupportedException;
-import org.picketlink.idm.spi.model.IdentityObject;
-import org.picketlink.idm.spi.model.IdentityObjectAttribute;
-import org.picketlink.idm.spi.model.IdentityObjectCredential;
-import org.picketlink.idm.spi.model.IdentityObjectRelationship;
-import org.picketlink.idm.spi.model.IdentityObjectRelationshipType;
-import org.picketlink.idm.spi.model.IdentityObjectType;
-import org.picketlink.idm.spi.search.IdentityObjectSearchCriteria;
-import org.picketlink.idm.spi.store.FeaturesMetaData;
-import org.picketlink.idm.spi.store.IdentityObjectSearchCriteriaType;
-import org.picketlink.idm.spi.store.IdentityStore;
-import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
-import org.picketlink.idm.spi.store.IdentityStoreSession;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,15 +60,43 @@ import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.SortControl;
 
+import org.picketlink.idm.common.exception.IdentityException;
+import org.picketlink.idm.impl.NotYetImplementedException;
+import org.picketlink.idm.impl.api.SimpleAttribute;
+import org.picketlink.idm.impl.helper.Tools;
+import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
+import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
+import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
+import org.picketlink.idm.impl.types.SimpleIdentityObject;
+import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
+import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
+import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
+import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
+import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationMetaData;
+import org.picketlink.idm.spi.exception.OperationNotSupportedException;
+import org.picketlink.idm.spi.model.IdentityObject;
+import org.picketlink.idm.spi.model.IdentityObjectAttribute;
+import org.picketlink.idm.spi.model.IdentityObjectCredential;
+import org.picketlink.idm.spi.model.IdentityObjectRelationship;
+import org.picketlink.idm.spi.model.IdentityObjectRelationshipType;
+import org.picketlink.idm.spi.model.IdentityObjectType;
+import org.picketlink.idm.spi.search.IdentityObjectSearchCriteria;
+import org.picketlink.idm.spi.store.FeaturesMetaData;
+import org.picketlink.idm.spi.store.IdentityObjectSearchCriteriaType;
+import org.picketlink.idm.spi.store.IdentityStore;
+import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
+import org.picketlink.idm.spi.store.IdentityStoreSession;
+
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
 public class LDAPIdentityStoreImpl implements IdentityStore
 {
+	private static final long serialVersionUID = -3823363689431954490L;
 
    //TODO: JNDI connection credentials encoding (pluggable?)
-
+	
    private static Logger log = Logger.getLogger(LDAPIdentityStoreImpl.class.getName());
 
    private final String id;
@@ -124,6 +123,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       this.id = id;
    }
 
+   @SuppressWarnings("rawtypes")
    public void bootstrap(IdentityStoreConfigurationContext configurationContext) throws IdentityException
    {
       if (configurationContext == null)

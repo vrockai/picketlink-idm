@@ -33,6 +33,8 @@ import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityConfigurationMetaData;
 import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationMetaData;
 import org.picketlink.idm.spi.store.IdentityStore;
+import org.picketlink.idm.spi.store.IdentityStoreFactory;
+import org.picketlink.idm.spi.store.IdentityStoreFactory.IdentityStoreType;
 import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
 import org.picketlink.idm.spi.store.IdentityStoreSession;
 
@@ -93,7 +95,7 @@ public class LDAPIdentityStoreTestCase extends LDAPTestPOJO implements IdentityS
 
       //populate();
 
-      store = new LDAPIdentityStoreImpl("LDAP Identity Store");
+      store =  IdentityStoreFactory.getIdentityStore( IdentityStoreType.LDAP,  "LDAP Identity Store");
 
       store.bootstrap(context);
 
