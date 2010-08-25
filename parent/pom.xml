@@ -8,7 +8,7 @@
    <groupId>org.picketlink.idm</groupId>
    <artifactId>picketlink-idm-parent</artifactId>
    <packaging>pom</packaging>
-   <version>1.1.5.CR03-SNAPSHOT</version>
+   <version>1.1.5.GA</version>
    <name>PicketLink IDM- Parent</name>
    <url>http://labs.jboss.org/portal/jbosssecurity/</url>
    <description>PicketLink is a cross-cutting project that handles identity  needs for the JEMS projects</description>
@@ -520,4 +520,10 @@
          </dependency>
       </dependencies>
    </dependencyManagement>
+
+  <scm>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/1.1.5.GA</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/1.1.5.GA</developerConnection>
+    <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/1.1.5.GA</url>
+  </scm>
 </project>
