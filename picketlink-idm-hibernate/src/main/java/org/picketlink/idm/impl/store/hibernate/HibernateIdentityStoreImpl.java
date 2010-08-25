@@ -511,7 +511,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       HibernateRealm realm = getRealm(session, ctx);
 
-      Number boxedSize = (Integer)session.createCriteria(HibernateIdentityObject.class)
+      Number boxedSize = (Number)session.createCriteria(HibernateIdentityObject.class)
          .createAlias("identityType", "type")
          .createAlias("realm", "rm")
          .add(Restrictions.eq("name", name))
