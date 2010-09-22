@@ -85,6 +85,10 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final boolean sortExtensionSupported;
 
+   private final boolean pagedExtensionSupported;
+
+   private final int pagedExtensionSize;
+
    private final boolean createMissingContexts;
 
 
@@ -131,6 +135,12 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final String NAMED_RELATIONSHIP_MEMBER_ATTRIBUTE_NAME = "namedRelationshipMemberAttributeName";
 
    public static final String SORT_EXTENSION_SUPPORTED = "sortExtensionSupported";
+
+   public static final String PAGE_EXTENSION_SUPPORTED = "pagedResultsExtensionSupported";
+
+   public static final String PAGE_EXTENSION_SIZE = "pagedResultsExtensionSize";
+
+   public static final int PAGE_EXTENSION_SIZE_DEFAULT = 1000;
 
    public static final String CREATE_MISSING_CONTEXTS = "createMissingContexts";
 
@@ -184,6 +194,27 @@ public class SimpleLDAPIdentityStoreConfiguration
       else
       {
          this.sortExtensionSupported = true;
+      }
+
+      String pagedExtension = storeMD.getOptionSingleValue(PAGE_EXTENSION_SUPPORTED);
+      if (pagedExtension != null && pagedExtension.equalsIgnoreCase("true"))
+      {
+         this.pagedExtensionSupported = true;
+      }
+      else
+      {
+         this.pagedExtensionSupported = false;
+      }
+
+      String pageSize = storeMD.getOptionSingleValue(PAGE_EXTENSION_SIZE);
+
+      if (pageSize != null)
+      {
+         this.pagedExtensionSize = Integer.valueOf(pageSize);
+      }
+      else
+      {
+         this.pagedExtensionSize = PAGE_EXTENSION_SIZE_DEFAULT;
       }
 
       String createMissingContexts = storeMD.getOptionSingleValue(CREATE_MISSING_CONTEXTS);
@@ -497,5 +528,15 @@ public class SimpleLDAPIdentityStoreConfiguration
    public boolean isCreateMissingContexts()
    {
       return createMissingContexts;
+   }
+
+   public boolean isPagedExtensionSupported()
+   {
+      return pagedExtensionSupported;
+   }
+
+   public int getPagedExtensionSize()
+   {
+      return pagedExtensionSize;
    }
 }

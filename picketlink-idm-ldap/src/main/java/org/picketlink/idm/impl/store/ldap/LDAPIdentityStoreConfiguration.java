@@ -86,4 +86,8 @@ public interface LDAPIdentityStoreConfiguration
 
    boolean isCreateMissingContexts();
 
+   boolean isPagedExtensionSupported();
+
+   int getPagedExtensionSize();
+
 }

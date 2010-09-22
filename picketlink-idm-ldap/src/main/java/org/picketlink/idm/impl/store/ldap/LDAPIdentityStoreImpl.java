@@ -50,9 +50,11 @@ import org.picketlink.idm.spi.store.IdentityStore;
 import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
 import org.picketlink.idm.spi.store.IdentityStoreSession;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,6 +89,8 @@ import javax.naming.ldap.Control;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
+import javax.naming.ldap.PagedResultsControl;
+import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 
 /**
@@ -3316,12 +3320,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       LdapContext ldapContext = getLDAPContext(ctx);
 
-      if (ldapContext != null)
-      {
-         ldapContext.setRequestControls(requestControls);
-      }
-
-      NamingEnumeration results = null;
+      //Reset request controls
+      ldapContext.setRequestControls(null);
+      
+      List<SearchResult> results = null;
 
       List<SearchResult> finalResults;
 
@@ -3357,14 +3359,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             if (filterArgs == null)
             {
-               results = ldapContext.search(jndiName, filter, searchControls);
+               results = searchLDAP(ldapContext, jndiName, filter, null, searchControls, requestControls);
             }
             else
             {
-               results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+               results = searchLDAP(ldapContext, jndiName, filter, filterArgs, searchControls, requestControls);
             }
 
-            List toReturn = Tools.toList(results);
+            List toReturn = results;
 
             if (log.isLoggable(Level.FINER) && toReturn != null)
             {
@@ -3387,13 +3389,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
                if (filterArgs == null)
                {
-                  results = ldapContext.search(jndiName, filter, searchControls);
+                  results = searchLDAP(ldapContext, jndiName, filter, null, searchControls, requestControls);
                }
                else
                {
-                  results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+                  results = searchLDAP(ldapContext, jndiName, filter, filterArgs, searchControls, requestControls);
                }
-               List singleResult = Tools.toList(results);
+               List singleResult = results;
 
                if (log.isLoggable(Level.FINER) && merged != null)
                {
@@ -3401,7 +3403,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
 
                merged.addAll(singleResult);
-               results.close();
             }
 
 
@@ -3411,10 +3412,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       finally
       {
-         if (results != null)
-         {
-            results.close();
-         }
          ldapContext.close();
       }
 
@@ -3432,6 +3429,162 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
 
       return finalResults;
+   }
+
+   protected List<SearchResult> searchLDAP(LdapContext ldapContext,
+                                           Name jndiName,
+                                           String filter,
+                                           Object[] filterArgs,
+                                           SearchControls searchControls,
+                                           Control[] requestControls) throws NamingException
+   {
+
+      // Add paged controls if needed
+
+      int pageSize = configuration.getPagedExtensionSize();
+
+      if (configuration.isPagedExtensionSupported())
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Adding 'Simple Paged Results' extension to LDAP search with page size: " + pageSize);
+         }
+
+         try
+         {
+            // Merge existing controls with PageResultscontrol
+            if (requestControls != null)
+            {
+
+               List<Control> controls = new ArrayList<Control>();
+               controls.addAll(Arrays.asList(requestControls));
+               controls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
+
+               ldapContext.setRequestControls(controls.toArray(new Control[controls.size()]));
+            }
+            else
+            {
+               ldapContext.setRequestControls(new Control[]{
+                   new PagedResultsControl(pageSize, Control.CRITICAL)
+               });
+            }
+         }
+         catch (IOException e)
+         {
+            if (log.isLoggable(Level.INFO))
+            {
+               log.log(Level.INFO, "Could not add 'Simple Paged Results' extension: ", e);
+            }
+         }
+      }
+      else
+      {
+         ldapContext.setRequestControls(requestControls);
+      }
+
+      int count = 0;
+      byte[] cookie = null;
+      int total = -1;
+
+      List<SearchResult> results = new LinkedList<SearchResult>();
+
+
+      while(true)
+      {
+         count++;
+
+         //System.err.println("Search loop count = " + count);
+
+         // Perform the search
+
+         NamingEnumeration resultsEnumeration = null;
+
+         if (filterArgs == null)
+         {
+            resultsEnumeration = ldapContext.search(jndiName, filter, searchControls);
+         }
+         else
+         {
+            resultsEnumeration = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+         }
+
+         if (resultsEnumeration != null)
+         {
+            results.addAll(Tools.toList(resultsEnumeration));
+            resultsEnumeration.close();
+         }
+
+         if (configuration.isPagedExtensionSupported())
+         {
+
+
+            // Examine the paged results control response
+            Control[] controls = ldapContext.getResponseControls();
+            if(controls!=null)
+            {
+               for(int k = 0; k<controls.length; k++)
+               {
+                  if(controls[k] instanceof PagedResultsResponseControl)
+                  {
+                     PagedResultsResponseControl prrc =
+                        (PagedResultsResponseControl)controls[k];
+                     total = prrc.getResultSize();
+                     cookie = prrc.getCookie();
+                  }
+               }
+            }
+
+            if (log.isLoggable(Level.FINER))
+            {
+               log.finer("'Simple Paged Results' extension search pass: " + count +
+                                                           "; pageSize: " + pageSize +
+                                                              "; total: " + total);
+            }
+         }
+
+         if(cookie == null)
+         {
+            break;
+         }
+
+         if (configuration.isPagedExtensionSupported())
+         {
+            // Re-activate paged results
+            try
+            {
+               if (requestControls != null)
+               {
+                  List<Control> controls = new LinkedList<Control>();
+                  controls.addAll(Arrays.asList(requestControls));
+                  controls.add(new PagedResultsControl(pageSize, cookie, Control.CRITICAL));
+
+                  ldapContext.setRequestControls(controls.toArray(new Control[controls.size()]));
+
+               }
+               else
+               {
+                  ldapContext.setRequestControls(new Control[]{
+                     new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
+               }
+            }
+            catch (IOException e)
+            {
+               if (log.isLoggable(Level.INFO))
+               {
+                  log.log(Level.INFO, "Could not add 'Simple Paged Results' extension: ", e);
+               }
+            }
+         }
+      }
+
+      if (log.isLoggable(Level.FINER) && results != null)
+      {
+         log.log(Level.FINER, "LDAP Search returned ", + results.size() + " results");
+      }
+
+
+      return results;
+
    }
 
    // HELPER
