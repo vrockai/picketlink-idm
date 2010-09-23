@@ -535,7 +535,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          String scope = getTypeConfiguration(ctx, identityType).getEntrySearchScope();
 
          //log.debug("Search filter: " + filter);
-         List sr = searchIdentityObjects(ctx, 
+         List<SerializableSearchResult> sr = searchIdentityObjects(ctx,
             entryCtxs, 
             filter, 
             null, 
@@ -581,7 +581,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List sr = null;
+         List<SerializableSearchResult> sr = null;
 
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
@@ -619,12 +619,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Found more than one identity object with name: " + name +
                "; Posible data inconsistency");
          }
-         SearchResult res = (SearchResult)sr.iterator().next();
-         ctx = (Context)res.getObject();
-         String dn = ctx.getNameInNamespace();
+         SerializableSearchResult res = sr.iterator().next();
+         String dn = res.getNameInNamespace();
          IdentityObject io = createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn);
-         ctx.close();
-
+         
          // Check for case insensitive name results
          if (!io.getName().equals(name))
          {
@@ -853,7 +851,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
          String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
@@ -885,10 +883,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             if (criteria != null && criteria.isSorted() && configuration.isSortExtensionSupported())
             {
                // It seams that the sort order is not configurable and
@@ -1275,7 +1272,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
 
          String filter = checkedTypeConfiguration.getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
          String scope = checkedTypeConfiguration.getEntrySearchScope();
@@ -1304,10 +1301,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                requestControls);
          }
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            LdapContext ldapCtx = (LdapContext)res.getObject();
-            String dn = ldapCtx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
 
             if (parents)
             {
@@ -1576,7 +1572,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = checkedTypeConfiguration.getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
          String scope = checkedTypeConfiguration.getEntrySearchScope();
@@ -1605,10 +1601,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                requestControls);
          }
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            LdapContext ldapCtx = (LdapContext)res.getObject();
-            String dn = ldapCtx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
 
 
 
@@ -2110,7 +2105,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          log.finer(toString() + ".removeRelationshipName with name: " + name);
       }
 
+      LdapContext ldapCtx = getLDAPContext(invocationCtx);
       Context ctx = null;
+
       try
       {
 
@@ -2120,7 +2117,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getConfiguration(invocationCtx).getRelationshipNameSearchFilter();
-         List sr = null;
+         List<SerializableSearchResult> sr = null;
 
 
          String[] entryCtxs = getConfiguration(invocationCtx).getRelationshipNamesCtxDNs();
@@ -2157,13 +2154,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Found more than one relationship name entry: " + name +
                "; Posible data inconsistency");
          }
-         SearchResult res = (SearchResult)sr.iterator().next();
-         ctx = (Context)res.getObject();
-         String dn = ctx.getNameInNamespace();
+         SerializableSearchResult res = sr.iterator().next();
+         String dn = res.getNameInNamespace();
+
+
 
          // Escape JNDI special characters
          Name jndiName = new CompositeName().add(dn);
-         ctx.unbind(jndiName);
+         ldapCtx.unbind(jndiName);
 
          invalidateCache();
 
@@ -2202,6 +2200,23 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             throw new IdentityException("Failed to close LDAP connection", e);
          }
+         try
+         {
+            if (ldapCtx != null)
+            {
+               ldapCtx.close();
+            }
+         }
+         catch (NamingException e)
+         {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
+            throw new IdentityException("Failed to close LDAP connection", e);
+         }
+
       }
 
       return null;
@@ -2235,7 +2250,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          StringBuilder af = new StringBuilder();
 
          String filter = config.getRelationshipNameSearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = config.getRelationshipNamesCtxDNs();
          String scope = config.getRelationshipNameSearchScope();
@@ -2265,10 +2280,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             String[] parts = dn.split("=");
 
             names.add(parts[1]);
@@ -3138,7 +3152,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             .append(")");
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
          String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
@@ -3168,10 +3182,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             objects.add(createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn));
          }
 
@@ -3258,7 +3271,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return ldapio;
    }
 
-   public List<SearchResult> searchIdentityObjects(IdentityStoreInvocationContext ctx,
+   public List<SerializableSearchResult> searchIdentityObjects(IdentityStoreInvocationContext ctx,
                                                    String[] entryCtxs,
                                                    String filter,
                                                    Object[] filterArgs,
@@ -3312,7 +3325,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                log.finer("LDAP search results found in cache. size=" + ((List)results).size());
             }
 
-            return (List<SearchResult>)results;
+            return (List<SerializableSearchResult>)results;
 
          }
       }
@@ -3323,9 +3336,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       //Reset request controls
       ldapContext.setRequestControls(null);
       
-      List<SearchResult> results = null;
+      List<SerializableSearchResult> results = null;
 
-      List<SearchResult> finalResults;
+      List<SerializableSearchResult> finalResults;
 
       try
       {
@@ -3379,7 +3392,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          else
          {
-            List<SearchResult> merged = new LinkedList();
+            List<SerializableSearchResult> merged = new LinkedList();
 
             for (String entryCtx : entryCtxs)
             {
@@ -3431,7 +3444,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return finalResults;
    }
 
-   protected List<SearchResult> searchLDAP(LdapContext ldapContext,
+   /**
+    * Separate search method in which additional stuff like Simple Paged Results extension are applied
+    * @param ldapContext
+    * @param jndiName
+    * @param filter
+    * @param filterArgs
+    * @param searchControls
+    * @param requestControls
+    * @return
+    * @throws NamingException
+    */
+   protected List<SerializableSearchResult> searchLDAP(LdapContext ldapContext,
                                            Name jndiName,
                                            String filter,
                                            Object[] filterArgs,
@@ -3486,7 +3510,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       byte[] cookie = null;
       int total = -1;
 
-      List<SearchResult> results = new LinkedList<SearchResult>();
+      List<SerializableSearchResult> results = new LinkedList<SerializableSearchResult>();
 
 
       while(true)
@@ -3510,7 +3534,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
          if (resultsEnumeration != null)
          {
-            results.addAll(Tools.toList(resultsEnumeration));
+            //results.addAll(Tools.toList(resultsEnumeration));
+
+            while (resultsEnumeration.hasMoreElements())
+            {
+               SearchResult sr =  (SearchResult)resultsEnumeration.nextElement();
+               results.add(new SerializableSearchResult(sr));
+            }
+
             resultsEnumeration.close();
          }
 
