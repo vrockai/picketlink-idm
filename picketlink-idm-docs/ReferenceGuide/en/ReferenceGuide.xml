@@ -1579,6 +1579,11 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
                            standard DirContext.search(Name, String, Object, SearchControls cons) method</para>
                     </listitem>
                     <listitem>
+                        <para><emphasis role="bold">entrySearchScope</emphasis>
+                           - defines a search scope. Values can be "subtree" and "object"
+                        </para>
+                    </listitem>
+                    <listitem>
                         <para><emphasis role="bold">enclosePasswordWith</emphasis>
                            - if specified password will be surunted with a given chars before update</para>
                     </listitem>
@@ -1625,6 +1630,23 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
                     <listitem>
                         <para><emphasis role="bold">externalJNDIContext</emphasis>
                            - name that will be used to perform JDNI lookup to grab JNDI connection context </para>
+                    </listitem>
+                    <listitem>
+                        <para><emphasis role="bold">sortExtensionSupported</emphasis>
+                           - if set to "false" will disable the use of sort extension that triggers sort on LDAP server side</para>
+                    </listitem>
+                    <listitem>
+                        <para><emphasis role="bold">pagedResultsExtensionSupported</emphasis>
+                           - if set to "true" will enable paged search. Searches that exceed size defined by "pagedResultsExtensionSize"
+                        option will be splitted into few smaller ones.</para>
+                    </listitem>
+                    <listitem>
+                        <para><emphasis role="bold">pagedResultsExtensionSize</emphasis>
+                           - defines page size for "pagedResultsExtensionSupported" option.</para>
+                    </listitem>
+                    <listitem>
+                        <para><emphasis role="bold">createMissingContexts</emphasis>
+                           - if set to "true" LDAP store will try to create missing LDAP contexts defined in the configuration.</para>
                     </listitem>
                 </itemizedlist>
 
