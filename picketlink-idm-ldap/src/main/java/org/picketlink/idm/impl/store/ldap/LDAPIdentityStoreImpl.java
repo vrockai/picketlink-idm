@@ -602,7 +602,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             //search all entries
-            filter = "(".concat(getTypeConfiguration(invocationCtx, type).getIdAttributeName()).concat("=").concat(name).concat(")");
+            filter = "("
+               .concat(getTypeConfiguration(invocationCtx, type).getIdAttributeName())
+               .concat("=")
+               .concat(Tools.escapeLDAPSearchFilter(name))
+               .concat(")");
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                filter,
@@ -1226,7 +1230,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                   af.append("(")
                      .append(stringEntry.getKey())
                      .append("=")
-                     .append(value)
+                     .append(Tools.escapeLDAPSearchFilter(value))
                      .append(")");
                }
             }
@@ -2138,7 +2142,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             //search all entries
-            filter = "(".concat(getConfiguration(invocationCtx).getRelationshipNameAttributeName()).concat("=").concat(name).concat(")");
+            filter = "("
+               .concat(getConfiguration(invocationCtx).getRelationshipNameAttributeName())
+               .concat("=")
+               .concat(Tools.escapeLDAPSearchFilter(name))
+               .concat(")");
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                filter,

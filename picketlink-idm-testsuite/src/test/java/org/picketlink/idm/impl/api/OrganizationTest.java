@@ -422,6 +422,12 @@ public class OrganizationTest extends Assert
          assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[]{binaryCredential}));
       }
 
+      session.getPersistenceManager().createUser("!(06_13_07 Sche) !(0");
+
+      User u1 = session.getPersistenceManager().findUser("!(06_13_07 Sche) !(0");
+
+      assertNotNull(u1);                 
+
 
       ctx.commit();
 

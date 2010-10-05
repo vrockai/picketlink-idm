@@ -118,4 +118,47 @@ public class Tools
 
       return null;
    }
+
+
+   /**
+    * Escape string for LDAP search filter use according to RFC 2554
+    *
+    *       Character       ASCII value
+    *       ---------------------------
+    *       *               0x2a
+    *       (               0x28
+    *       )               0x29
+    *       \               0x5c
+    *       NUL             0x00
+    * 
+    * @param filter
+    * @return
+    */
+   public static final String escapeLDAPSearchFilter(String filter)
+   {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < filter.length(); i++) {
+         char curChar = filter.charAt(i);
+         switch (curChar) {
+            case '\\':
+               sb.append("\\5c");
+               break;
+            case '*':
+               sb.append("\\2a");
+               break;
+            case '(':
+               sb.append("\\28");
+               break;
+            case ')':
+               sb.append("\\29");
+               break;
+            case '\u0000':
+               sb.append("\\00");
+               break;
+            default:
+               sb.append(curChar);
+         }
+      }
+      return sb.toString();
+   }
 }
