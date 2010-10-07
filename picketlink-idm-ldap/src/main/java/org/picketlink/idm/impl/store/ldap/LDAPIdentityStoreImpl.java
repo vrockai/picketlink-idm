@@ -1247,12 +1247,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                .append("=");
             if (checkedTypeConfiguration.isParentMembershipAttributeDN())
             {
-               af.append(ldapIO.getDn());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getDn()));
             }
             else
             {
                //TODO: this doesn't make much sense unless parent/child are same identity types and resides in the same LDAP context
-               af.append(ldapIO.getName());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getName()));
             }
             af.append(")");
          }
@@ -1264,12 +1264,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                .append("=");
             if (checkedTypeConfiguration.isChildMembershipAttributeDN())
             {
-               af.append(ldapIO.getDn());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getDn()));
             }
             else
             {
                //TODO: this doesn't make much sense unless parent/child are same identity types and resides in the same LDAP context
-               af.append(ldapIO.getName());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getName()));
             }
             af.append(")");
          }
@@ -1296,6 +1296,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             filter = "(".concat(checkedTypeConfiguration.getIdAttributeName()).concat("=").concat(nameFilter).concat(")");
+			 
             sr = searchIdentityObjects(ctx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
