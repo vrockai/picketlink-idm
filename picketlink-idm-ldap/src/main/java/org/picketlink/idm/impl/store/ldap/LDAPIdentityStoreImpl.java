@@ -2440,6 +2440,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             env.put(Context.SECURITY_PRINCIPAL, ldapIO.getDn());
             env.put(Context.SECURITY_CREDENTIALS, passwordString);
 
+            // Prevent password caching by JNDI connection poll
+            env.put("com.sun.jndi.ldap.connect.pool", "false");
+
             InitialContext initialCtx = new InitialLdapContext(env, null);
 
             if (initialCtx != null)
