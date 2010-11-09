@@ -91,6 +91,8 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final boolean createMissingContexts;
 
+   private final boolean allowNotCaseSensitiveSearch;
+
 
    // Consts
 
@@ -143,6 +145,8 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final int PAGE_EXTENSION_SIZE_DEFAULT = 1000;
 
    public static final String CREATE_MISSING_CONTEXTS = "createMissingContexts";
+
+   public static final String ALLOW_NOT_CASE_SENSITIVE_SEARCH = "allowNotCaseSensitiveSearch";
 
    public SimpleLDAPIdentityStoreConfiguration(IdentityStoreConfigurationMetaData storeMD)
    {
@@ -225,6 +229,16 @@ public class SimpleLDAPIdentityStoreConfiguration
       else
       {
          this.createMissingContexts = false;
+      }
+
+      String allowNotCaseSensitiveSearch = storeMD.getOptionSingleValue(ALLOW_NOT_CASE_SENSITIVE_SEARCH);
+      if (allowNotCaseSensitiveSearch != null && allowNotCaseSensitiveSearch.equalsIgnoreCase("true"))
+      {
+         this.allowNotCaseSensitiveSearch = true;
+      }
+      else
+      {
+         this.allowNotCaseSensitiveSearch = false;
       }
 
       Map<String, LDAPIdentityObjectTypeConfiguration> types = new HashMap<String, LDAPIdentityObjectTypeConfiguration>();
@@ -538,5 +552,10 @@ public class SimpleLDAPIdentityStoreConfiguration
    public int getPagedExtensionSize()
    {
       return pagedExtensionSize;
+   }
+
+   public boolean isAllowNotCaseSensitiveSearch()
+   {
+      return allowNotCaseSensitiveSearch;
    }
 }

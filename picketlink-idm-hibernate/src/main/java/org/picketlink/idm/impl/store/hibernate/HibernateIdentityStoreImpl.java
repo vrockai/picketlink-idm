@@ -98,6 +98,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
    public static final String ALLOW_NOT_DEFINED_IDENTITY_OBJECT_TYPES_OPTION = "allowNotDefinedIdentityObjectTypes";
 
+   public static final String ALLOW_NOT_CASE_SENSITIVE_SEARCH = "allowNotCaseSensitiveSearch";
+
    public static final String DEFAULT_REALM_NAME = HibernateIdentityStoreImpl.class.getName() + ".DEFAULT_REALM";
 
    public static final String CREDENTIAL_TYPE_PASSWORD = "PASSWORD";
@@ -115,6 +117,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    private boolean isAllowNotDefinedAttributes = false;
 
    private boolean isAllowNotDefinedIdentityObjectTypes = false;
+
+   private boolean isAllowNotCaseSensitiveSearch = false;
 
    private boolean isManageTransactionDuringBootstrap = true;
 
@@ -298,6 +302,13 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       if (allowNotDefinedIOT != null && allowNotDefinedIOT.equalsIgnoreCase("true"))
       {
          this.isAllowNotDefinedIdentityObjectTypes = true;
+      }
+
+      String allowNotCaseSensitiveSearch = configurationMD.getOptionSingleValue(ALLOW_NOT_CASE_SENSITIVE_SEARCH);
+
+      if (allowNotCaseSensitiveSearch != null && allowNotCaseSensitiveSearch.equalsIgnoreCase("true"))
+      {
+         this.isAllowNotCaseSensitiveSearch = true;
       }
 
       // Default realm
@@ -672,7 +683,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
 
       // Check result with case sensitive compare:
-      if (hibernateObject != null && hibernateObject.getName().equals(name))
+      if (isAllowNotCaseSensitiveSearch())
+      {
+         return hibernateObject;
+      }
+      else if (hibernateObject != null && hibernateObject.getName().equals(name))
       {
 
          return hibernateObject;
@@ -2978,4 +2993,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
       return isManageTransactionDuringBootstrap;
    }
+
+   public boolean isAllowNotCaseSensitiveSearch()
+   {
+      return isAllowNotCaseSensitiveSearch;
+   }
 }
+

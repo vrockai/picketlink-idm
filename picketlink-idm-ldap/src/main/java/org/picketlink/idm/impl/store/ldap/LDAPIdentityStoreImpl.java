@@ -628,7 +628,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          IdentityObject io = createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn);
          
          // Check for case insensitive name results
-         if (!io.getName().equals(name))
+         if (!configuration.isAllowNotCaseSensitiveSearch() && !io.getName().equals(name))
          {
             io = null;
          }
