@@ -903,7 +903,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
          }
 
-         defaultIdentityStore.removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+         Set<IdentityObjectRelationship> rels =
+                 defaultIdentityStore.resolveRelationships(defaultTargetCtx, fromIdentity, toIdentity, relationshipType);
+
+         for (IdentityObjectRelationship rel : rels) {
+
+            if (rel.getName() == null || rel.getName().equals(relationshipName))
+            {
+                defaultIdentityStore.
+                        removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+            }
+         }
+
       }
       catch (IdentityException e)
       {

@@ -1941,12 +1941,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       try
       {
          // Escape JNDI special characters
-         Name jndiName = new CompositeName().add(ldapFromIO.getDn());
-         Attributes attrs = ldapContext.getAttributes(jndiName);
+         Name fromJndiName = new CompositeName().add(ldapFromIO.getDn());
+         Attributes fromAttrs = ldapContext.getAttributes(fromJndiName);
+         Name toJndiName = new CompositeName().add(ldapToIO.getDn());
+         Attributes toAttrs = ldapContext.getAttributes(toJndiName);
+
 
          if (fromTypeConfig.getParentMembershipAttributeName() != null)
          {
-            Attribute member = attrs.get(fromTypeConfig.getParentMembershipAttributeName());
+            Attribute member = fromAttrs.get(fromTypeConfig.getParentMembershipAttributeName());
 
             if (member != null)
             {
@@ -1966,7 +1969,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          else if (toTypeConfig.getChildMembershipAttributeName() != null)
          {
-            Attribute member = attrs.get(toTypeConfig.getChildMembershipAttributeName());
+            Attribute member = toAttrs.get(toTypeConfig.getChildMembershipAttributeName());
 
             if (member != null)
             {
@@ -1975,8 +1978,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                {
                   String memberRef = memberValues.nextElement().toString();
 
-                  if ((fromTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getDn())) ||
-                     (!fromTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getName())))
+                  if ((toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getDn())) ||
+                     (!toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getName())))
                   {
                      //TODO: impl lacks support for rel type
                      relationships.add(new LDAPIdentityObjectRelationshipImpl(MEMBERSHIP_TYPE, ldapFromIO, ldapToIO));
