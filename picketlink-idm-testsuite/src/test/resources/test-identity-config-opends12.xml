@@ -211,6 +211,14 @@
                         <isReadOnly>false</isReadOnly>
                         <isUnique>true</isUnique>
                      </attribute>
+                     <attribute>
+                        <name>description</name>
+                        <mapping>description</mapping>
+                        <type>text</type>
+                        <isRequired>false</isRequired>
+                        <isMultivalued>false</isMultivalued>
+                        <isReadOnly>true</isReadOnly>
+                     </attribute>
                   </attributes>
                   <options/>
                </identity-object-type>
@@ -515,7 +523,7 @@
                         <type>text</type>
                         <isRequired>false</isRequired>
                         <isMultivalued>false</isMultivalued>
-                        <isReadOnly>false</isReadOnly>
+                        <isReadOnly>true</isReadOnly>
                      </attribute>
                      <attribute>
                         <name>carLicense</name>

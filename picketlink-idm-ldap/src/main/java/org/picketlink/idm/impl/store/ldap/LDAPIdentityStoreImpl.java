@@ -2819,14 +2819,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             if (mdMap != null)
             {
-               IdentityObjectAttributeMetaData amd = mdMap.get(attributeName);
+               IdentityObjectAttributeMetaData amd = mdMap.get(name);
                if (amd != null && !amd.isMultivalued() && values.size() > 1)
                {
                   throw new IdentityException("Cannot assigned multiply values to single valued attribute: " + attributeName);
                }
                if (amd != null && amd.isReadonly())
                {
-                  throw new IdentityException("Cannot update readonly attribute: " + attributeName);
+                 // Just silently fail and go on
+                 continue;
+                 // throw new IdentityException("Cannot update readonly attribute: " + attributeName);
                }
 
                if (amd != null && amd.isUnique())
@@ -2960,7 +2962,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
                if (amd != null && amd.isReadonly())
                {
-                  throw new IdentityException("Cannot update readonly attribute: " + attributeName);
+                  // Just silently fail and go on
+                  continue;
+                  //throw new IdentityException("Cannot update readonly attribute: " + attributeName);
                }
 
                if (amd != null && amd.isUnique())

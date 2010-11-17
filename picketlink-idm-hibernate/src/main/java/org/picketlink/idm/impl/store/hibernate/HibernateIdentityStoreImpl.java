@@ -1883,7 +1883,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             }
             if (amd.isReadonly())
             {
-               throw new IdentityException("Cannot update readonly attribute: " + attribute.getName());
+               // Just silently fail and go on
+               mappedAttributes.remove(name);
+               continue;
+               //throw new IdentityException("Cannot update readonly attribute: " + attribute.getName());
             }
 
             if (amd.isUnique())
@@ -2051,7 +2054,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             }
             if (amd.isReadonly())
             {
-               throw new IdentityException("Cannot add readonly attribute: " + attribute.getName());
+               // Just silently fail and go on
+               mappedAttributes.remove(name);
+               continue;
+               //throw new IdentityException("Cannot add readonly attribute: " + attribute.getName());
             }
 
             if (amd.isUnique())

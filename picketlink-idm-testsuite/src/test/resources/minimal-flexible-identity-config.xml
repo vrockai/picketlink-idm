@@ -41,7 +41,24 @@
                <relationship-type>JBOSS_IDENTITY_MEMBERSHIP</relationship-type>
                <relationship-type>JBOSS_IDENTITY_ROLE</relationship-type>
             </supported-relationship-types>
-            <supported-identity-object-types/>
+            <supported-identity-object-types>
+               <identity-object-type>
+                  <name>USER</name>
+                  <relationships/>
+                  <credentials/>
+                  <attributes>
+                     <attribute>
+                        <name>description</name>
+                        <mapping>description</mapping>
+                        <type>text</type>
+                        <isRequired>false</isRequired>
+                        <isMultivalued>false</isMultivalued>
+                        <isReadOnly>true</isReadOnly>
+                     </attribute>
+                  </attributes>
+                  <options/>
+               </identity-object-type>
+            </supported-identity-object-types>
             <options>
                <option>
                   <name>hibernateSessionFactoryJNDIName</name>
