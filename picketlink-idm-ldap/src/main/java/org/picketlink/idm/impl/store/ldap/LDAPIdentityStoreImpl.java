@@ -329,17 +329,36 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                               IdentityObjectType type,
                                               Map<String, String[]> attributes) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "createIdentityObject",
+            new Object[]{
+               "name", name,
+               "IdentityObjectType", type,
+               "attributes", attributes
+            });
+      }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "",
+            new Object[]{
+
+            });
+      }
+
       if (name == null)
       {
          throw new IdentityException("Name cannot be null");
       }
 
       checkIOType(type);
-
-      if (log.isLoggable(Level.FINER))
-      {
-         log.finer(toString() + ".createIdentityObject with name: " + name + " and type: " + type.getName());
-      }
 
       LdapContext ldapContext = getLDAPContext(invocationCtx);
 
@@ -446,7 +465,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }                                                                  
 
-      return new SimpleIdentityObject(name, dn, type);
+      IdentityObject result = new SimpleIdentityObject(name, dn, type);
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "createIdentityObject",
+            result);
+      }
+
+      return result;
 
    }
 
@@ -454,7 +484,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeIdentityObject: " + identity);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeIdentityObject",
+            new Object[]{
+               "IdentityObject", identity
+            });
       }
 
       LDAPIdentityObjectImpl ldapIdentity = getSafeLDAPIO(invocationCtx, identity);
@@ -510,7 +546,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getIdentityObjectsCount for type: " + identityType);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getIdentityObjectsCount",
+            new Object[]{
+               "IdentityObjectType", identityType
+            });
       }
 
       checkIOType(identityType);
@@ -543,7 +585,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             scope,
             null);
 
-         return sr.size();
+         int result = sr.size();
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "getIdentityObjectsCount",
+               result);
+         }
+
+         return result;
 
       }
       catch (NoSuchElementException e)
@@ -558,15 +611,34 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
          throw new IdentityException("User search failed.", e);
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getIdentityObjectsCount",
+            0);
+         }
+
       return 0;
    }
 
-   public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationCtx, String name, IdentityObjectType type) throws IdentityException
+   public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                            String name,
+                                            IdentityObjectType type) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".findIdentityObject with name: " + name + "; and type: " + type);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "name", name,
+               "IdentityObjectType", type
+            });
       }
 
       Context ctx = null;
@@ -633,6 +705,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             io = null;
          }
 
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObject",
+               io);
+         }
+
          return io;
 
       }
@@ -669,6 +750,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            null);
+      }
+
       return null;
    }
 
@@ -676,7 +766,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".findIdentityObject with id: " + id);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "id", id
+            });
       }
 
       LdapContext ldapContext = getLDAPContext(ctx);
@@ -750,7 +846,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Can't find identity entry with DN: " + dn);
          }
 
-         return createIdentityObjectInstance(ctx, type, attrs, dn);
+         IdentityObject result = createIdentityObjectInstance(ctx, type, attrs, dn);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObject",
+               result);
+         }
+
+         return result;
 
       }
       catch (NoSuchElementException e)
@@ -782,6 +889,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            null);
+      }
+
       return null;
    }
 
@@ -792,6 +909,17 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       //TODO: page control with LDAP request control
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "IdentityObjectType", type,
+               "IdentityObjectSearchCriteria", criteria
+            });
+      }
 
 
       String nameFilter = "*";
@@ -957,6 +1085,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          objects = (LinkedList)cutPageFromResults(objects, criteria);
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            objects);
+      }
+
       return objects;
    }
 
@@ -973,6 +1110,20 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                         boolean parent,
                                                         IdentityObjectSearchCriteria criteria) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "parent", parent,
+               "IdentityObjectSearchCriteria", criteria
+            });
+      }
+
 
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
       {
@@ -1150,6 +1301,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          sortByName(objects, criteria.isAscending());
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            objects);
+      }
+
       return objects;
    }
 
@@ -1160,6 +1320,20 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                           boolean parents)
       throws IdentityException, NamingException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findRelatedIdentityObjects",
+            new Object[]{
+               "IdentityObject", identity,
+               "LDAPIdentityObjectImpl", ldapIO,
+               "IdentityObjectSearchCriteria", criteria,
+               "parents", parents
+            });
+      }
 
       List<IdentityObject> objects = new LinkedList<IdentityObject>();
 
@@ -1324,6 +1498,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findRelatedIdentityObjects",
+            objects);
+      }
+
       return objects;
    }
 
@@ -1334,6 +1517,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                                boolean named,
                                                                String name) throws IdentityException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectRelationshipType", type,
+               "parent", parent,
+               "named", named,
+               "name", name
+            });
+      }
 
       if (type == null || !type.getName().equals(MEMBERSHIP_TYPE))
       {
@@ -1477,6 +1675,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            relationships);
+      }
 
       return relationships;
    }
@@ -1499,6 +1705,19 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                                             boolean parents)
       throws IdentityException, NamingException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findRelationships",
+            new Object[]{
+               "IdentityObject", identity,
+               "LDAPIdentityObjectImpl", ldapIO,
+               "parents", parents
+            });
+      }
 
       Set<LDAPIdentityObjectRelationshipImpl> relationships = new HashSet<LDAPIdentityObjectRelationshipImpl>();
 
@@ -1631,6 +1850,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findRelationships",
+            relationships);
+      }
+
       return relationships;
    }
 
@@ -1642,20 +1870,29 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return findIdentityObject(ctx, identity, relationshipType, parent, null);
    }
 
-   public IdentityObjectRelationship createRelationship(IdentityStoreInvocationContext ctx, IdentityObject fromIdentity, IdentityObject toIdentity,
-                                  IdentityObjectRelationshipType relationshipType,
-                                  String name, boolean createNames) throws IdentityException
+   public IdentityObjectRelationship createRelationship(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject fromIdentity,
+                                                        IdentityObject toIdentity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        String name,
+                                                        boolean createNames) throws IdentityException
    {
 
       //TODO: relationshipType is ignored for now
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".createRelationship with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-            + "; relationshipType: " + relationshipType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "createRelationship",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "name", name,
+               "createNames", createNames
+            });
       }
 
       if (relationshipType == null || !relationshipType.getName().equals(MEMBERSHIP_TYPE))
@@ -1761,21 +1998,38 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "createRelationship",
+            relationship);
+      }
 
       return relationship;
    }
 
-   public void removeRelationship(IdentityStoreInvocationContext ctx, IdentityObject fromIdentity, IdentityObject toIdentity, IdentityObjectRelationshipType relationshipType, String name) throws IdentityException
+   public void removeRelationship(IdentityStoreInvocationContext ctx,
+                                  IdentityObject fromIdentity,
+                                  IdentityObject toIdentity,
+                                  IdentityObjectRelationshipType relationshipType,
+                                  String name) throws IdentityException
    {
       // relationshipType is ignored for now
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeRelationship with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-            + "; relationshipType: " + relationshipType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeRelationship",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "name", name
+            });
       }
 
       LDAPIdentityObjectImpl ldapFromIO = getSafeLDAPIO(ctx, fromIdentity);
@@ -1880,14 +2134,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void removeRelationships(IdentityStoreInvocationContext ctx, IdentityObject identity1, IdentityObject identity2, boolean named) throws IdentityException
+   public void removeRelationships(IdentityStoreInvocationContext ctx,
+                                   IdentityObject identity1,
+                                   IdentityObject identity2,
+                                   boolean named) throws IdentityException
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeRelationships with "
-            + "identity1: " + identity1
-            + "; identity2: " + identity2
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeRelationships",
+            new Object[]{
+               "identity1", identity1,
+               "identity2", identity2,
+               "named", named
+            });
       }
 
 
@@ -1907,10 +2169,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".resolveRelationships with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType
+            });
       }
 
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
@@ -2015,6 +2282,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            relationships);
+      }
+
       return relationships;
    }
 
@@ -2399,8 +2676,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       
    }
 
-   public boolean validateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
+   public boolean validateCredential(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identityObject,
+                                     IdentityObjectCredential credential) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "validateCredential",
+            new Object[]{
+               "IdentityObject", identityObject,
+               "IdentityObjectCredential", "****"
+            });
+      }
+
       if (credential == null)
       {
          throw new IllegalArgumentException();
@@ -2421,6 +2712,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             passwordString = credential.getValue().toString();
             if (passwordString.length() == 0 && !getTypeConfiguration(ctx, identityObject.getIdentityType()).isAllowEmptyPassword())
             {
+
+               if (log.isLoggable(Level.FINER))
+               {
+                  Tools.logMethodOut(
+                     log,
+                     Level.FINER,
+                     "validateCredential",
+                     false);
+               }
+
                return false;
             }
          }
@@ -2451,6 +2752,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             if (initialCtx != null)
             {
                initialCtx.close();
+
+               if (log.isLoggable(Level.FINER))
+               {
+                  Tools.logMethodOut(
+                     log,
+                     Level.FINER,
+                     "validateCredential",
+                     true);
+               }
+
                return true;
             }
 
@@ -2475,6 +2786,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                throw new IdentityException("Failed to close LDAP connection", e);
             }
          }
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "validateCredential",
+               false);
+         }
          return false;
 
 
@@ -2485,8 +2805,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void updateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
+   public void updateCredential(IdentityStoreInvocationContext ctx,
+                                IdentityObject identityObject,
+                                IdentityObjectCredential credential) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "updateCredential",
+            new Object[]{
+               "IdentityObject", identityObject,
+               "IdentityObjectCredential", "****"
+            });
+      }
+
       if (credential == null)
       {
          throw new IllegalArgumentException();
@@ -2632,40 +2966,84 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
    // Attributes
 
-   public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext, IdentityObjectType identityType) throws IdentityException
+   public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext,
+                                                 IdentityObjectType identityType) throws IdentityException
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getSupportedAttributeNames with "
-            + "identityType: " + identityType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getSupportedAttributeNames",
+            new Object[]{
+               "IdentityObjectType", identityType
+            });
       }
 
       checkIOType(identityType);
 
-      return getTypeConfiguration(invocationContext, identityType).getMappedAttributesNames();
+      Set<String> results = getTypeConfiguration(invocationContext, identityType).getMappedAttributesNames();
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getSupportedAttributeNames",
+            results);
+      }
+
+      return results;
    }
 
-   public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(IdentityStoreInvocationContext invocationContext, IdentityObjectType identityObjectType)
+   public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(IdentityStoreInvocationContext invocationContext,
+                                                                             IdentityObjectType identityObjectType)
    {
-      return attributesMetaData.get(identityObjectType.getName());
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getAttributeMetaData",
+            new Object[]{
+               "IdentityObjectType", identityObjectType
+            });
+      }
+      Map<String, IdentityObjectAttributeMetaData> results = attributesMetaData.get(identityObjectType.getName());
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getAttributesMetaData",
+            results);
+      }
+
+      return results;
    }
 
 
-   public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext, IdentityObject identity, String name) throws IdentityException
+   public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext,
+                                               IdentityObject identity, String name) throws IdentityException
    {
       //TODO: dummy temporary implementation
       return getAttributes(invocationContext, identity).get(name);
    }
 
-   public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity) throws IdentityException
+   public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext ctx,
+                                                             IdentityObject identity) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getAttributes with "
-            + "identity: " + identity
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getAttributes",
+            new Object[]{
+               "IdentityObject", identity
+            });
       }
 
       // Cache
@@ -2759,19 +3137,34 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          getCache().putIdentityObjectAttributes(getNamespace(), identity, attrsMap);
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getAttributes",
+            attrsMap);
+      }
+
       return attrsMap;
 
    }
 
-   public void updateAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
+   public void updateAttributes(IdentityStoreInvocationContext ctx,
+                                IdentityObject identity,
+                                IdentityObjectAttribute[] attributes) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".updateAttributes with "
-            + "identity: " + identity
-            + "attributes: " + attributes
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "updateAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectAttribute[]", attributes
+            });
       }
 
       if (getCache() != null)
@@ -2900,15 +3293,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
    }
 
-   public void addAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
+   public void addAttributes(IdentityStoreInvocationContext ctx,
+                             IdentityObject identity,
+                             IdentityObjectAttribute[] attributes) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".addAttributes with "
-            + "identity: " + identity
-            + "attributes: " + attributes
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "addAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectAttribute[]", attributes
+            });
       }
 
       if (getCache() != null)
@@ -3037,15 +3436,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void removeAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, String[] attributeNames) throws IdentityException
+   public void removeAttributes(IdentityStoreInvocationContext ctx,
+                                IdentityObject identity,
+                                String[] attributeNames) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeAttributes with "
-            + "identity: " + identity
-            + "attributeNames: " + attributeNames
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "attributeNames", attributeNames
+            });
       }
 
       if (getCache() != null)
@@ -3140,8 +3545,24 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public IdentityObject findIdentityObjectByUniqueAttribute(IdentityStoreInvocationContext invocationCtx, IdentityObjectType type, IdentityObjectAttribute attribute) throws IdentityException
+   public IdentityObject findIdentityObjectByUniqueAttribute(IdentityStoreInvocationContext invocationCtx,
+                                                             IdentityObjectType type,
+                                                             IdentityObjectAttribute attribute)
+      throws IdentityException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObjectByUniqueAttribute",
+            new Object[]{
+               "IdentityObjectType", type,
+               "IdentityObjectAttribute", attribute
+            });
+      }
+
       String nameFilter = "*";
 
 
@@ -3246,6 +3667,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       if (objects.size() == 0)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObjectByUniqueAttribute",
+               null);
+         }
+
          return null;
       }
       if (objects.size() > 1)
@@ -3253,6 +3683,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          throw new IdentityException("Illegal state - more than one IdentityObject of same type share same unique attribute value");
       }
 
+      if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObjectByUniqueAttribute",
+               objects.get(0));
+         }
 
       return objects.get(0);
    }
@@ -3460,6 +3898,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "searchIdentityObjects",
+               finalResults);
+         }
+
       return finalResults;
    }
 
@@ -3481,6 +3928,20 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                            SearchControls searchControls,
                                            Control[] requestControls) throws NamingException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "searchLDAP",
+            new Object[]{
+               "jndiName", jndiName,
+               "filterArgs", filterArgs,
+               "SearchControls", searchControls,
+               "requestControls", requestControls
+            });
+      }
 
       // Add paged controls if needed
 

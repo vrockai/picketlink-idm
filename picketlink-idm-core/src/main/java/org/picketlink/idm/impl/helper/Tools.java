@@ -22,10 +22,14 @@
 
 package org.picketlink.idm.impl.helper;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -161,4 +165,71 @@ public class Tools
       }
       return sb.toString();
    }
+
+   public static void logMethodIn(Logger log, Level level, String methodName, Object[] args)
+   {
+      try
+      {
+         StringBuilder sb = new StringBuilder();
+         sb.append("Method '")
+            .append(methodName)
+            .append("' called with arguments: ");
+
+         if (args != null)
+         {
+            for (Object arg : args)
+            {
+               if (arg != null && arg instanceof Object[])
+               {
+                  sb.append(Arrays.toString((Object[])arg))
+                     .append("; ");
+               }
+               else
+               {
+                  sb.append(arg)
+                     .append("; ");
+               }
+            }
+         }
+         log.log(level, sb.toString());
+      }
+      catch (Throwable t)
+      {
+         log.log(level, "Error in logging code block (not related to application code): ", t);
+      }
+
+   }
+
+   public static void logMethodOut(Logger log, Level level, String methodName, Object result)
+   {
+      try
+      {
+         StringBuilder sb = new StringBuilder();
+         sb.append("Method '")
+            .append(methodName)
+            .append("' returning object: ");
+
+         if (result != null && result instanceof Collection)
+         {
+            sb.append("Collection of size: ").append(((Collection)result).size());
+         }
+         else
+         {
+            if (result != null)
+            {
+               sb.append("[").append(result.getClass().getCanonicalName()).append("]");
+            }
+            sb.append(result);
+         }
+
+         log.log(level, sb.toString());
+
+      }
+      catch (Throwable t)
+      {
+         log.log(level, "Error in logging code block (not related to application code): ", t);
+      }
+   }
+
+
 }
