@@ -23,13 +23,23 @@
 package org.picketlink.idm.impl.store.ldap;
 
 import org.picketlink.idm.common.exception.IdentityException;
+import org.picketlink.idm.impl.helper.Tools;
 import org.picketlink.idm.spi.store.IdentityStoreSession;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.ldap.InitialLdapContext;
@@ -90,9 +100,27 @@ public class LDAPIdentityStoreSessionImpl implements IdentityStoreSession
          env.put(Context.SECURITY_PRINCIPAL, storeConfig.getAdminDN());
 
       }
+
+
       if (storeConfig.getAdminPassword() != null)
       {
-         env.put(Context.SECURITY_CREDENTIALS, storeConfig.getAdminPassword());
+         String credentials = null;
+
+         if (storeConfig.getJaasSecurityDomain() != null)
+         {
+            String securityDomain = storeConfig.getJaasSecurityDomain();
+
+            credentials = getPassword(securityDomain, storeConfig.getAdminPassword());
+         }
+
+         else
+         {
+            credentials = storeConfig.getAdminPassword();
+         }
+
+
+
+         env.put(Context.SECURITY_CREDENTIALS, credentials);
 
       }
 
@@ -183,4 +211,29 @@ public class LDAPIdentityStoreSessionImpl implements IdentityStoreSession
    {
       return false;
    }
+
+   public String getPassword(String securityDomain, String encoded) throws Exception
+   {
+
+
+      try
+      {
+         ObjectName serviceName = new ObjectName(securityDomain);
+         MBeanServer server = Tools.locateJBoss();
+
+         byte[] secret = (byte[]) server.invoke(serviceName, "decode64", new Object[] {encoded},
+            new String[] {String.class.getName()});
+
+         // Convert to UTF-8 base char array
+         return new String(secret, "UTF-8");
+      }
+      catch (Exception e)
+      {
+         log.log(Level.INFO, "Failed to decode LDAP password from JBoss JAAS Security Domain: " + securityDomain, e);
+         throw new IdentityException("Failed to decode LDAP password from JBoss JAAS Security Domain: " + securityDomain, e);
+      }
+   }
+
+
+
 }

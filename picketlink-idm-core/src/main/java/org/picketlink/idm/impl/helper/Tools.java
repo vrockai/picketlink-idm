@@ -22,8 +22,11 @@
 
 package org.picketlink.idm.impl.helper;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Enumeration;
 import java.util.ArrayList;
@@ -37,6 +40,8 @@ import java.util.logging.Logger;
  */
 public class Tools
 {
+
+   private static MBeanServer instance = null;
 
    public static <E> List<E> toList(Enumeration<E> e)
    {
@@ -229,6 +234,28 @@ public class Tools
       {
          log.log(level, "Error in logging code block (not related to application code): ", t);
       }
+   }
+
+   public static MBeanServer locateJBoss()
+   {
+      synchronized (Tools.class)
+      {
+         if (instance != null)
+         {
+            return instance;
+         }
+      }
+      for (Iterator i = MBeanServerFactory.findMBeanServer(null).iterator(); i.hasNext(); )
+      {
+         MBeanServer server = (MBeanServer) i.next();
+         if (server.getDefaultDomain().equals("jboss"))
+         {
+            return server;
+         }
+      }
+
+
+      throw new IllegalStateException("No 'jboss' MBeanServer found!");
    }
 
 

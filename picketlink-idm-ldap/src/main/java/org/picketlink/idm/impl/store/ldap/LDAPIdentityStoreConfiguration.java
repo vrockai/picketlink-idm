@@ -44,6 +44,8 @@ public interface LDAPIdentityStoreConfiguration
 
    String getAdminPassword();
 
+   String getJaasSecurityDomain();
+
    String getAuthenticationMethod();
 
    int getSearchTimeLimit();

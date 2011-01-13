@@ -49,6 +49,8 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final String adminPassword;
 
+   private final String jaasSecurityDomain;
+
    private final String authenticationMethod;
 
    private final int searchTimeLimit;
@@ -103,6 +105,8 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final String AUTHENTICATION_METHOD = "authenticationMethod";
 
    public static final String ADMIN_PASSWORD = "adminPassword";
+
+   public static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
 
    public static final String SEARCH_TIME_LIMIT = "searchTimeLimit";
 
@@ -161,6 +165,7 @@ public class SimpleLDAPIdentityStoreConfiguration
       this.adminDN = storeMD.getOptionSingleValue(ADMIN_DN);
       this.authenticationMethod = storeMD.getOptionSingleValue(AUTHENTICATION_METHOD);
       this.adminPassword = storeMD.getOptionSingleValue(ADMIN_PASSWORD);
+      this.jaasSecurityDomain = storeMD.getOptionSingleValue(SECURITY_DOMAIN_OPT);
       this.externalJNDIContext = storeMD.getOptionSingleValue(EXTERNAL_JNDI_CONTEXT);
       this.membershipToRelationshipTypeMapping = storeMD.getOptionSingleValue(MEMBERSHIP_TO_RELATIONSHIP_TYPE_MAPPING);
       this.relationshipNameSearchFilter = storeMD.getOptionSingleValue(RELATIONSHIP_NAME_SEARCH_FILTER);
@@ -423,6 +428,11 @@ public class SimpleLDAPIdentityStoreConfiguration
    public String getAdminPassword()
    {
       return adminPassword;
+   }
+
+   public String getJaasSecurityDomain()
+   {
+      return jaasSecurityDomain;
    }
 
    public int getSearchTimeLimit()
