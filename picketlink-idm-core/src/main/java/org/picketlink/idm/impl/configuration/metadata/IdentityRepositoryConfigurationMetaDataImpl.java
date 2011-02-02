@@ -44,7 +44,7 @@ public class IdentityRepositoryConfigurationMetaDataImpl implements IdentityRepo
 
    private String defaultIdentityStoreId;
 
-   private String defaultAttributeStroeId;
+   private String defaultAttributeStoreId;
 
    private List<IdentityStoreMappingMetaData> identityStoreToIdentityObjectTypeMappings;
 
@@ -97,12 +97,12 @@ public class IdentityRepositoryConfigurationMetaDataImpl implements IdentityRepo
 
    public String getDefaultAttributeStoreId()
    {
-      return defaultAttributeStroeId;
+      return defaultAttributeStoreId;
    }
 
-   public void setDefaultAttributeStroeId(String defaultAttributeStroeId)
+   public void setDefaultAttributeStoreId(String defaultAttributeStroeId)
    {
-      this.defaultAttributeStroeId = defaultAttributeStroeId;
+      this.defaultAttributeStoreId = defaultAttributeStroeId;
    }
 
    public List<IdentityStoreMappingMetaData> getIdentityStoreToIdentityObjectTypeMappings()

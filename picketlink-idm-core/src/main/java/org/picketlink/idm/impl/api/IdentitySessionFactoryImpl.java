@@ -69,9 +69,13 @@ public class IdentitySessionFactoryImpl implements IdentitySessionFactory, Seria
 
    public IdentitySession createIdentitySession(String realmName) throws IdentityException
    {
+     return createIdentitySession(realmName, null);
+   }
 
+   public IdentitySession createIdentitySession(String realmName,
+         Map<String,Object> sessionOptions) throws IdentityException
+   {
       IdentitySessionConfigurationContext sessionConfigCtx = sessionContextMap.get(realmName);
-
       // If no realm mapped then look for a template which name is a prefix of realmName
       if (sessionConfigCtx == null)
       {
@@ -112,7 +116,8 @@ public class IdentitySessionFactoryImpl implements IdentitySessionFactory, Seria
             sessionConfigCtx.getTypeMapper(),
             sessionConfigCtx.getApiCacheProvider(),
             sessionConfigCtx.getIdentityConfigurationContext(),
-            sessionConfigCtx.getRealmOptions());
+            sessionConfigCtx.getRealmOptions(),
+            sessionOptions);
 
       realmMap.put(realmName, newSession);
 
