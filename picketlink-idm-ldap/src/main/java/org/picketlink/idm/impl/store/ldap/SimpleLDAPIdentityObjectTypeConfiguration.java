@@ -177,7 +177,7 @@ public class SimpleLDAPIdentityObjectTypeConfiguration implements LDAPIdentityOb
          this.isChildMembershipAttributeDN = false;
       }
 
-      String isChildMembershipAttributeVirtual = objectTypeMD.getOptionSingleValue(CHILD_MEMBERSHIP_ATTRIBUTE_DN);
+      String isChildMembershipAttributeVirtual = objectTypeMD.getOptionSingleValue(CHILD_MEMBERSHIP_ATTRIBUTE_VIRTUAL);
       if (isChildMembershipAttributeVirtual != null && isChildMembershipAttributeVirtual.equalsIgnoreCase("false"))
       {
          this.isChildMembershipAttributeVirtual = false;

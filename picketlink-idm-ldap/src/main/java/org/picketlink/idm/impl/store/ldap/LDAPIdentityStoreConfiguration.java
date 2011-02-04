@@ -44,6 +44,8 @@ public interface LDAPIdentityStoreConfiguration
 
    String getAdminPassword();
 
+   String getJaasSecurityDomain();
+
    String getAuthenticationMethod();
 
    int getSearchTimeLimit();
@@ -86,4 +88,10 @@ public interface LDAPIdentityStoreConfiguration
 
    boolean isCreateMissingContexts();
 
+   boolean isPagedExtensionSupported();
+
+   int getPagedExtensionSize();
+
+   public boolean isAllowNotCaseSensitiveSearch();
+   
 }

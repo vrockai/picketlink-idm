@@ -246,12 +246,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, count);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObject count stored in cache: " + count + "; type=" + type
-          + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, count);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObject count stored in cache: " + count + "; type=" + type
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -298,12 +301,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, safeCopyIO(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObject search stored in cache: results.size()=" + results.size()
-          + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, safeCopyIO(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObject search stored in cache: results.size()=" + results.size()
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -344,12 +350,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, safeCopyIOR(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObjectRelationship search stored in cache: results.size()=" + results.size()
-          + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, safeCopyIOR(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObjectRelationship search stored in cache: results.size()=" + results.size()
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -390,12 +399,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, results);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObjectRelationshipName search stored in cache: results.size()=" + results.size()
-          + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, results);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObjectRelationshipName search stored in cache: results.size()=" + results.size()
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -436,12 +448,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, properties);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObjectRelationship properties stored in cache: relationship="
-            + relationship + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, properties);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObjectRelationship properties stored in cache: relationship="
+               + relationship + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -501,12 +516,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, properties);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObjectRelationshipName properties stored in cache: name="
-            + name + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, properties);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObjectRelationshipName properties stored in cache: name="
+               + name + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -559,12 +577,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, safeCopyAttr(attributes));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "IdentityObject attributes stored in cache: io=" + io
-            + "; attributes.size()=" + attributes.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, safeCopyAttr(attributes));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "IdentityObject attributes stored in cache: io=" + io
+               + "; attributes.size()=" + attributes.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -614,12 +635,15 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, value);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Object stored in cache: hash=" + hash
-            + "; value=" + value + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, value);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Object stored in cache: hash=" + hash
+               + "; value=" + value + ";namespace=" + ns);
+         }
       }
    }
 

@@ -1,3 +1,4 @@
+
 /*
 * JBoss, a division of Red Hat
 * Copyright 2006, Red Hat Middleware, LLC, and individual contributors as indicated
@@ -20,33 +21,38 @@
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
 
-package org.picketlink.idm.impl.types;
+package org.picketlink.idm.impl.store.ldap;
 
-import org.picketlink.idm.spi.model.IdentityObjectRelationshipType;
+import java.io.Serializable;
+
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchResult;
+
 
 /**
- * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
- * @version : 0.1 $
+ * Class that helps to repackage needed content from JNDI SearchResult into serializable object
+ *                                                                
  */
-public class SimpleIdentityObjectRelationshipType implements IdentityObjectRelationshipType
+public class SerializableSearchResult implements Serializable
 {
-   private String name;
 
-   public SimpleIdentityObjectRelationshipType(String name)
+   private final Attributes attributes;
+
+   private final String nameInNamespace;
+
+   public SerializableSearchResult(SearchResult result)
    {
-      this.name = name;
+      nameInNamespace = result.getNameInNamespace();
+      attributes = result.getAttributes();
    }
 
-   public String getName()
+   public Attributes getAttributes()
    {
-      return name;
+      return attributes;
    }
 
-   @Override
-   public String toString()
+   public String getNameInNamespace()
    {
-      return "SimpleIdentityObjectRelationshipType{" +
-         "name='" + name + '\'' +
-         '}';
+      return nameInNamespace;
    }
 }

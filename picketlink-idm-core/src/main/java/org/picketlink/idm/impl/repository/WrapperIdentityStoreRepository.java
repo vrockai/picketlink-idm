@@ -89,10 +89,10 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
 
       return new RepositoryIdentityStoreSessionImpl(sessions);
    }
-   
+
 
    public IdentityStoreSession createIdentityStoreSession(
-         Map<String, Object> sessionOptions) throws IdentityException
+      Map<String, Object> sessionOptions) throws IdentityException
    {
       Map<String, IdentityStoreSession> sessions = new HashMap<String, IdentityStoreSession>();
 
@@ -104,7 +104,7 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
       }
 
       return new RepositoryIdentityStoreSessionImpl(sessions);
-   }   
+   }
 
    IdentityStoreInvocationContext resolveIdentityStoreInvocationContext(IdentityStoreInvocationContext invocationCtx)
    {

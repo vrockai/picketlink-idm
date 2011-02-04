@@ -23,10 +23,10 @@
 package org.picketlink.idm.spi.configuration.metadata;
 
 /**
- * Relationship meta data, used to represent a single allowed relationship type.
- * 
+ *Relationship meta data, used to represent a single allowed relationship type.
+ *
  * This metadata is used by the configuration to define a set of allowable
- * relationship types for a single identity store.  
+ * relationship types for a single identity store.
  *
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
@@ -35,15 +35,14 @@ public interface RelationshipMetaData
 {
    /**
     * Returns the name of the relationship type, e.g. MEMBER_OF, ROLE, etc
-    * 
+    *
     * @return RelationshipType name
     */
    String getRelationshipTypeRef();
 
    /**
-    * Returns the name of the allowed identity object type on the "to" side of 
-    * the relationship, e.g. ORGANIZATION, GROUP.
-    * 
+    * Returns the name of the allowed identity object type on the "to" side of
+    *
     * @return IdentityObjectType name
     */
    String getIdentityObjectTypeRef();

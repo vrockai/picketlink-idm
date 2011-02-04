@@ -49,6 +49,8 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final String adminPassword;
 
+   private final String jaasSecurityDomain;
+
    private final String authenticationMethod;
 
    private final int searchTimeLimit;
@@ -85,7 +87,13 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final boolean sortExtensionSupported;
 
+   private final boolean pagedExtensionSupported;
+
+   private final int pagedExtensionSize;
+
    private final boolean createMissingContexts;
+
+   private final boolean allowNotCaseSensitiveSearch;
 
 
    // Consts
@@ -97,6 +105,8 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final String AUTHENTICATION_METHOD = "authenticationMethod";
 
    public static final String ADMIN_PASSWORD = "adminPassword";
+
+   public static final String SECURITY_DOMAIN_OPT = "jaasSecurityDomain";
 
    public static final String SEARCH_TIME_LIMIT = "searchTimeLimit";
 
@@ -132,7 +142,15 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    public static final String SORT_EXTENSION_SUPPORTED = "sortExtensionSupported";
 
+   public static final String PAGE_EXTENSION_SUPPORTED = "pagedResultsExtensionSupported";
+
+   public static final String PAGE_EXTENSION_SIZE = "pagedResultsExtensionSize";
+
+   public static final int PAGE_EXTENSION_SIZE_DEFAULT = 1000;
+
    public static final String CREATE_MISSING_CONTEXTS = "createMissingContexts";
+
+   public static final String ALLOW_NOT_CASE_SENSITIVE_SEARCH = "allowNotCaseSensitiveSearch";
 
    public SimpleLDAPIdentityStoreConfiguration(IdentityStoreConfigurationMetaData storeMD)
    {
@@ -147,6 +165,7 @@ public class SimpleLDAPIdentityStoreConfiguration
       this.adminDN = storeMD.getOptionSingleValue(ADMIN_DN);
       this.authenticationMethod = storeMD.getOptionSingleValue(AUTHENTICATION_METHOD);
       this.adminPassword = storeMD.getOptionSingleValue(ADMIN_PASSWORD);
+      this.jaasSecurityDomain = storeMD.getOptionSingleValue(SECURITY_DOMAIN_OPT);
       this.externalJNDIContext = storeMD.getOptionSingleValue(EXTERNAL_JNDI_CONTEXT);
       this.membershipToRelationshipTypeMapping = storeMD.getOptionSingleValue(MEMBERSHIP_TO_RELATIONSHIP_TYPE_MAPPING);
       this.relationshipNameSearchFilter = storeMD.getOptionSingleValue(RELATIONSHIP_NAME_SEARCH_FILTER);
@@ -186,6 +205,27 @@ public class SimpleLDAPIdentityStoreConfiguration
          this.sortExtensionSupported = true;
       }
 
+      String pagedExtension = storeMD.getOptionSingleValue(PAGE_EXTENSION_SUPPORTED);
+      if (pagedExtension != null && pagedExtension.equalsIgnoreCase("true"))
+      {
+         this.pagedExtensionSupported = true;
+      }
+      else
+      {
+         this.pagedExtensionSupported = false;
+      }
+
+      String pageSize = storeMD.getOptionSingleValue(PAGE_EXTENSION_SIZE);
+
+      if (pageSize != null)
+      {
+         this.pagedExtensionSize = Integer.valueOf(pageSize);
+      }
+      else
+      {
+         this.pagedExtensionSize = PAGE_EXTENSION_SIZE_DEFAULT;
+      }
+
       String createMissingContexts = storeMD.getOptionSingleValue(CREATE_MISSING_CONTEXTS);
       if (createMissingContexts != null && createMissingContexts.equalsIgnoreCase("true"))
       {
@@ -194,6 +234,16 @@ public class SimpleLDAPIdentityStoreConfiguration
       else
       {
          this.createMissingContexts = false;
+      }
+
+      String allowNotCaseSensitiveSearch = storeMD.getOptionSingleValue(ALLOW_NOT_CASE_SENSITIVE_SEARCH);
+      if (allowNotCaseSensitiveSearch != null && allowNotCaseSensitiveSearch.equalsIgnoreCase("true"))
+      {
+         this.allowNotCaseSensitiveSearch = true;
+      }
+      else
+      {
+         this.allowNotCaseSensitiveSearch = false;
       }
 
       Map<String, LDAPIdentityObjectTypeConfiguration> types = new HashMap<String, LDAPIdentityObjectTypeConfiguration>();
@@ -380,6 +430,11 @@ public class SimpleLDAPIdentityStoreConfiguration
       return adminPassword;
    }
 
+   public String getJaasSecurityDomain()
+   {
+      return jaasSecurityDomain;
+   }
+
    public int getSearchTimeLimit()
    {
       return searchTimeLimit;
@@ -497,5 +552,20 @@ public class SimpleLDAPIdentityStoreConfiguration
    public boolean isCreateMissingContexts()
    {
       return createMissingContexts;
+   }
+
+   public boolean isPagedExtensionSupported()
+   {
+      return pagedExtensionSupported;
+   }
+
+   public int getPagedExtensionSize()
+   {
+      return pagedExtensionSize;
+   }
+
+   public boolean isAllowNotCaseSensitiveSearch()
+   {
+      return allowNotCaseSensitiveSearch;
    }
 }

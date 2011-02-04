@@ -270,7 +270,7 @@ public class IdentityConfigurationImpl
                   {
                      cacheClassName = metaData.getOptions().get(key).get(0);
                   }
-   
+
                   if (key.equals("cache.providerRegistryName") && metaData.getOptions().get(key).size() > 0)
                   {
                      cacheRegistryName = metaData.getOptions().get(key).get(0);

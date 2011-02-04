@@ -66,17 +66,16 @@ public class IdentitySessionFactoryImpl implements IdentitySessionFactory, Seria
    {
       return false;
    }
-   
+
    public IdentitySession createIdentitySession(String realmName) throws IdentityException
    {
-      return createIdentitySession(realmName, null);
+     return createIdentitySession(realmName, null);
    }
 
-   public IdentitySession createIdentitySession(String realmName, 
+   public IdentitySession createIdentitySession(String realmName,
          Map<String,Object> sessionOptions) throws IdentityException
    {
       IdentitySessionConfigurationContext sessionConfigCtx = sessionContextMap.get(realmName);
-
       // If no realm mapped then look for a template which name is a prefix of realmName
       if (sessionConfigCtx == null)
       {

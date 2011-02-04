@@ -1280,11 +1280,7 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
             search.setGroupType(groupType);
             search.setSearchCriteria(criteria);
 
-            Collection<Group> results = cache.getGroupSearch(cacheNS, search);
-            if (results != null)
-            {
-               return results;
-            }
+            cache.putGroupSearch(cacheNS, search, identities);
          }
 
          return identities;

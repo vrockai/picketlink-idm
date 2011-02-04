@@ -41,4 +41,12 @@ public class SimpleIdentityObjectRelationshipTypeImpl implements IdentityObjectR
    {
       return name;
    }
+
+   @Override
+   public String toString()
+   {
+      return "SimpleIdentityObjectRelationshipTypeImpl{" +
+         "name='" + name + '\'' +
+         '}';
+   }
 }

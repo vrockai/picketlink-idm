@@ -289,6 +289,18 @@ public class OrganizationTest extends Assert
       assertEquals(3, attributes.keySet().size());
       assertEquals("Dawidowicz", (attributes.get(P3PConstants.INFO_USER_NAME_FAMILY)).getValue());
       
+       // Check readOnly attribute change
+      userInfo = new Attribute[]
+         {
+            new SimpleAttribute("description", new String[]{"some description"})
+         };
+
+      session.getAttributesManager().addAttributes(bdawidowUser, userInfo);
+      session.getAttributesManager().updateAttributes(bdawidowUser, userInfo);
+
+      attributes = session.getAttributesManager().getAttributes(bdawidowUser);
+      assertEquals(3, attributes.keySet().size());
+      assertEquals(null, (attributes.get("description")));
 
       // Generate random binary data for binary attribute
       Random random = new Random();
@@ -421,6 +433,12 @@ public class OrganizationTest extends Assert
          session.getAttributesManager().updateCredential(anotherOne, binaryCredential);
          assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[]{binaryCredential}));
       }
+
+      session.getPersistenceManager().createUser("!(06_13_07 Sche) !(0");
+
+      User u1 = session.getPersistenceManager().findUser("!(06_13_07 Sche) !(0");
+
+      assertNotNull(u1);
 
 
       ctx.commit();

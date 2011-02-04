@@ -299,7 +299,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       return new RepositoryIdentityStoreSessionImpl(sessions);
    }
-   
+
    public IdentityStoreSession createIdentityStoreSession(
          Map<String, Object> sessionOptions) throws IdentityException
    {
@@ -329,7 +329,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
 
       return new RepositoryIdentityStoreSessionImpl(sessions);
-   }   
+   }
 
    public String getId()
    {
@@ -934,7 +934,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             defaultIdentityStore.createIdentityObject(defaultTargetCtx, toIdentity.getName(),  toIdentity.getIdentityType());
          }
 
-         defaultIdentityStore.removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+         Set<IdentityObjectRelationship> rels =
+                 defaultIdentityStore.resolveRelationships(defaultTargetCtx, fromIdentity, toIdentity, relationshipType);
+
+         for (IdentityObjectRelationship rel : rels) {
+
+            if (rel.getName() == null || rel.getName().equals(relationshipName))
+            {
+                defaultIdentityStore.
+                        removeRelationship(defaultTargetCtx, fromIdentity, toIdentity, relationshipType, relationshipName);
+            }
+         }
+
       }
       catch (IdentityException e)
       {
@@ -1916,8 +1927,6 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       return false;
    }
-
-
 
 
 }

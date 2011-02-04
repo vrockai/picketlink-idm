@@ -256,12 +256,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-
-      ioNode.put(NODE_OBJECT_KEY, user);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "User stored in cache: " + user.getId() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, user);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "User stored in cache: " + user.getId() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -304,13 +306,16 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(users));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(users));
 
-         log.finer(this.toString() + "User criteria search stored in cache: users.size()=" + users.size() +
-         "; criteria.hash()=" + criteria + ";namespace=" + ns);
+         if (log.isLoggable(Level.FINER))
+         {
+
+            log.finer(this.toString() + "User criteria search stored in cache: users.size()=" + users.size() +
+               "; criteria.hash()=" + criteria + ";namespace=" + ns);
+         }
       }
    }
 
@@ -355,11 +360,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, count);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Users count stored in cache: " + count + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, count);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Users count stored in cache: " + count + ";namespace=" + ns);
+         }
       }
    }
 
@@ -404,11 +412,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, group);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group stored in cache: " + group.getKey() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, group);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group stored in cache: " + group.getKey() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -452,12 +463,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(groups));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group criteria search stored in cache: groups.size()=" + groups.size() +
-         "; criteria.hash()=" + criteria + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(groups));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group criteria search stored in cache: groups.size()=" + groups.size() +
+               "; criteria.hash()=" + criteria + ";namespace=" + ns);
+         }
       }
    }
 
@@ -502,12 +516,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, count);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group count stored in cache: type=" + groupType + "; count=" + count
-            + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, count);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group count stored in cache: type=" + groupType + "; count=" + count
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -553,12 +570,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-
-      ioNode.put(NODE_OBJECT_KEY, role);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Role stored in cache: " + role + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, role);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Role stored in cache: " + role + ";namespace=" + ns);
+         }
       }
    }
 
@@ -595,11 +614,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
 
-      ioNode.put(NODE_OBJECT_KEY, role);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "RoleType stored in cache: name=" + role.getName() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, role);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "RoleType stored in cache: name=" + role.getName() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -635,12 +657,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(attributes));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Attributes stored in cache: id=" + id + "; attributes.size()="
-            + attributes.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(attributes));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Attributes stored in cache: id=" + id + "; attributes.size()="
+               + attributes.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -690,12 +715,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Role properties stored in cache: role=" + role + "; properties.size()="
-            + properties.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Role properties stored in cache: role=" + role + "; properties.size()="
+               + properties.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -745,12 +773,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "RoleType properties stored in cache: roleType=" + roleType
-            + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "RoleType properties stored in cache: roleType=" + roleType
+               + "; properties.size()=" + properties.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -818,12 +849,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "User search stored in cache: results.size()=" + results.size()
-            + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "User search stored in cache: results.size()=" + results.size()
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -855,11 +889,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -890,11 +927,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, result);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode == null)
       {
-         log.finer(this.toString() + "Relationship search stored in cache: result=" + result + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, result);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Relationship search stored in cache: result=" + result + ";namespace=" + ns);
+         }
       }
    }
 
@@ -925,11 +965,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Role search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Role search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -960,11 +1003,14 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "RoleType search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "RoleType search stored in cache: results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1007,12 +1053,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_KEY, results);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "User query stored in cache: q.hashCode()=" + q.hashCode()
-            + "; results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_KEY, results);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "User query stored in cache: q.hashCode()=" + q.hashCode()
+               + "; results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1022,12 +1071,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_UNIQUE_KEY, user);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "User query stored in cache: q.hashCode()=" + q.hashCode() + "; user=" + user
-          + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_UNIQUE_KEY, user);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "User query stored in cache: q.hashCode()=" + q.hashCode() + "; user=" + user
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1089,12 +1141,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_KEY, unmodifiableCollection(results));
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group query stored in cache: q.hashCode()=" + q.hashCode()
-            + "; results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_KEY, unmodifiableCollection(results));
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group query stored in cache: q.hashCode()=" + q.hashCode()
+               + "; results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1104,12 +1159,15 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_UNIQUE_KEY, group);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Group query stored in cache: q.hashCode()=" + q.hashCode()
-            + "; group=" + group + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_UNIQUE_KEY, group);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Group query stored in cache: q.hashCode()=" + q.hashCode()
+               + "; group=" + group + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1171,26 +1229,33 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_KEY, results);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Role query stored in cache: q.hashCode()=" + q.hashCode()
-            + "; results.size()=" + results.size() + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_KEY, results);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Role query stored in cache: q.hashCode()=" + q.hashCode()
+               + "; results.size()=" + results.size() + ";namespace=" + ns);
+         }
       }
    }
+
    public void putRoleQueryUnique(String ns, RoleQuery q, Role role)
    {
       Fqn nodeFqn = getFqn(ns, NODE_ROLE_QUERIES, q.hashCode());
 
       Node ioNode = getCache().getRoot().addChild(nodeFqn);
 
-      ioNode.put(NODE_QUERY_UNIQUE_KEY, role);
-
-      if (log.isLoggable(Level.FINER))
+      if (ioNode != null)
       {
-         log.finer(this.toString() + "Role query stored in cache: q.hashCode()=" + q.hashCode() + "; role=" + role
-          + ";namespace=" + ns);
+         ioNode.put(NODE_QUERY_UNIQUE_KEY, role);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer(this.toString() + "Role query stored in cache: q.hashCode()=" + q.hashCode() + "; role=" + role
+               + ";namespace=" + ns);
+         }
       }
    }
 
@@ -1248,6 +1313,10 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
    private Collection unmodifiableCollection(Collection collection)
    {
+      if (collection == null)
+      {
+         return collection;
+      }
       if (collection instanceof List)
       {
          return Collections.unmodifiableList((List)collection);

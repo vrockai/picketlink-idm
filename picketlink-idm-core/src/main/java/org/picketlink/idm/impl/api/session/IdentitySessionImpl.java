@@ -113,16 +113,16 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
    {
       return sessionContext;
    }
-   
+
    public IdentitySessionImpl(String realmName,
-         IdentityStoreRepository repository,
-         IdentityObjectTypeMapper typeMapper,
-         APICacheProvider apiCacheProvider,
-         IdentityConfigurationContext configurationContext,
-         Map<String, List<String>> realmOptions) throws IdentityException
+                              IdentityStoreRepository repository,
+                              IdentityObjectTypeMapper typeMapper,
+                              APICacheProvider apiCacheProvider,
+                              IdentityConfigurationContext configurationContext,
+                              Map<String, List<String>> realmOptions) throws IdentityException
    {
-      this(realmName, repository, typeMapper, apiCacheProvider, 
-            configurationContext, realmOptions, null);
+      this(realmName, repository, typeMapper, apiCacheProvider,
+         configurationContext, realmOptions, null);
    }
 
    public IdentitySessionImpl(String realmName,
@@ -176,6 +176,13 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
       this.userQueryExecutor = new UserQueryExecutorImpl(this);
       this.groupQueryExecutor = new GroupQueryExecutorImpl(this);
       this.roleQueryExecutor = new RoleQueryExecutorImpl(this);
+      
+
+
+
+
+
+
    }
 
    public String getId()

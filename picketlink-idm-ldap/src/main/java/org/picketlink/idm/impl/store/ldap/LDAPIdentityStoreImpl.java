@@ -22,8 +22,39 @@
 
 package org.picketlink.idm.impl.store.ldap;
 
+import org.picketlink.idm.api.cfg.IdentityConfigurationRegistry;
+import org.picketlink.idm.common.exception.IdentityException;
+import org.picketlink.idm.impl.NotYetImplementedException;
+import org.picketlink.idm.impl.api.SimpleAttribute;
+import org.picketlink.idm.impl.helper.Tools;
+import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
+import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
+import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
+import org.picketlink.idm.impl.types.SimpleIdentityObject;
+import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
+import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
+import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
+import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
+import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationMetaData;
+import org.picketlink.idm.spi.exception.OperationNotSupportedException;
+import org.picketlink.idm.spi.model.IdentityObject;
+import org.picketlink.idm.spi.model.IdentityObjectAttribute;
+import org.picketlink.idm.spi.model.IdentityObjectCredential;
+import org.picketlink.idm.spi.model.IdentityObjectRelationship;
+import org.picketlink.idm.spi.model.IdentityObjectRelationshipType;
+import org.picketlink.idm.spi.model.IdentityObjectType;
+import org.picketlink.idm.spi.search.IdentityObjectSearchCriteria;
+import org.picketlink.idm.spi.store.FeaturesMetaData;
+import org.picketlink.idm.spi.store.IdentityObjectSearchCriteriaType;
+import org.picketlink.idm.spi.store.IdentityStore;
+import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
+import org.picketlink.idm.spi.store.IdentityStoreSession;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,34 +89,9 @@ import javax.naming.ldap.Control;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
+import javax.naming.ldap.PagedResultsControl;
+import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
-
-import org.picketlink.idm.common.exception.IdentityException;
-import org.picketlink.idm.impl.NotYetImplementedException;
-import org.picketlink.idm.impl.api.SimpleAttribute;
-import org.picketlink.idm.impl.helper.Tools;
-import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
-import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
-import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
-import org.picketlink.idm.impl.types.SimpleIdentityObject;
-import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
-import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
-import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
-import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
-import org.picketlink.idm.spi.configuration.metadata.IdentityStoreConfigurationMetaData;
-import org.picketlink.idm.spi.exception.OperationNotSupportedException;
-import org.picketlink.idm.spi.model.IdentityObject;
-import org.picketlink.idm.spi.model.IdentityObjectAttribute;
-import org.picketlink.idm.spi.model.IdentityObjectCredential;
-import org.picketlink.idm.spi.model.IdentityObjectRelationship;
-import org.picketlink.idm.spi.model.IdentityObjectRelationshipType;
-import org.picketlink.idm.spi.model.IdentityObjectType;
-import org.picketlink.idm.spi.search.IdentityObjectSearchCriteria;
-import org.picketlink.idm.spi.store.FeaturesMetaData;
-import org.picketlink.idm.spi.store.IdentityObjectSearchCriteriaType;
-import org.picketlink.idm.spi.store.IdentityStore;
-import org.picketlink.idm.spi.store.IdentityStoreInvocationContext;
-import org.picketlink.idm.spi.store.IdentityStoreSession;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -93,10 +99,9 @@ import org.picketlink.idm.spi.store.IdentityStoreSession;
  */
 public class LDAPIdentityStoreImpl implements IdentityStore
 {
-	private static final long serialVersionUID = -3823363689431954490L;
 
    //TODO: JNDI connection credentials encoding (pluggable?)
-	
+
    private static Logger log = Logger.getLogger(LDAPIdentityStoreImpl.class.getName());
 
    private final String id;
@@ -123,7 +128,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       this.id = id;
    }
 
-   @SuppressWarnings("rawtypes")
    public void bootstrap(IdentityStoreConfigurationContext configurationContext) throws IdentityException
    {
       if (configurationContext == null)
@@ -302,13 +306,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       return new LDAPIdentityStoreSessionImpl(configuration);
    }
-   
 
    public IdentityStoreSession createIdentityStoreSession(
-         Map<String, Object> sessionOptions) throws IdentityException
+      Map<String, Object> sessionOptions) throws IdentityException
    {
       return createIdentityStoreSession();
-   }   
+   }
+
 
    public String getId()
    {
@@ -332,17 +336,36 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                               IdentityObjectType type,
                                               Map<String, String[]> attributes) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "createIdentityObject",
+            new Object[]{
+               "name", name,
+               "IdentityObjectType", type,
+               "attributes", attributes
+            });
+      }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "",
+            new Object[]{
+
+            });
+      }
+
       if (name == null)
       {
          throw new IdentityException("Name cannot be null");
       }
 
       checkIOType(type);
-
-      if (log.isLoggable(Level.FINER))
-      {
-         log.finer(toString() + ".createIdentityObject with name: " + name + " and type: " + type.getName());
-      }
 
       LdapContext ldapContext = getLDAPContext(invocationCtx);
 
@@ -449,7 +472,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }                                                                  
 
-      return new SimpleIdentityObject(name, dn, type);
+      IdentityObject result = new SimpleIdentityObject(name, dn, type);
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "createIdentityObject",
+            result);
+      }
+
+      return result;
 
    }
 
@@ -457,7 +491,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeIdentityObject: " + identity);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeIdentityObject",
+            new Object[]{
+               "IdentityObject", identity
+            });
       }
 
       LDAPIdentityObjectImpl ldapIdentity = getSafeLDAPIO(invocationCtx, identity);
@@ -513,7 +553,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getIdentityObjectsCount for type: " + identityType);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getIdentityObjectsCount",
+            new Object[]{
+               "IdentityObjectType", identityType
+            });
       }
 
       checkIOType(identityType);
@@ -538,7 +584,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          String scope = getTypeConfiguration(ctx, identityType).getEntrySearchScope();
 
          //log.debug("Search filter: " + filter);
-         List sr = searchIdentityObjects(ctx, 
+         List<SerializableSearchResult> sr = searchIdentityObjects(ctx,
             entryCtxs, 
             filter, 
             null, 
@@ -546,7 +592,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             scope,
             null);
 
-         return sr.size();
+         int result = sr.size();
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "getIdentityObjectsCount",
+               result);
+         }
+
+         return result;
 
       }
       catch (NoSuchElementException e)
@@ -561,15 +618,34 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             }
          throw new IdentityException("User search failed.", e);
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getIdentityObjectsCount",
+            0);
+         }
+
       return 0;
    }
 
-   public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationCtx, String name, IdentityObjectType type) throws IdentityException
+   public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                            String name,
+                                            IdentityObjectType type) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".findIdentityObject with name: " + name + "; and type: " + type);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "name", name,
+               "IdentityObjectType", type
+            });
       }
 
       Context ctx = null;
@@ -584,7 +660,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List sr = null;
+         List<SerializableSearchResult> sr = null;
 
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
@@ -605,7 +681,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             //search all entries
-            filter = "(".concat(getTypeConfiguration(invocationCtx, type).getIdAttributeName()).concat("=").concat(name).concat(")");
+            filter = "("
+               .concat(getTypeConfiguration(invocationCtx, type).getIdAttributeName())
+               .concat("=")
+               .concat(Tools.escapeLDAPSearchFilter(name))
+               .concat(")");
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                filter,
@@ -622,18 +702,25 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Found more than one identity object with name: " + name +
                "; Posible data inconsistency");
          }
-         SearchResult res = (SearchResult)sr.iterator().next();
-         ctx = (Context)res.getObject();
-         String dn = ctx.getNameInNamespace();
+         SerializableSearchResult res = sr.iterator().next();
+         String dn = res.getNameInNamespace();
          IdentityObject io = createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn);
-         ctx.close();
-
+         
          // Check for case insensitive name results
-         if (!io.getName().equals(name))
+         if (!configuration.isAllowNotCaseSensitiveSearch() && !io.getName().equals(name))
          {
             io = null;
          }
-                     
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObject",
+               io);
+         }
+
          return io;
 
       }
@@ -670,6 +757,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            null);
+      }
+
       return null;
    }
 
@@ -677,7 +773,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".findIdentityObject with id: " + id);
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "id", id
+            });
       }
 
       LdapContext ldapContext = getLDAPContext(ctx);
@@ -751,7 +853,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Can't find identity entry with DN: " + dn);
          }
 
-         return createIdentityObjectInstance(ctx, type, attrs, dn);
+         IdentityObject result = createIdentityObjectInstance(ctx, type, attrs, dn);
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObject",
+               result);
+         }
+
+         return result;
 
       }
       catch (NoSuchElementException e)
@@ -783,6 +896,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            null);
+      }
+
       return null;
    }
 
@@ -793,6 +916,17 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       //TODO: page control with LDAP request control
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "IdentityObjectType", type,
+               "IdentityObjectSearchCriteria", criteria
+            });
+      }
 
 
       String nameFilter = "*";
@@ -856,7 +990,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
          String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
@@ -888,10 +1022,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             if (criteria != null && criteria.isSorted() && configuration.isSortExtensionSupported())
             {
                // It seams that the sort order is not configurable and
@@ -959,6 +1092,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          objects = (LinkedList)cutPageFromResults(objects, criteria);
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            objects);
+      }
+
       return objects;
    }
 
@@ -975,6 +1117,20 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                         boolean parent,
                                                         IdentityObjectSearchCriteria criteria) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "parent", parent,
+               "IdentityObjectSearchCriteria", criteria
+            });
+      }
+
 
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
       {
@@ -1152,6 +1308,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          sortByName(objects, criteria.isAscending());
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findIdentityObject",
+            objects);
+      }
+
       return objects;
    }
 
@@ -1162,6 +1327,20 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                           boolean parents)
       throws IdentityException, NamingException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findRelatedIdentityObjects",
+            new Object[]{
+               "IdentityObject", identity,
+               "LDAPIdentityObjectImpl", ldapIO,
+               "IdentityObjectSearchCriteria", criteria,
+               "parents", parents
+            });
+      }
 
       List<IdentityObject> objects = new LinkedList<IdentityObject>();
 
@@ -1232,7 +1411,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                   af.append("(")
                      .append(stringEntry.getKey())
                      .append("=")
-                     .append(value)
+                     .append(Tools.escapeLDAPSearchFilter(value))
                      .append(")");
                }
             }
@@ -1249,12 +1428,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                .append("=");
             if (checkedTypeConfiguration.isParentMembershipAttributeDN())
             {
-               af.append(ldapIO.getDn());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getDn()));
             }
             else
             {
                //TODO: this doesn't make much sense unless parent/child are same identity types and resides in the same LDAP context
-               af.append(ldapIO.getName());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getName()));
             }
             af.append(")");
          }
@@ -1266,19 +1445,19 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                .append("=");
             if (checkedTypeConfiguration.isChildMembershipAttributeDN())
             {
-               af.append(ldapIO.getDn());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getDn()));
             }
             else
             {
                //TODO: this doesn't make much sense unless parent/child are same identity types and resides in the same LDAP context
-               af.append(ldapIO.getName());
+               af.append(Tools.escapeLDAPSearchFilter(ldapIO.getName()));
             }
             af.append(")");
          }
 
 
          String filter = checkedTypeConfiguration.getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
          String scope = checkedTypeConfiguration.getEntrySearchScope();
@@ -1298,6 +1477,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             filter = "(".concat(checkedTypeConfiguration.getIdAttributeName()).concat("=").concat(nameFilter).concat(")");
+			 
             sr = searchIdentityObjects(ctx,
                entryCtxs,
                "(&(" + filter + ")" + af.toString() + ")",
@@ -1307,10 +1487,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                requestControls);
          }
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            LdapContext ldapCtx = (LdapContext)res.getObject();
-            String dn = ldapCtx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
 
             if (parents)
             {
@@ -1326,6 +1505,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findRelatedIdentityObjects",
+            objects);
+      }
+
       return objects;
    }
 
@@ -1336,6 +1524,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                                boolean named,
                                                                String name) throws IdentityException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectRelationshipType", type,
+               "parent", parent,
+               "named", named,
+               "name", name
+            });
+      }
 
       if (type == null || !type.getName().equals(MEMBERSHIP_TYPE))
       {
@@ -1479,6 +1682,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            relationships);
+      }
 
       return relationships;
    }
@@ -1501,6 +1712,19 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                                                                             boolean parents)
       throws IdentityException, NamingException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findRelationships",
+            new Object[]{
+               "IdentityObject", identity,
+               "LDAPIdentityObjectImpl", ldapIO,
+               "parents", parents
+            });
+      }
 
       Set<LDAPIdentityObjectRelationshipImpl> relationships = new HashSet<LDAPIdentityObjectRelationshipImpl>();
 
@@ -1579,7 +1803,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = checkedTypeConfiguration.getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = checkedTypeConfiguration.getCtxDNs();
          String scope = checkedTypeConfiguration.getEntrySearchScope();
@@ -1608,10 +1832,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                requestControls);
          }
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            LdapContext ldapCtx = (LdapContext)res.getObject();
-            String dn = ldapCtx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
 
 
 
@@ -1634,6 +1857,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "findRelationships",
+            relationships);
+      }
+
       return relationships;
    }
 
@@ -1645,20 +1877,29 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return findIdentityObject(ctx, identity, relationshipType, parent, null);
    }
 
-   public IdentityObjectRelationship createRelationship(IdentityStoreInvocationContext ctx, IdentityObject fromIdentity, IdentityObject toIdentity,
-                                  IdentityObjectRelationshipType relationshipType,
-                                  String name, boolean createNames) throws IdentityException
+   public IdentityObjectRelationship createRelationship(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject fromIdentity,
+                                                        IdentityObject toIdentity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        String name,
+                                                        boolean createNames) throws IdentityException
    {
 
       //TODO: relationshipType is ignored for now
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".createRelationship with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-            + "; relationshipType: " + relationshipType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "createRelationship",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "name", name,
+               "createNames", createNames
+            });
       }
 
       if (relationshipType == null || !relationshipType.getName().equals(MEMBERSHIP_TYPE))
@@ -1764,21 +2005,38 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "createRelationship",
+            relationship);
+      }
 
       return relationship;
    }
 
-   public void removeRelationship(IdentityStoreInvocationContext ctx, IdentityObject fromIdentity, IdentityObject toIdentity, IdentityObjectRelationshipType relationshipType, String name) throws IdentityException
+   public void removeRelationship(IdentityStoreInvocationContext ctx,
+                                  IdentityObject fromIdentity,
+                                  IdentityObject toIdentity,
+                                  IdentityObjectRelationshipType relationshipType,
+                                  String name) throws IdentityException
    {
       // relationshipType is ignored for now
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeRelationship with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-            + "; relationshipType: " + relationshipType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeRelationship",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType,
+               "name", name
+            });
       }
 
       LDAPIdentityObjectImpl ldapFromIO = getSafeLDAPIO(ctx, fromIdentity);
@@ -1883,14 +2141,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void removeRelationships(IdentityStoreInvocationContext ctx, IdentityObject identity1, IdentityObject identity2, boolean named) throws IdentityException
+   public void removeRelationships(IdentityStoreInvocationContext ctx,
+                                   IdentityObject identity1,
+                                   IdentityObject identity2,
+                                   boolean named) throws IdentityException
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeRelationships with "
-            + "identity1: " + identity1
-            + "; identity2: " + identity2
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeRelationships",
+            new Object[]{
+               "identity1", identity1,
+               "identity2", identity2,
+               "named", named
+            });
       }
 
 
@@ -1910,10 +2176,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".resolveRelationships with "
-            + "fromIdentity: " + fromIdentity
-            + "; toIdentity: " + toIdentity
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            new Object[]{
+               "fromIdentity", fromIdentity,
+               "toIdentity", toIdentity,
+               "IdentityObjectRelationshipType", relationshipType
+            });
       }
 
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
@@ -1944,12 +2215,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       try
       {
          // Escape JNDI special characters
-         Name jndiName = new CompositeName().add(ldapFromIO.getDn());
-         Attributes attrs = ldapContext.getAttributes(jndiName);
+         Name fromJndiName = new CompositeName().add(ldapFromIO.getDn());
+         Attributes fromAttrs = ldapContext.getAttributes(fromJndiName);
+         Name toJndiName = new CompositeName().add(ldapToIO.getDn());
+         Attributes toAttrs = ldapContext.getAttributes(toJndiName);
+
 
          if (fromTypeConfig.getParentMembershipAttributeName() != null)
          {
-            Attribute member = attrs.get(fromTypeConfig.getParentMembershipAttributeName());
+            Attribute member = fromAttrs.get(fromTypeConfig.getParentMembershipAttributeName());
 
             if (member != null)
             {
@@ -1969,7 +2243,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          else if (toTypeConfig.getChildMembershipAttributeName() != null)
          {
-            Attribute member = attrs.get(toTypeConfig.getChildMembershipAttributeName());
+            Attribute member = toAttrs.get(toTypeConfig.getChildMembershipAttributeName());
 
             if (member != null)
             {
@@ -1978,8 +2252,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                {
                   String memberRef = memberValues.nextElement().toString();
 
-                  if ((fromTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getDn())) ||
-                     (!fromTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getName())))
+                  if ((toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getDn())) ||
+                     (!toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getName())))
                   {
                      //TODO: impl lacks support for rel type
                      relationships.add(new LDAPIdentityObjectRelationshipImpl(MEMBERSHIP_TYPE, ldapFromIO, ldapToIO));
@@ -2015,6 +2289,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Failed to close LDAP connection", e);
          }
       }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "resolveRelationships",
+            relationships);
+      }
+
       return relationships;
    }
 
@@ -2113,7 +2397,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          log.finer(toString() + ".removeRelationshipName with name: " + name);
       }
 
+      LdapContext ldapCtx = getLDAPContext(invocationCtx);
       Context ctx = null;
+
       try
       {
 
@@ -2123,7 +2409,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
          String filter = getConfiguration(invocationCtx).getRelationshipNameSearchFilter();
-         List sr = null;
+         List<SerializableSearchResult> sr = null;
 
 
          String[] entryCtxs = getConfiguration(invocationCtx).getRelationshipNamesCtxDNs();
@@ -2144,7 +2430,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          else
          {
             //search all entries
-            filter = "(".concat(getConfiguration(invocationCtx).getRelationshipNameAttributeName()).concat("=").concat(name).concat(")");
+            filter = "("
+               .concat(getConfiguration(invocationCtx).getRelationshipNameAttributeName())
+               .concat("=")
+               .concat(Tools.escapeLDAPSearchFilter(name))
+               .concat(")");
             sr = searchIdentityObjects(invocationCtx,
                entryCtxs,
                filter,
@@ -2160,13 +2450,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             throw new IdentityException("Found more than one relationship name entry: " + name +
                "; Posible data inconsistency");
          }
-         SearchResult res = (SearchResult)sr.iterator().next();
-         ctx = (Context)res.getObject();
-         String dn = ctx.getNameInNamespace();
+         SerializableSearchResult res = sr.iterator().next();
+         String dn = res.getNameInNamespace();
+
+
 
          // Escape JNDI special characters
          Name jndiName = new CompositeName().add(dn);
-         ctx.unbind(jndiName);
+         ldapCtx.unbind(jndiName);
 
          invalidateCache();
 
@@ -2205,6 +2496,23 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             throw new IdentityException("Failed to close LDAP connection", e);
          }
+         try
+         {
+            if (ldapCtx != null)
+            {
+               ldapCtx.close();
+            }
+         }
+         catch (NamingException e)
+         {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.FINER, "Exception occurred: ", e);
+            }
+
+            throw new IdentityException("Failed to close LDAP connection", e);
+         }
+
       }
 
       return null;
@@ -2238,7 +2546,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          StringBuilder af = new StringBuilder();
 
          String filter = config.getRelationshipNameSearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = config.getRelationshipNamesCtxDNs();
          String scope = config.getRelationshipNameSearchScope();
@@ -2268,10 +2576,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             String[] parts = dn.split("=");
 
             names.add(parts[1]);
@@ -2376,8 +2683,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       
    }
 
-   public boolean validateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
+   public boolean validateCredential(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identityObject,
+                                     IdentityObjectCredential credential) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "validateCredential",
+            new Object[]{
+               "IdentityObject", identityObject,
+               "IdentityObjectCredential", "****"
+            });
+      }
+
       if (credential == null)
       {
          throw new IllegalArgumentException();
@@ -2398,6 +2719,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             passwordString = credential.getValue().toString();
             if (passwordString.length() == 0 && !getTypeConfiguration(ctx, identityObject.getIdentityType()).isAllowEmptyPassword())
             {
+
+               if (log.isLoggable(Level.FINER))
+               {
+                  Tools.logMethodOut(
+                     log,
+                     Level.FINER,
+                     "validateCredential",
+                     false);
+               }
+
                return false;
             }
          }
@@ -2420,11 +2751,24 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             env.put(Context.SECURITY_PRINCIPAL, ldapIO.getDn());
             env.put(Context.SECURITY_CREDENTIALS, passwordString);
 
+            // Prevent password caching by JNDI connection poll
+            env.put("com.sun.jndi.ldap.connect.pool", "false");
+
             InitialContext initialCtx = new InitialLdapContext(env, null);
 
             if (initialCtx != null)
             {
                initialCtx.close();
+
+               if (log.isLoggable(Level.FINER))
+               {
+                  Tools.logMethodOut(
+                     log,
+                     Level.FINER,
+                     "validateCredential",
+                     true);
+               }
+
                return true;
             }
 
@@ -2449,6 +2793,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                throw new IdentityException("Failed to close LDAP connection", e);
             }
          }
+
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "validateCredential",
+               false);
+         }
          return false;
 
 
@@ -2459,8 +2812,22 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void updateCredential(IdentityStoreInvocationContext ctx, IdentityObject identityObject, IdentityObjectCredential credential) throws IdentityException
+   public void updateCredential(IdentityStoreInvocationContext ctx,
+                                IdentityObject identityObject,
+                                IdentityObjectCredential credential) throws IdentityException
    {
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "updateCredential",
+            new Object[]{
+               "IdentityObject", identityObject,
+               "IdentityObjectCredential", "****"
+            });
+      }
+
       if (credential == null)
       {
          throw new IllegalArgumentException();
@@ -2606,40 +2973,84 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
    // Attributes
 
-   public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext, IdentityObjectType identityType) throws IdentityException
+   public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext,
+                                                 IdentityObjectType identityType) throws IdentityException
    {
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getSupportedAttributeNames with "
-            + "identityType: " + identityType
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getSupportedAttributeNames",
+            new Object[]{
+               "IdentityObjectType", identityType
+            });
       }
 
       checkIOType(identityType);
 
-      return getTypeConfiguration(invocationContext, identityType).getMappedAttributesNames();
+      Set<String> results = getTypeConfiguration(invocationContext, identityType).getMappedAttributesNames();
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getSupportedAttributeNames",
+            results);
+      }
+
+      return results;
    }
 
-   public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(IdentityStoreInvocationContext invocationContext, IdentityObjectType identityObjectType)
+   public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(IdentityStoreInvocationContext invocationContext,
+                                                                             IdentityObjectType identityObjectType)
    {
-      return attributesMetaData.get(identityObjectType.getName());
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getAttributeMetaData",
+            new Object[]{
+               "IdentityObjectType", identityObjectType
+            });
+      }
+      Map<String, IdentityObjectAttributeMetaData> results = attributesMetaData.get(identityObjectType.getName());
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getAttributesMetaData",
+            results);
+      }
+
+      return results;
    }
 
 
-   public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext, IdentityObject identity, String name) throws IdentityException
+   public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext,
+                                               IdentityObject identity, String name) throws IdentityException
    {
       //TODO: dummy temporary implementation
       return getAttributes(invocationContext, identity).get(name);
    }
 
-   public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity) throws IdentityException
+   public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext ctx,
+                                                             IdentityObject identity) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".getAttributes with "
-            + "identity: " + identity
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "getAttributes",
+            new Object[]{
+               "IdentityObject", identity
+            });
       }
 
       // Cache
@@ -2733,19 +3144,34 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          getCache().putIdentityObjectAttributes(getNamespace(), identity, attrsMap);
       }
 
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodOut(
+            log,
+            Level.FINER,
+            "getAttributes",
+            attrsMap);
+      }
+
       return attrsMap;
 
    }
 
-   public void updateAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
+   public void updateAttributes(IdentityStoreInvocationContext ctx,
+                                IdentityObject identity,
+                                IdentityObjectAttribute[] attributes) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".updateAttributes with "
-            + "identity: " + identity
-            + "attributes: " + attributes
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "updateAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectAttribute[]", attributes
+            });
       }
 
       if (getCache() != null)
@@ -2793,14 +3219,16 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             if (mdMap != null)
             {
-               IdentityObjectAttributeMetaData amd = mdMap.get(attributeName);
+               IdentityObjectAttributeMetaData amd = mdMap.get(name);
                if (amd != null && !amd.isMultivalued() && values.size() > 1)
                {
                   throw new IdentityException("Cannot assigned multiply values to single valued attribute: " + attributeName);
                }
                if (amd != null && amd.isReadonly())
                {
-                  throw new IdentityException("Cannot update readonly attribute: " + attributeName);
+                 // Just silently fail and go on
+                 continue;
+                 // throw new IdentityException("Cannot update readonly attribute: " + attributeName);
                }
 
                if (amd != null && amd.isUnique())
@@ -2872,15 +3300,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
    }
 
-   public void addAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectAttribute[] attributes) throws IdentityException
+   public void addAttributes(IdentityStoreInvocationContext ctx,
+                             IdentityObject identity,
+                             IdentityObjectAttribute[] attributes) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".addAttributes with "
-            + "identity: " + identity
-            + "attributes: " + attributes
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "addAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "IdentityObjectAttribute[]", attributes
+            });
       }
 
       if (getCache() != null)
@@ -2934,7 +3368,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
                if (amd != null && amd.isReadonly())
                {
-                  throw new IdentityException("Cannot update readonly attribute: " + attributeName);
+                  // Just silently fail and go on
+                  continue;
+                  //throw new IdentityException("Cannot update readonly attribute: " + attributeName);
                }
 
                if (amd != null && amd.isUnique())
@@ -3007,15 +3443,21 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public void removeAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity, String[] attributeNames) throws IdentityException
+   public void removeAttributes(IdentityStoreInvocationContext ctx,
+                                IdentityObject identity,
+                                String[] attributeNames) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))
       {
-         log.finer(toString() + ".removeAttributes with "
-            + "identity: " + identity
-            + "attributeNames: " + attributeNames
-         );
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "removeAttributes",
+            new Object[]{
+               "IdentityObject", identity,
+               "attributeNames", attributeNames
+            });
       }
 
       if (getCache() != null)
@@ -3110,8 +3552,24 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
    }
 
-   public IdentityObject findIdentityObjectByUniqueAttribute(IdentityStoreInvocationContext invocationCtx, IdentityObjectType type, IdentityObjectAttribute attribute) throws IdentityException
+   public IdentityObject findIdentityObjectByUniqueAttribute(IdentityStoreInvocationContext invocationCtx,
+                                                             IdentityObjectType type,
+                                                             IdentityObjectAttribute attribute)
+      throws IdentityException
    {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "findIdentityObjectByUniqueAttribute",
+            new Object[]{
+               "IdentityObjectType", type,
+               "IdentityObjectAttribute", attribute
+            });
+      }
+
       String nameFilter = "*";
 
 
@@ -3141,7 +3599,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             .append(")");
 
          String filter = getTypeConfiguration(invocationCtx, type).getEntrySearchFilter();
-         List<SearchResult> sr = null;
+         List<SerializableSearchResult> sr = null;
 
          String[] entryCtxs = getTypeConfiguration(invocationCtx, type).getCtxDNs();
          String scope = getTypeConfiguration(invocationCtx, type).getEntrySearchScope();
@@ -3171,10 +3629,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
 
 
-         for (SearchResult res : sr)
+         for (SerializableSearchResult res : sr)
          {
-            ctx = (LdapContext)res.getObject();
-            String dn = ctx.getNameInNamespace();
+            String dn = res.getNameInNamespace();
             objects.add(createIdentityObjectInstance(invocationCtx, type, res.getAttributes(), dn));
          }
 
@@ -3217,6 +3674,15 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       if (objects.size() == 0)
       {
+         if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObjectByUniqueAttribute",
+               null);
+         }
+
          return null;
       }
       if (objects.size() > 1)
@@ -3224,6 +3690,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          throw new IdentityException("Illegal state - more than one IdentityObject of same type share same unique attribute value");
       }
 
+      if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "findIdentityObjectByUniqueAttribute",
+               objects.get(0));
+         }
 
       return objects.get(0);
    }
@@ -3261,7 +3735,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return ldapio;
    }
 
-   public List<SearchResult> searchIdentityObjects(IdentityStoreInvocationContext ctx,
+   public List<SerializableSearchResult> searchIdentityObjects(IdentityStoreInvocationContext ctx,
                                                    String[] entryCtxs,
                                                    String filter,
                                                    Object[] filterArgs,
@@ -3315,7 +3789,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                log.finer("LDAP search results found in cache. size=" + ((List)results).size());
             }
 
-            return (List<SearchResult>)results;
+            return (List<SerializableSearchResult>)results;
 
          }
       }
@@ -3323,14 +3797,12 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
       LdapContext ldapContext = getLDAPContext(ctx);
 
-      if (ldapContext != null)
-      {
-         ldapContext.setRequestControls(requestControls);
-      }
+      //Reset request controls
+      ldapContext.setRequestControls(null);
+      
+      List<SerializableSearchResult> results = null;
 
-      NamingEnumeration results = null;
-
-      List<SearchResult> finalResults;
+      List<SerializableSearchResult> finalResults;
 
       try
       {
@@ -3364,14 +3836,14 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             if (filterArgs == null)
             {
-               results = ldapContext.search(jndiName, filter, searchControls);
+               results = searchLDAP(ldapContext, jndiName, filter, null, searchControls, requestControls);
             }
             else
             {
-               results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+               results = searchLDAP(ldapContext, jndiName, filter, filterArgs, searchControls, requestControls);
             }
 
-            List toReturn = Tools.toList(results);
+            List toReturn = results;
 
             if (log.isLoggable(Level.FINER) && toReturn != null)
             {
@@ -3384,7 +3856,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
          else
          {
-            List<SearchResult> merged = new LinkedList();
+            List<SerializableSearchResult> merged = new LinkedList();
 
             for (String entryCtx : entryCtxs)
             {
@@ -3394,13 +3866,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
                if (filterArgs == null)
                {
-                  results = ldapContext.search(jndiName, filter, searchControls);
+                  results = searchLDAP(ldapContext, jndiName, filter, null, searchControls, requestControls);
                }
                else
                {
-                  results = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+                  results = searchLDAP(ldapContext, jndiName, filter, filterArgs, searchControls, requestControls);
                }
-               List singleResult = Tools.toList(results);
+               List singleResult = results;
 
                if (log.isLoggable(Level.FINER) && merged != null)
                {
@@ -3408,7 +3880,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                }
 
                merged.addAll(singleResult);
-               results.close();
             }
 
 
@@ -3418,10 +3889,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       }
       finally
       {
-         if (results != null)
-         {
-            results.close();
-         }
          ldapContext.close();
       }
 
@@ -3438,7 +3905,204 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          }
       }
 
+      if (log.isLoggable(Level.FINER))
+         {
+            Tools.logMethodOut(
+               log,
+               Level.FINER,
+               "searchIdentityObjects",
+               finalResults);
+         }
+
       return finalResults;
+   }
+
+   /**
+    * Separate search method in which additional stuff like Simple Paged Results extension are applied
+    * @param ldapContext
+    * @param jndiName
+    * @param filter
+    * @param filterArgs
+    * @param searchControls
+    * @param requestControls
+    * @return
+    * @throws NamingException
+    */
+   protected List<SerializableSearchResult> searchLDAP(LdapContext ldapContext,
+                                           Name jndiName,
+                                           String filter,
+                                           Object[] filterArgs,
+                                           SearchControls searchControls,
+                                           Control[] requestControls) throws NamingException
+   {
+
+      if (log.isLoggable(Level.FINER))
+      {
+         Tools.logMethodIn(
+            log,
+            Level.FINER,
+            "searchLDAP",
+            new Object[]{
+               "jndiName", jndiName,
+               "filterArgs", filterArgs,
+               "SearchControls", searchControls,
+               "requestControls", requestControls
+            });
+      }
+
+      // Add paged controls if needed
+
+      int pageSize = configuration.getPagedExtensionSize();
+
+      if (configuration.isPagedExtensionSupported())
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.finer("Adding 'Simple Paged Results' extension to LDAP search with page size: " + pageSize);
+         }
+
+         try
+         {
+            // Merge existing controls with PageResultscontrol
+            if (requestControls != null)
+            {
+
+               List<Control> controls = new ArrayList<Control>();
+               controls.addAll(Arrays.asList(requestControls));
+               controls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
+
+               ldapContext.setRequestControls(controls.toArray(new Control[controls.size()]));
+            }
+            else
+            {
+               ldapContext.setRequestControls(new Control[]{
+                   new PagedResultsControl(pageSize, Control.CRITICAL)
+               });
+            }
+         }
+         catch (IOException e)
+         {
+            if (log.isLoggable(Level.INFO))
+            {
+               log.log(Level.INFO, "Could not add 'Simple Paged Results' extension: ", e);
+            }
+         }
+      }
+      else
+      {
+         ldapContext.setRequestControls(requestControls);
+      }
+
+      int count = 0;
+      byte[] cookie = null;
+      int total = -1;
+
+      List<SerializableSearchResult> results = new LinkedList<SerializableSearchResult>();
+
+
+      while(true)
+      {
+         count++;
+
+         //System.err.println("Search loop count = " + count);
+
+         // Perform the search
+
+         NamingEnumeration resultsEnumeration = null;
+
+         if (filterArgs == null)
+         {
+            resultsEnumeration = ldapContext.search(jndiName, filter, searchControls);
+         }
+         else
+         {
+            resultsEnumeration = ldapContext.search(jndiName, filter, filterArgs, searchControls);
+         }
+
+         if (resultsEnumeration != null)
+         {
+            //results.addAll(Tools.toList(resultsEnumeration));
+
+            while (resultsEnumeration.hasMoreElements())
+            {
+               SearchResult sr =  (SearchResult)resultsEnumeration.nextElement();
+               results.add(new SerializableSearchResult(sr));
+            }
+
+            resultsEnumeration.close();
+         }
+
+         if (configuration.isPagedExtensionSupported())
+         {
+
+
+            // Examine the paged results control response
+            Control[] controls = ldapContext.getResponseControls();
+            if(controls!=null)
+            {
+               for(int k = 0; k<controls.length; k++)
+               {
+                  if(controls[k] instanceof PagedResultsResponseControl)
+                  {
+                     PagedResultsResponseControl prrc =
+                        (PagedResultsResponseControl)controls[k];
+                     total = prrc.getResultSize();
+                     cookie = prrc.getCookie();
+                  }
+               }
+            }
+
+            if (log.isLoggable(Level.FINER))
+            {
+               log.finer("'Simple Paged Results' extension search pass: " + count +
+                                                           "; pageSize: " + pageSize +
+                                                              "; total: " + total);
+            }
+         }
+
+         if(cookie == null)
+         {
+            break;
+         }
+
+         if (configuration.isPagedExtensionSupported())
+         {
+            // Re-activate paged results
+            try
+            {
+               if (requestControls != null)
+               {
+                  List<Control> controls = new LinkedList<Control>();
+                  controls.addAll(Arrays.asList(requestControls));
+                  controls.add(new PagedResultsControl(pageSize, cookie, Control.CRITICAL));
+
+                  ldapContext.setRequestControls(controls.toArray(new Control[controls.size()]));
+
+               }
+               else
+               {
+                  ldapContext.setRequestControls(new Control[]{
+                     new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
+               }
+            }
+            catch (IOException e)
+            {
+               if (log.isLoggable(Level.INFO))
+               {
+                  log.log(Level.INFO, "Could not add 'Simple Paged Results' extension: ", e);
+               }
+            }
+         }
+      }
+
+      if (log.isLoggable(Level.FINER) && results != null)
+      {
+         log.log(Level.FINER, "LDAP Search returned ", + results.size() + " results");
+      }
+
+
+      return results;
+
    }
 
    // HELPER

@@ -110,6 +110,18 @@ public class CommonIdentityStoreTest extends Assert
 
       assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam//Ewa////Toto*%.$", IdentityTypeEnum.USER));
 
+      user1 = testContext.getStore().createIdentityObject(testContext.getCtx(), "Adam(Ewa)", IdentityTypeEnum.USER);
+
+      assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam(Ewa)", IdentityTypeEnum.USER));
+
+      user1 = testContext.getStore().createIdentityObject(testContext.getCtx(), "Adam!(Ewa)", IdentityTypeEnum.USER);
+
+      assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "Adam!(Ewa)", IdentityTypeEnum.USER));
+
+      user1 = testContext.getStore().createIdentityObject(testContext.getCtx(), "!(06_13_07 Sche) !(0", IdentityTypeEnum.USER);
+
+      assertNotNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "!(06_13_07 Sche) !(0", IdentityTypeEnum.USER));
+
 
 
       testContext.commit();
@@ -148,12 +160,12 @@ public class CommonIdentityStoreTest extends Assert
       results = testContext.getStore().findIdentityObject(testContext.getCtx(), IdentityTypeEnum.ROLE, null);
       assertEquals(0, results.size());
 
-
       // Check case sensitive checks
 
       assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "adam", IdentityTypeEnum.USER));
       assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "ADAM", IdentityTypeEnum.USER));
       assertNull(testContext.getStore().findIdentityObject(testContext.getCtx(), "deVISIon3", IdentityTypeEnum.ORGANIZATION));
+
 
       testContext.commit();
 

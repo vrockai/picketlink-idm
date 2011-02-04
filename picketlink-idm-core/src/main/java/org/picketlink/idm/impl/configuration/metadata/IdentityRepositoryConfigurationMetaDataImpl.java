@@ -100,9 +100,9 @@ public class IdentityRepositoryConfigurationMetaDataImpl implements IdentityRepo
       return defaultAttributeStoreId;
    }
 
-   public void setDefaultAttributeStoreId(String defaultAttributeStoreId)
+   public void setDefaultAttributeStoreId(String defaultAttributeStroeId)
    {
-      this.defaultAttributeStoreId = defaultAttributeStoreId;
+      this.defaultAttributeStoreId = defaultAttributeStroeId;
    }
 
    public List<IdentityStoreMappingMetaData> getIdentityStoreToIdentityObjectTypeMappings()

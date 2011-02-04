@@ -29,30 +29,33 @@ import java.util.Map;
 
 /**
  * Factory interface for creating IdentityStoreSession instances.
- * 
+ *
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @author Shane Bryzak
  * @version : 0.1 $
  */
 public interface IdentityStoreSessionFactory extends Serializable
 {
+
+
    /**
+    * @return
     * Creates a new IdentityStoreSession.
-    * 
+    *
     * @return The new IdentityStoreSession
     * @throws IdentityException
     */
    IdentityStoreSession createIdentityStoreSession() throws IdentityException;
-   
+
    /**
-    * Creates an IdentityStoreSession.  This factory method allows additional 
-    * session options to be passed in which may be used by the factory method 
+    * Creates an IdentityStoreSession.  This factory method allows additional
+    * session options to be passed in which may be used by the factory method
     * implementation to customise the IdentityStoreSession returned.
-    * 
+    *
     * @param sessionOptions A Map containing the session option values
     * @return The new IdentityStoreSession
     * @throws IdentityException
     */
    IdentityStoreSession createIdentityStoreSession(Map<String,Object> sessionOptions) throws IdentityException;
-   
+
 }

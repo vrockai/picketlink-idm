@@ -348,7 +348,7 @@ public class HibernateIdentityStoreTestCase extends IdentityTestPOJO implements 
    {
       assertEquals(2, store.getSupportedFeatures().getSupportedRelationshipTypes().size());
    }
-   
+
    public void testRelationships() throws Exception
    {
       commonTest.testRelationships();

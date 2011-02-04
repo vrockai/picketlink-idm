@@ -27,11 +27,10 @@ import java.util.Map;
 import org.picketlink.idm.common.exception.IdentityException;
 
 /**
- * Creates IdentitySession objects for a given Realm.  An IdentitySessionFactory
- * is typically created from an IdentityConfiguration.  
- * 
+ * Creates IdentitySession objects for a given Realm. An IdentitySessionFactory
+ * is typically created from an IdentityConfiguration.
+ *
  * @see org.picketlink.idm.api.cfg.IdentityConfiguration#buildIdentitySessionFactory()
- * 
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @author Shane Bryzak
  * @version : 0.1 $
@@ -50,25 +49,25 @@ public interface IdentitySessionFactory
 
    /**
     * Creates a new IdentitySession.
-    * 
+    *
     * @param realmName The name of the realm
     * @return The new IdentitySession
     */
    IdentitySession createIdentitySession(String realmName) throws IdentityException;
-   
+
+
    /**
     * Creates a new IdentitySession for the given realm.  This method accepts
     * a sessionOptions parameter which may be used to customize the IdentitySession
     * instance returned.
-    *  
+    *
     * @param realmName The name of the realm
     * @param sessionOptions A Map containing session options
     * @return The new IdentitySession
     * @throws IdentityException
     */
-   IdentitySession createIdentitySession(String realmName, 
-         Map<String,Object> sessionOptions) throws IdentityException;
-
+  IdentitySession createIdentitySession(String realmName,
+        Map<String,Object> sessionOptions) throws IdentityException;
 
    /**
     * Get current open session associated with a realm. If not present, creates one

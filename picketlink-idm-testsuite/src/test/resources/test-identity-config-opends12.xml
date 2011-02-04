@@ -211,6 +211,14 @@
                         <isReadOnly>false</isReadOnly>
                         <isUnique>true</isUnique>
                      </attribute>
+                     <attribute>
+                        <name>description</name>
+                        <mapping>description</mapping>
+                        <type>text</type>
+                        <isRequired>false</isRequired>
+                        <isMultivalued>false</isMultivalued>
+                        <isReadOnly>true</isReadOnly>
+                     </attribute>
                   </attributes>
                   <options/>
                </identity-object-type>
@@ -515,7 +523,7 @@
                         <type>text</type>
                         <isRequired>false</isRequired>
                         <isMultivalued>false</isMultivalued>
-                        <isReadOnly>false</isReadOnly>
+                        <isReadOnly>true</isReadOnly>
                      </attribute>
                      <attribute>
                         <name>carLicense</name>
@@ -898,6 +906,14 @@
               <option>
                 <name>cache.configFile</name>
                 <value>jboss-cache.xml</value>
+              </option>
+              <option>
+                <name>pagedResultsExtensionSupported</name>
+                <value>true</value>
+              </option>
+              <option>
+                <name>pagedResultsExtensionSize</name>
+                <value>1</value>
               </option>
             </options>
          </identity-store>
