@@ -36,6 +36,7 @@ import org.picketlink.idm.common.exception.IdentityException;
 import org.picketlink.idm.impl.helper.SecurityActions;
 import org.picketlink.idm.impl.cache.JBossCacheIdentityStoreWrapper;
 
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashSet;
@@ -56,9 +57,13 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
 
    private static Logger log = Logger.getLogger(AbstractIdentityStoreRepository.class.getName());
 
-   protected Map<String, IdentityStore> identityStoreMappings = new HashMap<String, IdentityStore>();
+   protected Map<String, List<IdentityStore>> identityStoreMappings = new HashMap<String, List<IdentityStore>>();
 
-   protected Map<String, AttributeStore> attributeStoreMappings = new HashMap<String, AttributeStore>();
+   protected Map<String, List<AttributeStore>> attributeStoreMappings = new HashMap<String, List<AttributeStore>>();
+
+   protected Set<IdentityStore> configuredIdentityStores = new HashSet<IdentityStore>();
+
+   protected Set<AttributeStore> configuredAttributeStores = new HashSet<AttributeStore>();
 
    protected IdentityStore defaultIdentityStore;
 
@@ -95,6 +100,7 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
       if (asId != null && bootstrappedAttributeStores.keySet().contains(asId))
       {
          defaultAttributeStore = bootstrappedAttributeStores.get(asId);
+         configuredAttributeStores.add(defaultAttributeStore);
 
          //TODO: cache wrap support
       }
@@ -109,6 +115,7 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
       if (isId != null && bootstrappedIdentityStores.keySet().contains(isId))
       {
          defaultIdentityStore = bootstrappedIdentityStores.get(isId);
+         configuredIdentityStores.add(defaultIdentityStore);
 
          String cacheOption = configurationMD.getOptionSingleValue(CACHE_OPTION);
 
@@ -282,8 +289,24 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
 
          for (String mapping : identityObjectTypeMappings)
          {
-            identityStoreMappings.put(mapping, store);
-            attributeStoreMappings.put(mapping, store);
+            List<IdentityStore> mappedIS = identityStoreMappings.get(mapping);
+            if (mappedIS == null)
+            {
+               mappedIS = new LinkedList<IdentityStore>();
+               identityStoreMappings.put(mapping, mappedIS);
+            }
+            mappedIS.add(store);
+            configuredIdentityStores.add(store);
+
+            List<AttributeStore> mappedAS = attributeStoreMappings.get(mapping);
+            if (mappedAS == null)
+            {
+               mappedAS = new LinkedList<AttributeStore>();
+               attributeStoreMappings.put(mapping, mappedAS);
+            }
+            mappedAS.add(store);
+            configuredAttributeStores.add(store);
+
          }
 
       }
@@ -292,27 +315,73 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
 
    public Set<IdentityStore> getConfiguredIdentityStores()
    {
-      return new HashSet<IdentityStore>(identityStoreMappings.values());
+      return new HashSet<IdentityStore>(configuredIdentityStores);
    }
 
    public Set<AttributeStore> getConfiguredAttributeStores()
    {
-      return new HashSet<AttributeStore>(attributeStoreMappings.values());
+      return new HashSet<AttributeStore>(configuredIdentityStores);
    }
 
    public Map<String, IdentityStore> getIdentityStoreMappings()
    {
-      return identityStoreMappings;
+      Map<String, IdentityStore> firstInTheList = new HashMap<String, IdentityStore>();
+
+      for (Map.Entry<String, List<IdentityStore>> entry : identityStoreMappings.entrySet())
+      {
+         if(entry.getValue().size() > 0)
+         {
+            firstInTheList.put(entry.getKey(), entry.getValue().get(0));
+         }
+      }
+
+      return firstInTheList;
    }
 
    public Map<String, AttributeStore> getAttributeStoreMappings()
    {
-      return attributeStoreMappings;
+      Map<String, AttributeStore> firstInTheList = new HashMap<String, AttributeStore>();
+
+      for (Map.Entry<String, List<AttributeStore>> entry : attributeStoreMappings.entrySet())
+      {
+         if(entry.getValue().size() > 0)
+         {
+            firstInTheList.put(entry.getKey(), entry.getValue().get(0));
+         }
+      }
+
+      return firstInTheList;
+   }
+
+   public List<IdentityStore> getIdentityStores(IdentityObjectType identityObjectType) throws IdentityException
+   {
+      if (identityStoreMappings.keySet().contains(identityObjectType.getName()))
+      {
+         return identityStoreMappings.get(identityObjectType.getName());
+      }
+      else
+      {
+         return new LinkedList<IdentityStore>();
+      }
+
+   }
+
+   public List<AttributeStore> getAttributeStores(IdentityObjectType identityObjectType) throws IdentityException
+   {
+      if (attributeStoreMappings.keySet().contains(identityObjectType.getName()))
+      {
+         return attributeStoreMappings.get(identityObjectType.getName());
+      }
+      else
+      {
+         return new LinkedList<AttributeStore>();
+      }
+
    }
 
    public IdentityStore getIdentityStore(IdentityObjectType identityObjectType) throws IdentityException
    {
-      IdentityStore store = identityStoreMappings.get(identityObjectType.getName());
+      IdentityStore store = getIdentityStoreMappings().get(identityObjectType.getName());
 
       if (store == null)
       {
@@ -333,7 +402,7 @@ public abstract class AbstractIdentityStoreRepository implements IdentityStoreRe
 
    public AttributeStore getAttributeStore(IdentityObjectType identityObjectType) throws IdentityException
    {
-      AttributeStore store = attributeStoreMappings.get(identityObjectType.getName());
+      AttributeStore store = getAttributeStoreMappings().get(identityObjectType.getName());
 
       if (store == null)
       {

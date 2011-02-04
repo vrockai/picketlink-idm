@@ -21,6 +21,7 @@
  */
 package org.picketlink.idm.spi.repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,11 +75,24 @@ public interface IdentityStoreRepository extends IdentityStore
     */
    IdentityStore getIdentityStore(IdentityObjectType identityObjectType) throws IdentityException;
 
+    /**
+    * @param identityObjectType
+    * @return proper identity store collection configured to store given identity type
+    */
+   List<IdentityStore> getIdentityStores(IdentityObjectType identityObjectType) throws IdentityException;
+
+
    /**
     * @param identityObjectType
-    * @return proper identity store to store given identity type
+    * @return proper attribute store to store given identity type
     */
    AttributeStore getAttributeStore(IdentityObjectType identityObjectType) throws IdentityException;
+
+   /**
+    * @param identityObjectType
+    * @return proper attribute store to store given identity type
+    */
+   List<AttributeStore> getAttributeStores(IdentityObjectType identityObjectType) throws IdentityException;
 
 
    /**

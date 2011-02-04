@@ -274,12 +274,12 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       Map<String, IdentityStoreSession> sessions = new HashMap<String, IdentityStoreSession>();
 
-      for (IdentityStore identityStore : identityStoreMappings.values())
+      for (IdentityStore identityStore : configuredIdentityStores)
       {
          sessions.put(identityStore.getId(), identityStore.createIdentityStoreSession());
       }
 
-      for (AttributeStore attributeStore : attributeStoreMappings.values())
+      for (AttributeStore attributeStore : configuredIdentityStores)
       {
          if (!sessions.containsKey(attributeStore.getId()))
          {
@@ -305,12 +305,12 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       Map<String, IdentityStoreSession> sessions = new HashMap<String, IdentityStoreSession>();
 
-      for (IdentityStore identityStore : identityStoreMappings.values())
+      for (IdentityStore identityStore : configuredIdentityStores)
       {
          sessions.put(identityStore.getId(), identityStore.createIdentityStoreSession(sessionOptions));
       }
 
-      for (AttributeStore attributeStore : attributeStoreMappings.values())
+      for (AttributeStore attributeStore : configuredIdentityStores)
       {
          if (!sessions.containsKey(attributeStore.getId()))
          {
@@ -373,6 +373,40 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       if (ids == null)
       {
          ids = defaultIdentityStore;
+      }
+      return ids;
+   }
+
+   List<IdentityStore> resolveIdentityStores(IdentityObjectType iot)
+   {
+
+      List<IdentityStore> ids = null;
+      try
+      {
+         ids = getIdentityStores(iot);
+      }
+      catch (IdentityException e)
+      {
+         if (isAllowNotDefinedAttributes())
+         {
+            ids = new LinkedList<IdentityStore>();
+            ids.add(defaultIdentityStore);
+            return ids;
+         }
+
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
+         throw new IllegalStateException("Used IdentityObjectType not mapped. Consider using " + ALLOW_NOT_DEFINED_IDENTITY_OBJECT_TYPES_OPTION +
+            " repository option switch: " + iot );
+      }
+
+      if (ids == null || ids.size() == 0)
+      {
+         ids = new LinkedList<IdentityStore>();
+         ids.add(defaultIdentityStore);
       }
       return ids;
    }
@@ -505,31 +539,36 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
    public void removeIdentityObject(IdentityStoreInvocationContext invocationCtx, IdentityObject identity) throws IdentityException
    {
-      IdentityStore targetStore = resolveIdentityStore(identity);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+      List<IdentityStore> targetStores = resolveIdentityStores(identity.getIdentityType());
       IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
 
-      if (isIdentityStoreReadOnly(targetStore))
+      for (IdentityStore targetStore : targetStores)
       {
-         targetStore = defaultIdentityStore;
-         targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
 
-      }
-
-      try
-      {
-         targetStore.removeIdentityObject(targetCtx, identity);
-      }
-      catch (IdentityException e)
-      {
-         if (log.isLoggable(Level.INFO))
+         if (isIdentityStoreReadOnly(targetStore))
          {
-            log.log(Level.INFO, "Failed to remove IdentityObject from target store: ", e);
+            targetStore = defaultIdentityStore;
+            targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+
+         }
+
+         try
+         {
+            targetStore.removeIdentityObject(targetCtx, identity);
+         }
+         catch (IdentityException e)
+         {
+            if (log.isLoggable(Level.INFO))
+            {
+               log.log(Level.INFO, "Failed to remove IdentityObject from target store: ", e);
+            }
          }
       }
 
+
       // Sync remove in default store
-      if (targetStore != defaultIdentityStore && hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+      if (!targetStores.contains(defaultIdentityStore) && hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
       {
 
          try
@@ -548,61 +587,67 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
    public int getIdentityObjectsCount(IdentityStoreInvocationContext invocationCtx, IdentityObjectType identityType) throws IdentityException
    {
-      IdentityStore targetStore = resolveIdentityStore(identityType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+      List<IdentityStore> targetStores = resolveIdentityStores(identityType);
 
       //TODO: Result may be inaccurate - at least try to check if both stores don't match and return bigger count;
 
       int result = 0;
 
-      try
+      for (IdentityStore targetStore : targetStores)
       {
-         result = targetStore.getIdentityObjectsCount(targetCtx, identityType);
-      }
-      catch (IdentityException e)
-      {
-         if (log.isLoggable(Level.FINER))
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+         try
          {
-            log.log(Level.INFO, "Failed to obtain IdentityObject count: ", e);
+            result += targetStore.getIdentityObjectsCount(targetCtx, identityType);
+         }
+         catch (IdentityException e)
+         {
+            if (log.isLoggable(Level.FINER))
+            {
+               log.log(Level.INFO, "Failed to obtain IdentityObject count: ", e);
+            }
          }
       }
+      
 
       return result;
    }
 
    public IdentityObject findIdentityObject(IdentityStoreInvocationContext invocationContext, String name, IdentityObjectType identityObjectType) throws IdentityException
    {
-      IdentityStore targetStore = resolveIdentityStore(identityObjectType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
+      List<IdentityStore> targetStores = resolveIdentityStores(identityObjectType);
 
 
       IdentityObject io = null;
 
-      try
+      for (IdentityStore targetStore : targetStores)
       {
-         io = targetStore.findIdentityObject(targetCtx, name, identityObjectType);
-      }
-      catch (IdentityException e)
-      {
-         if (log.isLoggable(Level.INFO))
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
+
+         try
          {
-            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
+            io = targetStore.findIdentityObject(targetCtx, name, identityObjectType);
          }
+         catch (IdentityException e)
+         {
+            if (log.isLoggable(Level.INFO))
+            {
+               log.log(Level.INFO, "Failed to create IdentityObject: ", e);
+            }
+         }
+
+         if (io != null)
+         {
+            return io;
+         }
+
       }
 
-      if (io != null)
-      {
-         return io;
-      }
-      else
-      {
-         targetStore = defaultIdentityStore;
-         targetCtx = resolveInvocationContext(defaultIdentityStore, invocationContext);
-      }
-
+      
       try
       {
-         io = targetStore.findIdentityObject(targetCtx, name, identityObjectType);
+         io = defaultIdentityStore.
+            findIdentityObject(resolveInvocationContext(defaultIdentityStore, invocationContext), name, identityObjectType);
       }
       catch (IdentityException e)
       {
@@ -633,21 +678,25 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       return defaultIdentityStore.findIdentityObject(invocationContext, id);
    }
 
-   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx, IdentityObjectType identityType, IdentityObjectSearchCriteria criteria) throws IdentityException
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                                        IdentityObjectType identityType,
+                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
    {
-      IdentityStore targetStore = resolveIdentityStore(identityType);
-      IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+      List<IdentityStore> targetStores = resolveIdentityStores(identityType);
 
       Collection<IdentityObject> results = new LinkedList<IdentityObject>();
       Collection<IdentityObject> defaultIOs = new LinkedList<IdentityObject>();
 
-      if (targetStore == defaultIdentityStore)
+
+
+      if (targetStores.size() == 1 && targetStores.contains(defaultIdentityStore))
       {
          Collection<IdentityObject> resx = new LinkedList<IdentityObject>();
 
          try
          {
-            resx = targetStore.findIdentityObject(targetCtx, identityType, criteria);
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
+            resx = defaultIdentityStore.findIdentityObject(targetCtx, identityType, criteria);
          }
          catch (IdentityException e)
          {
@@ -661,25 +710,28 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       else
       {
+
+
          IdentitySearchCriteriaImpl c = null;
          if (criteria != null)
          {
             c = new IdentitySearchCriteriaImpl(criteria);
             c.setPaged(false);
          }
-
          // Get results from default store with not paged criteria
          defaultIOs = defaultIdentityStore.
             findIdentityObject(resolveInvocationContext(defaultIdentityStore, invocationCtx), identityType, c);
 
          // if default store results are not present then apply criteria. Otherwise apply criteria without page
          // as result need to be merged
-         if (defaultIOs.size() == 0)
+         if (defaultIOs.size() == 0 && targetStores.size() == 1)
          {
             Collection<IdentityObject> resx = new LinkedList<IdentityObject>();
 
             try
             {
+               IdentityStore targetStore = targetStores.get(0);
+               IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
                resx =  targetStore.findIdentityObject(targetCtx, identityType, criteria);
             }
             catch (IdentityException e)
@@ -695,17 +747,22 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          else
          {
 
-            try
+            for (IdentityStore targetStore : targetStores)
             {
-               results = targetStore.findIdentityObject(targetCtx, identityType, c);
-            }
-            catch (IdentityException e)
-            {
-               if (log.isLoggable(Level.FINER))
+               try
                {
-                  log.log(Level.FINER, "Exception occurred: ", e);
+                  IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
+                  results.addAll(targetStore.findIdentityObject(targetCtx, identityType, c));
+               }
+               catch (IdentityException e)
+               {
+                  if (log.isLoggable(Level.FINER))
+                  {
+                     log.log(Level.FINER, "Exception occurred: ", e);
+                  }
                }
             }
+
          }
 
       }
@@ -757,14 +814,14 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       try
       {
-         IdentityStore mappedStore = resolveIdentityStore(identity);
+         List<IdentityStore> mappedStores = resolveIdentityStores(identity.getIdentityType());
 
          IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
 
          IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
 
-         if (mappedStore == defaultIdentityStore)
+         if (mappedStores.size() == 1 && mappedStores.contains(defaultIdentityStore));
          {
             return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
          }
