@@ -300,6 +300,37 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       return new RepositoryIdentityStoreSessionImpl(sessions);
    }
 
+   public IdentityStoreSession createIdentityStoreSession(
+         Map<String, Object> sessionOptions) throws IdentityException
+   {
+      Map<String, IdentityStoreSession> sessions = new HashMap<String, IdentityStoreSession>();
+
+      for (IdentityStore identityStore : identityStoreMappings.values())
+      {
+         sessions.put(identityStore.getId(), identityStore.createIdentityStoreSession(sessionOptions));
+      }
+
+      for (AttributeStore attributeStore : attributeStoreMappings.values())
+      {
+         if (!sessions.containsKey(attributeStore.getId()))
+         {
+            sessions.put(attributeStore.getId(), attributeStore.createIdentityStoreSession(sessionOptions));
+         }
+      }
+
+      if (!sessions.containsKey(defaultAttributeStore.getId()))
+      {
+         sessions.put(defaultAttributeStore.getId(), defaultAttributeStore.createIdentityStoreSession(sessionOptions));
+      }
+
+      if (!sessions.containsKey(defaultIdentityStore.getId()))
+      {
+         sessions.put(defaultIdentityStore.getId(), defaultIdentityStore.createIdentityStoreSession(sessionOptions));
+      }
+
+      return new RepositoryIdentityStoreSessionImpl(sessions);
+   }
+
    public String getId()
    {
       return id;

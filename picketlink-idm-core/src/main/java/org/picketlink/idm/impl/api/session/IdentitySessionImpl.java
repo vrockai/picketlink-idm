@@ -121,9 +121,21 @@ public class IdentitySessionImpl implements IdentitySession, Serializable
                               IdentityConfigurationContext configurationContext,
                               Map<String, List<String>> realmOptions) throws IdentityException
    {
+      this(realmName, repository, typeMapper, apiCacheProvider,
+         configurationContext, realmOptions, null);
+   }
+
+   public IdentitySessionImpl(String realmName,
+                              IdentityStoreRepository repository,
+                              IdentityObjectTypeMapper typeMapper,
+                              APICacheProvider apiCacheProvider,
+                              IdentityConfigurationContext configurationContext,
+                              Map<String, List<String>> realmOptions,
+                              Map<String,Object> sessionOptions) throws IdentityException
+   {
       this.realmName = realmName;
 
-      IdentityStoreSession storeSession = repository.createIdentityStoreSession();
+      IdentityStoreSession storeSession = repository.createIdentityStoreSession(sessionOptions);
       final IdentityStoreInvocationContext invocationCtx = new SimpleIdentityStoreInvocationContext(storeSession, realmName,  String.valueOf(this.hashCode()));
 
       IdentityStoreInvocationContextResolver resolver = new IdentityStoreInvocationContextResolver()

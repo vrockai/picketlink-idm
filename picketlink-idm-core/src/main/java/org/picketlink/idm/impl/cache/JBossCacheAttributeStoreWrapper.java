@@ -84,6 +84,13 @@ public class JBossCacheAttributeStoreWrapper implements AttributeStore
       return attributeStore.createIdentityStoreSession();
    }
 
+   public IdentityStoreSession createIdentityStoreSession(
+         Map<String, Object> sessionOptions) throws IdentityException
+   {
+      return attributeStore.createIdentityStoreSession(sessionOptions);
+   }
+
+
    public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext,
                                                  IdentityObjectType identityType) throws IdentityException
    {

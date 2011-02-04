@@ -256,22 +256,25 @@ public class IdentityConfigurationImpl
          String cacheRegistryName = null;
 
          // Parse all 'cache.' prefixed options
-         for (String key : metaData.getOptions().keySet())
+         if (metaData.getOptions() != null)
          {
-            if (key.startsWith("cache."))
+            for (String key : metaData.getOptions().keySet())
             {
-               if (metaData.getOptions().get(key).size() > 0)
+               if (key.startsWith("cache."))
                {
-                  cacheProps.put(key, metaData.getOptions().get(key).get(0));
-               }
-               if (key.equals("cache.providerClass") && metaData.getOptions().get(key).size() > 0)
-               {
-                  cacheClassName = metaData.getOptions().get(key).get(0);
-               }
+                  if (metaData.getOptions().get(key).size() > 0)
+                  {
+                     cacheProps.put(key, metaData.getOptions().get(key).get(0));
+                  }
+                  if (key.equals("cache.providerClass") && metaData.getOptions().get(key).size() > 0)
+                  {
+                     cacheClassName = metaData.getOptions().get(key).get(0);
+                  }
 
-               if (key.equals("cache.providerRegistryName") && metaData.getOptions().get(key).size() > 0)
-               {
-                  cacheRegistryName = metaData.getOptions().get(key).get(0);
+                  if (key.equals("cache.providerRegistryName") && metaData.getOptions().get(key).size() > 0)
+                  {
+                     cacheRegistryName = metaData.getOptions().get(key).get(0);
+                  }
                }
             }
          }
