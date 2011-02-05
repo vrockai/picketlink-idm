@@ -30,7 +30,10 @@ import org.picketlink.idm.impl.LDAPTestPOJO;
 public class ManyLDAPStoresTestCase extends LDAPTestPOJO
 {
 
-   
+    public void testSimple() throws Exception
+    {
+       assertTrue(true);
+    }
 
    
 

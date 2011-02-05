@@ -814,14 +814,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       try
       {
-         List<IdentityStore> mappedStores = resolveIdentityStores(identity.getIdentityType());
+         //List<IdentityStore> mappedStores = resolveIdentityStores(identity.getIdentityType());
+         IdentityStore mappedStore = resolveIdentityStore(identity.getIdentityType());
 
          IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
 
          IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
 
-         if (mappedStores.size() == 1 && mappedStores.contains(defaultIdentityStore));
+         //if (mappedStores.size() == 1 && mappedStores.contains(defaultIdentityStore))
+         if (mappedStore.equals(defaultIdentityStore))
          {
             return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
          }
