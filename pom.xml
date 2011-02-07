@@ -34,6 +34,7 @@
             <module>picketlink-idm-api</module>
             <module>picketlink-idm-core</module>
             <module>picketlink-idm-hibernate</module>
+            <module>picketlink-idm-jpa</module>
             <module>picketlink-idm-ldap</module>
             <module>picketlink-idm-cache</module>
             <module>picketlink-idm-auth</module>
@@ -51,6 +52,7 @@
             <module>picketlink-idm-api</module>
             <module>picketlink-idm-core</module>
             <module>picketlink-idm-hibernate</module>
+            <module>picketlink-idm-jpa</module>
             <module>picketlink-idm-ldap</module>
             <module>picketlink-idm-cache</module>
             <module>picketlink-idm-auth</module>
@@ -80,6 +82,7 @@
             <module>picketlink-idm-api</module>
             <module>picketlink-idm-core</module>
             <module>picketlink-idm-hibernate</module>
+            <module>picketlink-idm-jpa</module>
             <module>picketlink-idm-ldap</module>
             <module>picketlink-idm-cache</module>
             <module>picketlink-idm-auth</module>
