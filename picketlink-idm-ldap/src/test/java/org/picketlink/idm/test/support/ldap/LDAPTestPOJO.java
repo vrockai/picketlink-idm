@@ -20,11 +20,10 @@
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
 
-package org.picketlink.idm.impl;
+package org.picketlink.idm.test.support.ldap;
 
-
+import org.picketlink.idm.test.support.opends.OpenDSService;
 import org.jboss.portal.test.framework.embedded.DSConfig;
-import org.jboss.unit.api.pojo.annotations.Parameter;
 
 import java.net.URL;
 import java.util.Hashtable;
@@ -36,8 +35,8 @@ import javax.naming.directory.DirContext;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
-import org.picketlink.idm.test.support.opends.OpenDSService;
 import org.opends.server.tools.LDAPModify;
+import org.picketlink.idm.test.support.IdentityTestPOJO;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -87,7 +86,6 @@ public class LDAPTestPOJO extends IdentityTestPOJO
    @Override
    public void stop() throws Exception
    {
-      // System.out.println("t2");
       cleanUp(new InitialLdapContext(env, null));
 
       super.stop();
@@ -101,7 +99,7 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
    public void overrideFromProperties() throws Exception
    {
-      super.overrideFromProperties();
+//      super.overrideFromProperties();
 
       String dirName = System.getProperties().getProperty("directoryName");
 
@@ -126,7 +124,6 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
    }
 
-   @Parameter
    public void setDirectoryName(String directoryName)
    {
       this.directoryName = directoryName;
@@ -144,7 +141,12 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
    public void populateClean() throws Exception
    {
-      populateLDIF(directoryConfig.getPopulateLdif());
+
+      String ldif = directoryConfig.getPopulateLdif();
+      if (ldif != null && ldif.length() != 0)
+      {
+         populateLDIF(directoryConfig.getPopulateLdif());
+      }
    }
 
    public void populateLDIF(String ldif) throws Exception
@@ -152,8 +154,6 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
       URL ldifURL = Thread.currentThread().getContextClassLoader().getResource(ldif);
 
-      System.out.println("LDIF: " + ldif);
-      System.out.println("LDIF: " + ldifURL);
       System.out.println("LDIF: " + ldifURL.toURI().getPath());
 
       String[] cmd = new String[] {"-h", directoryConfig.getHost(),

@@ -283,11 +283,11 @@ public class RoleManagerTest extends Assert
 
       session.getRoleManager().createRole("rt1", "u1", g1.getKey());
 
-      assertNotNull(session.getRoleManager().getRole("rt1","u1", g1.getKey()));
+      assertNotNull(session.getRoleManager().getRole("rt1", "u1", g1.getKey()));
 
       session.getRoleManager().removeRoleType("rt1");
 
-      assertNull(session.getRoleManager().getRole("rt1","u1", g1.getKey()));
+      assertNull(session.getRoleManager().getRole("rt1", "u1", g1.getKey()));
 
 
 

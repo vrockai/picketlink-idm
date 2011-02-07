@@ -29,6 +29,14 @@
          <artifactId>picketlink-idm-core</artifactId>
          <version>${project.version}</version>
       </dependency>
+     <dependency>
+         <groupId>org.picketlink.idm</groupId>
+         <artifactId>picketlink-idm-testsuite</artifactId>
+         <version>${project.version}</version>
+         <type>test-jar</type>
+         <!--<classifier>test</classifier>-->
+         <scope>test</scope>
+      </dependency>
 
       <dependency>
          <groupId>org.jboss.unit</groupId>

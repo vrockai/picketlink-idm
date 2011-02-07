@@ -299,7 +299,7 @@ public class RelationshipManagerTest extends Assert
       // #7
       assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user1, ORGANIZATION).size());
       assertEquals(0, session.getRelationshipManager().findAssociatedGroups(user1, ORGANIZATION_UNIT).size());
-      assertEquals(2, session.getRelationshipManager().findAssociatedGroups(user2, (String)null).size());
+      assertEquals(2, session.getRelationshipManager().findAssociatedGroups(user2, (String) null).size());
       assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, ORGANIZATION).size());
       assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, ORGANIZATION_UNIT).size());
       assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user3, ORGANIZATION).size());
@@ -438,7 +438,7 @@ public class RelationshipManagerTest extends Assert
       // Assert
 
       assertEquals(2, session.getRelationshipManager().findRelatedGroups(user2, null, null).size());
-      assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, (IdentitySearchCriteria)null).size());
+      assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, (IdentitySearchCriteria) null).size());
 
       assertEquals(2, session.getRelationshipManager().findAssociatedUsers(group1, false, null).size());
       assertEquals(4, session.getRelationshipManager().findRelatedUsers(group1, null).size());
@@ -446,10 +446,10 @@ public class RelationshipManagerTest extends Assert
       assertEquals(0, session.getRelationshipManager().findAssociatedUsers(group2, false, null).size());
       assertEquals(1, session.getRelationshipManager().findRelatedUsers(group2, null).size());
 
-      assertEquals(0, session.getRelationshipManager().findAssociatedGroups(user3, (IdentitySearchCriteria)null).size());
+      assertEquals(0, session.getRelationshipManager().findAssociatedGroups(user3, (IdentitySearchCriteria) null).size());
       assertEquals(2, session.getRelationshipManager().findRelatedGroups(user3, null, null).size());
 
-      assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, (IdentitySearchCriteria)null).size());
+      assertEquals(1, session.getRelationshipManager().findAssociatedGroups(user2, (IdentitySearchCriteria) null).size());
       assertEquals(2, session.getRelationshipManager().findRelatedGroups(user2, null, null).size());
 
       ctx.commit();

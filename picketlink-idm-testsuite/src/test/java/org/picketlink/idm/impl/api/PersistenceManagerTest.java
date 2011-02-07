@@ -137,7 +137,7 @@ public class PersistenceManagerTest extends Assert
       id = session.getPersistenceManager().createGroupKey("groupName3", PROJECT);
       session.getPersistenceManager().removeGroup(id, false);
 
-      assertEquals(0, session.getPersistenceManager().findGroup(ORGANIZATION, (IdentitySearchCriteria)null).size());
+      assertEquals(0, session.getPersistenceManager().findGroup(ORGANIZATION, (IdentitySearchCriteria) null).size());
       assertEquals(0, session.getPersistenceManager().findGroup(PROJECT).size());
       assertEquals(0, session.getPersistenceManager().findGroup(DEPARTMENT).size());
 
@@ -163,7 +163,7 @@ public class PersistenceManagerTest extends Assert
       //TODO: this should throw some meaningfull exception or simply return null
       //assertNull(session.getPersistenceManager().findUser("olaf"));
 
-      assertEquals(2, session.getPersistenceManager().findUser((IdentitySearchCriteria)null).size());
+      assertEquals(2, session.getPersistenceManager().findUser((IdentitySearchCriteria) null).size());
 
       session.getPersistenceManager().removeUser(u1, false);
 
@@ -173,7 +173,7 @@ public class PersistenceManagerTest extends Assert
 
       assertEquals(0, session.getPersistenceManager().getUserCount());
 
-      assertEquals(0, session.getPersistenceManager().findUser((IdentitySearchCriteria)null).size());
+      assertEquals(0, session.getPersistenceManager().findUser((IdentitySearchCriteria) null).size());
 
 
       ctx.commit();

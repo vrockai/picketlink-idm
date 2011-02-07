@@ -16,18 +16,8 @@ import org.picketlink.idm.api.User;
 import org.jboss.portal.test.framework.embedded.DSConfig;
 import org.jboss.unit.api.pojo.annotations.Parameter;
 
-import java.net.URL;
-import java.util.Hashtable;
-
-import javax.naming.Binding;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.directory.DirContext;
-import javax.naming.ldap.InitialLdapContext;
-import javax.naming.ldap.LdapContext;
-
 import org.picketlink.idm.ldap.cases.LDAPIdentityStoreTests;
-import org.picketlink.idm.opends.OpenDSService;
+import org.picketlink.idm.test.support.opends.OpenDSService;
 /**
  *
  * @author vrockai

@@ -51,7 +51,7 @@ import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.InitialLdapContext;
 import junit.framework.TestCase;
 import org.picketlink.idm.api.IdentitySessionFactory;
-import org.picketlink.idm.opends.OpenDSService;
+import org.picketlink.idm.test.support.opends.OpenDSService;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw

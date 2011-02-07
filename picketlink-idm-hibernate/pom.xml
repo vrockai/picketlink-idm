@@ -30,12 +30,16 @@
          <version>${project.version}</version>
       </dependency>
 
-      <!-- hibernate -->
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-core</artifactId>
-         <version>3.3.2.GA</version>
+     <dependency>
+         <groupId>org.picketlink.idm</groupId>
+         <artifactId>picketlink-idm-testsuite</artifactId>
+         <version>${project.version}</version>
+         <type>test-jar</type>
+         <!--<classifier>test</classifier>-->
+         <scope>test</scope>
       </dependency>
+
+      <!-- hibernate -->
       <dependency>
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-core</artifactId>

@@ -326,7 +326,7 @@ public class OrganizationTest extends Assert
          attributes = session.getAttributesManager().getAttributes(bdawidowUser);
          assertEquals(4, attributes.keySet().size());
          assertEquals("Dawidowicz", (attributes.get(P3PConstants.INFO_USER_NAME_FAMILY)).getValue());
-         assertTrue(Arrays.equals((byte[])attributes.get("picture").getValue(), picture));
+         assertTrue(Arrays.equals((byte[]) attributes.get("picture").getValue(), picture));
 
          // Update
 
@@ -344,7 +344,7 @@ public class OrganizationTest extends Assert
 
          attributes = session.getAttributesManager().getAttributes(bdawidowUser);
          assertEquals(4, attributes.keySet().size());
-         assertTrue(Arrays.equals((byte[])attributes.get("picture").getValue(), picture));
+         assertTrue(Arrays.equals((byte[]) attributes.get("picture").getValue(), picture));
       }
 
 
@@ -419,7 +419,7 @@ public class OrganizationTest extends Assert
          // #2
          Credential password = new PasswordCredential("SuperPassword2345");
          session.getAttributesManager().updateCredential(anotherOne, password);
-         assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[]{password}));
+         assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[] {password}));
 
          // #3
       }
@@ -431,7 +431,7 @@ public class OrganizationTest extends Assert
          random.nextBytes(cert);
          Credential binaryCredential = new BinaryCredential(cert);
          session.getAttributesManager().updateCredential(anotherOne, binaryCredential);
-         assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[]{binaryCredential}));
+         assertTrue(session.getAttributesManager().validateCredentials(anotherOne, new Credential[] {binaryCredential}));
       }
 
       session.getPersistenceManager().createUser("!(06_13_07 Sche) !(0");

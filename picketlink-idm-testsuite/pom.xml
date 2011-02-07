@@ -29,47 +29,47 @@
          <artifactId>picketlink-idm-cache</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm</groupId>
-         <artifactId>picketlink-idm-hibernate</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm</groupId>
-         <artifactId>picketlink-idm-ldap</artifactId>
-         <version>${project.version}</version>
-      </dependency>
+      <!--<dependency>-->
+         <!--<groupId>org.picketlink.idm</groupId>-->
+         <!--<artifactId>picketlink-idm-hibernate</artifactId>-->
+         <!--<version>${project.version}</version>-->
+      <!--</dependency>-->
+      <!--<dependency>-->
+         <!--<groupId>org.picketlink.idm</groupId>-->
+         <!--<artifactId>picketlink-idm-ldap</artifactId>-->
+         <!--<version>${project.version}</version>-->
+      <!--</dependency>-->
 
       <dependency>
          <groupId>org.picketlink.idm</groupId>
          <artifactId>picketlink-idm-core</artifactId>
          <version>${project.version}</version>
          <classifier>tests</classifier>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
 
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <scope>test</scope>
+         <version>3.8.1</version>
       </dependency>
       <dependency>
          <groupId>hsqldb</groupId>
          <artifactId>hsqldb</artifactId>
          <version>1.8.0.7</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
       <dependency>
          <groupId>sun-opends</groupId>
          <artifactId>OpenDS</artifactId>
          <version>1.0.0</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
       <dependency>
          <groupId>berkeleydb</groupId>
          <artifactId>je</artifactId>
          <version>3.2.76</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
 
       <dependency>
@@ -77,7 +77,7 @@
          <artifactId>portal-test</artifactId>
          <version>1.2.2</version>
 
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
          <exclusions>
             <exclusion>
                <groupId>hibernate</groupId>
@@ -110,19 +110,19 @@
          <groupId>jboss.jbossas.core-libs</groupId>
          <artifactId>jboss-local-jdbc</artifactId>
          <version>4.0.4.GA</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
       <dependency>
          <groupId>jboss.jbossas.core-libs</groupId>
          <artifactId>jboss-common-jdbc-wrapper</artifactId>
          <version>4.0.4.GA</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
       <dependency>
          <groupId>jboss</groupId>
          <artifactId>jboss-logging-log4j</artifactId>
          <version>2.0.2.GA</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
          <exclusions>
             <exclusion>
                <groupId>apache-log4j</groupId>
@@ -134,7 +134,7 @@
          <groupId>net.sourceforge.jtds</groupId>
          <artifactId>jtds</artifactId>
          <version>1.2.2</version>
-         <scope>test</scope>
+         <!--<scope>test</scope>-->
       </dependency>
    </dependencies>
 
@@ -172,6 +172,19 @@
                </systemProperties>
             </configuration>
          </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.2</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
 
       </plugins>
    </build>

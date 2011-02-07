@@ -12,14 +12,14 @@
 
         <!--Without LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.api.OrganizationTestCase"/>
+            <class name="org.picketlink.idm.impl.store.hibernate.OrganizationTestCase"/>
             <parameter name="sampleOrganizationRealmName" value="realm://RedHat/DB"/>
             <parameter name="samplePortalRealmName" value="realm://portal/SamplePortal/DB"/>
         </test>
 
         <!--With LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.api.OrganizationLDAPTestCase"/>
+            <class name="org.picketlink.idm.impl.store.ldap.OrganizationLDAPTestCase"/>
             <parameter name="directoryName" value="EmbeddedOpenDS"/>
             <parameter name="sampleOrganizationRealmName" value="realm://RedHat/DB_LDAP"/>
             <parameter name="samplePortalRealmName" value="realm://portal/SamplePortal/DB_LDAP"/>
@@ -27,31 +27,31 @@
 
         <!--Without LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.api.APITestCase"/>
+            <class name="org.picketlink.idm.impl.store.hibernate.APITestCase"/>
             <parameter name="realmName" value="realm://RedHat/DB"/>
         </test>
 
         <!--With LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.api.APILDAPTestCase"/>
+            <class name="org.picketlink.idm.impl.store.ldap.APILDAPTestCase"/>
             <parameter name="directoryName" value="EmbeddedOpenDS"/>
             <parameter name="realmName" value="realm://RedHat/DB_LDAP"/>
         </test>
 
         <!--Without LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.store.hibernate.HibernateIdentityStoreTestCase"/>
+            <class name="HibernateIdentityStoreTestCase"/>
             <parameter name="identityConfig" value="store-test-config.xml"/>
         </test>
 
         <!--Without LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.store.hibernate.HibernateModelTestCase"/>
+            <class name="HibernateModelTestCase"/>
         </test>
 
         <!--With LDAP-->
         <test >
-            <class name="org.picketlink.idm.impl.store.ldap.LDAPIdentityStoreTestCase"/>
+            <class name="LDAPIdentityStoreTestCase"/>
             <parameter name="directoryName" value="EmbeddedOpenDS"/>
             <parameter name="identityConfig" value="store-test-config.xml"/>
         </test>

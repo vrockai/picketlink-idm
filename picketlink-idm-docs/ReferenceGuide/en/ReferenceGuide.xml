@@ -567,7 +567,7 @@ member: uid=admin,ou=People,o=test,dc=portal,dc=example,dc=com
                 One of the best ways to get familiar with the PicketLink IDM component is to look at the source code.
                 You will find link to the subversion repository in the project webpage.
                 There are couple of quite meaningful testcases there. One of the best to start with is
-                org.picketlink.idm.impl.api.OrganizationTest under 'idm-testsuite' module . It contains two example identity structures.
+                OrganizationTest under 'idm-testsuite' module . It contains two example identity structures.
                 One mapping hierarchical organization of Red Hat and JBoss projects and the other describes theoretical
                 portal tree for ACME company.
             </para>
