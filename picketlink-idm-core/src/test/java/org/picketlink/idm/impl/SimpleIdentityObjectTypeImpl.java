@@ -23,6 +23,7 @@
 package org.picketlink.idm.impl;
 
 import org.picketlink.idm.spi.model.IdentityObjectType;
+import org.picketlink.idm.spi.model.IdentityObjectType.TYPE;
 
 import java.io.Serializable;
 
@@ -33,6 +34,8 @@ import java.io.Serializable;
 public class SimpleIdentityObjectTypeImpl implements IdentityObjectType, Serializable
 {
    String name;
+   
+   private TYPE t = TYPE.GROUP;
 
    public SimpleIdentityObjectTypeImpl(String name)
    {
@@ -66,6 +69,17 @@ public class SimpleIdentityObjectTypeImpl implements IdentityObjectType, Seriali
       return true;
    }
 
+   public void setType( TYPE T)
+   {
+      t = T;
+   }
+   
+
+   public TYPE getType()
+   { 
+      return t;
+   }
+   
    @Override
    public int hashCode()
    {

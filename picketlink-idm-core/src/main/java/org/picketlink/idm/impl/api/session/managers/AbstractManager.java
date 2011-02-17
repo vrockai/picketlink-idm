@@ -213,7 +213,7 @@ public abstract class
       return getSessionContext().getIdentityObjectTypeMapper().getIdentityObjectType();
    }
 
-   protected IdentityObjectType getIdentityObjectType(String groupType)
+   protected IdentityObjectType getIdentityObjectType( String groupType)
    {
       return getSessionContext().getIdentityObjectTypeMapper().getIdentityObjectType(groupType);
    }

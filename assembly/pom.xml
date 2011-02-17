@@ -44,51 +44,7 @@
          <artifactId>picketlink-idm-core</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm</groupId>
-         <artifactId>picketlink-idm-hibernate</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm</groupId>
-         <artifactId>picketlink-idm-ldap</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm</groupId>
-         <artifactId>picketlink-idm-cache</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm.integration</groupId>
-         <artifactId>picketlink-idm-jboss5</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm.integration</groupId>
-         <artifactId>picketlink-idm-jboss5-deployer</artifactId>
-         <classifier>config</classifier>
-         <type>zip</type>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.picketlink.idm.integration</groupId>
-         <artifactId>picketlink-idm-jboss5-deployer</artifactId>
-         <classifier>deployer</classifier>
-         <type>zip</type>
-         <version>${project.version}</version>
-      </dependency>
                
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-commons-annotations</artifactId>
-         <version>${hibernate-commons-annotations}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-tools</artifactId>
-         <version>${hibernate-tools-version}</version>
-      </dependency>
       <dependency>
          <groupId>hsqldb</groupId>
          <artifactId>hsqldb</artifactId>
@@ -100,27 +56,11 @@
          <version>${apache.ant.version}</version>
       </dependency>
 		    
-      <!-- Database Drivers -->
-      <dependency>
-         <groupId>mysql</groupId>
-         <artifactId>mysql-connector-java</artifactId>
-         <version>${mysql.connector.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>postgresql</groupId>
-         <artifactId>postgresql</artifactId>
-         <version>${postgresql.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>net.sourceforge.jtds</groupId>
-         <artifactId>jtds</artifactId>
-         <version>${jtds.version}</version>
-      </dependency>
-			
    </dependencies>
 
    <build>
       <plugins>
+<!--
 	      <plugin>
 	        <artifactId>maven-antrun-plugin</artifactId>
 	        <executions>
@@ -140,6 +80,8 @@
 	          </execution>
 	        </executions>
 	      </plugin>
+
+   -->
 	      
 	    <plugin>
         <artifactId>maven-assembly-plugin</artifactId>

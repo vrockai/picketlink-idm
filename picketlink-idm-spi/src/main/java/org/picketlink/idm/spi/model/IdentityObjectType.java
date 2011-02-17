@@ -33,5 +33,8 @@ public interface IdentityObjectType
     * @return
     */
    String getName();
-
+   
+   public enum TYPE { USER,ROLE,GROUP};
+   
+   TYPE getType(); 
 }

@@ -34,6 +34,8 @@ public class SimpleIdentityObjectType implements IdentityObjectType, Serializabl
 {
    private String name;
 
+   private TYPE t = TYPE.GROUP;
+   
    private SimpleIdentityObjectType()
    { 
    }
@@ -87,5 +89,15 @@ public class SimpleIdentityObjectType implements IdentityObjectType, Serializabl
    public int hashCode()
    {
       return name != null ? name.hashCode() : 0;
+   }
+   
+   public void setType( TYPE T)
+   {
+      t = T;
+   }
+
+   public TYPE getType()
+   { 
+      return t;
    }
 }

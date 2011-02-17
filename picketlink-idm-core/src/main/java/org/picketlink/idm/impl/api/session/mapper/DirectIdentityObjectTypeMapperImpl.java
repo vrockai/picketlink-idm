@@ -25,6 +25,7 @@ package org.picketlink.idm.impl.api.session.mapper;
 import java.io.Serializable;
 
 import org.picketlink.idm.spi.model.IdentityObjectType;
+import org.picketlink.idm.spi.model.IdentityObjectType.TYPE;
 import org.picketlink.idm.impl.types.SimpleIdentityObjectType;
 import org.picketlink.idm.impl.api.session.mapper.IdentityObjectTypeMapper;
 
@@ -44,7 +45,9 @@ public class DirectIdentityObjectTypeMapperImpl implements IdentityObjectTypeMap
 
    public IdentityObjectType getIdentityObjectType()
    {
-      return new SimpleIdentityObjectType(identityTypeName);
+      SimpleIdentityObjectType simple =  new SimpleIdentityObjectType(identityTypeName);
+      simple.setType( TYPE.USER );
+      return simple;
    }
 
    public IdentityObjectType getIdentityObjectType(String groupType)
@@ -53,8 +56,10 @@ public class DirectIdentityObjectTypeMapperImpl implements IdentityObjectTypeMap
       {
          throw new IllegalArgumentException("groupType is null");
       }
-
-      return new SimpleIdentityObjectType(groupType);
+      
+      SimpleIdentityObjectType simple =  new SimpleIdentityObjectType(groupType);
+      simple.setType( TYPE.GROUP );
+      return simple;
    }
 
    public String getGroupType(IdentityObjectType identityObjectType)

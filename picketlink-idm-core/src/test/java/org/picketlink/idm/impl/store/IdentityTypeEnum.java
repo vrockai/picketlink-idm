@@ -42,4 +42,9 @@ public enum IdentityTypeEnum implements IdentityObjectType
       return this.name();
    }
 
+   public TYPE getType()
+   { 
+      return null;
+   }
+
 }

@@ -20,6 +20,8 @@
     </dependencySet>
     
       <!-- modules -->    
+
+   <!--
      <dependencySet>
       <outputDirectory>modules</outputDirectory>
       <useStrictFiltering>true</useStrictFiltering>
@@ -36,6 +38,9 @@
       </includes>
       <unpack>true</unpack>
     </dependencySet>  
+
+   -->
+
   </dependencySets>
 
   <fileSets>
@@ -92,6 +97,8 @@
       <directory>../picketlink-idm-core/src/main/java</directory>
       <outputDirectory>src</outputDirectory>
     </fileSet>
+
+  <!--
     <fileSet>
       <directory>../picketlink-idm-hibernate/src/main/java</directory>
       <outputDirectory>src</outputDirectory>
@@ -116,5 +123,7 @@
       <directory>../integration/jboss5/src/main/resources</directory>
       <outputDirectory>src</outputDirectory>
     </fileSet>
+   -->
+
   </fileSets>
 </assembly>
