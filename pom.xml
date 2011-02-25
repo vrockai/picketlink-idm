@@ -33,6 +33,7 @@
             <module>picketlink-idm-spi</module>
             <module>picketlink-idm-api</module>
             <module>picketlink-idm-core</module>
+            <module>picketlink-idm-memory</module>
             <module>picketlink-idm-docs</module>
          </modules>
       </profile>
