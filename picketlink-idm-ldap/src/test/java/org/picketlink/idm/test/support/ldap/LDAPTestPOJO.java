@@ -45,11 +45,11 @@ import org.picketlink.idm.test.support.IdentityTestPOJO;
 public class LDAPTestPOJO extends IdentityTestPOJO
 {
 
-   private String EMBEDDED_OPEN_DS_DIRECTORY_NAME = "EmbeddedOpenDS";
+   public String EMBEDDED_OPEN_DS_DIRECTORY_NAME = "EmbeddedOpenDS";
 
    protected DSConfig directoryConfig;
 
-   private String directories = "datasources/directories.xml";
+   public String directories = "datasources/directories.xml";
 
    //By default use embedded OpenDS
    private String directoryName = EMBEDDED_OPEN_DS_DIRECTORY_NAME;

@@ -73,19 +73,19 @@ public class HibernateTestSupport
       }
       try
       {
-         logger.info("Building JPA EntityManager for unit tests");
+         logger.info("Building Hibernate SessionFactory for unit tests");
          sessionFactory = new Configuration().configure(hibernateConfiguration).buildSessionFactory();
       }
       catch (Exception ex)
       {
          ex.printStackTrace();
-         logger.fine("Exception during JPA EntityManager instanciation.");
+         logger.fine("Exception during Hibernate SessionFactory instanciation.");
          throw ex;
       }
    }
 
    public void stop() throws Exception {
-      logger.info("Shuting down Hibernate JPA layer.");
+      logger.info("Shuting down Hibernate layer.");
       if (sessionFactory != null)
       {
          sessionFactory.close();

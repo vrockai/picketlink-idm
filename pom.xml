@@ -59,6 +59,7 @@
         <module>picketlink-idm-cache</module>
         <module>picketlink-idm-auth</module>
         <module>picketlink-idm-testsuite/integration</module>
+        <module>picketlink-idm-testsuite/performance</module>
         <module>integration</module>
         <module>picketlink-idm-docs</module>
         <module>assembly</module>
