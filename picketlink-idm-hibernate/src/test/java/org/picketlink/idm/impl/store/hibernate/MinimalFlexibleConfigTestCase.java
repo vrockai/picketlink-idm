@@ -28,7 +28,6 @@ import org.picketlink.idm.impl.api.OrganizationTest;
 import org.picketlink.idm.impl.api.PersistenceManagerTest;
 import org.picketlink.idm.impl.api.RoleManagerTest;
 import org.picketlink.idm.impl.api.UserQueryTest;
-import org.picketlink.idm.test.support.IdentityTestPOJO;
 import org.picketlink.idm.impl.configuration.IdentityConfigurationImpl;
 import org.picketlink.idm.api.IdentitySessionFactory;
 import org.picketlink.idm.impl.api.RelationshipManagerTest;
@@ -60,10 +59,10 @@ public class MinimalFlexibleConfigTestCase extends HibernateTestPOJO
 
    public void setUp() throws Exception
    {
+      super.start();
+
       setIdentityConfig("minimal-flexible-identity-config.xml");
       setRealmName("realm://FlexibleRealm");
-
-      super.start();
 
       orgTest = new OrganizationTest(this);
 

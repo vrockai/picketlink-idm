@@ -38,6 +38,8 @@ public class HibernateTestPOJO extends IdentityTestPOJO
    {
       overrideFromProperties();
 
+      identityConfig = "hibernate-test-identity-config.xml";
+
       jndiSupport = new JNDISupport();
       jndiSupport.start();
       transactonManagerSupport = new TransactionManagerSupport();
@@ -107,7 +109,7 @@ public class HibernateTestPOJO extends IdentityTestPOJO
    {
       String dsName = System.getProperties().getProperty("dataSourceName");
 
-      if (dsName != null && !dsName.startsWith("$"))
+      if (dsName != null && dsName.length() > 0 && !dsName.startsWith("$"))
       {
          setDataSourceName(dsName);
       }

@@ -103,7 +103,7 @@ public class LDAPTestPOJO extends IdentityTestPOJO
 
       String dirName = System.getProperties().getProperty("directoryName");
 
-      if (dirName != null && !dirName.startsWith("$"))
+      if (dirName != null && dirName.length() > 0 && !dirName.startsWith("$"))
       {
          setDirectoryName(dirName);
       }
