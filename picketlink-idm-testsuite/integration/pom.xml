@@ -16,6 +16,7 @@
 
   <modules>
     <module>ldap</module>
+    <module>ldap2</module>
   </modules>
 
   <!-- Plugins -->
