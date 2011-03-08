@@ -346,6 +346,30 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       return resolveIdentityStore(io.getIdentityType());
    }
 
+   /**
+    * Should return mapped store which actually contain given IdentityObject.
+    *
+    * @param io
+    * @return may return null
+    * @throws IdentityException
+    */
+   IdentityStore resolveFirstIdentityStoreWithIO(IdentityObject io, IdentityStoreInvocationContext ic) throws IdentityException
+   {
+      List<IdentityStore> mappedStores = resolveIdentityStores(io.getIdentityType());
+
+      for (IdentityStore mappedStore : mappedStores)
+      {
+         IdentityStoreInvocationContext mappedContext = resolveInvocationContext(mappedStore, ic);
+
+         if (hasIdentityObject(mappedContext, mappedStore, io))
+         {
+            return mappedStore;
+         }
+      }
+
+      return null;
+   }
+
    IdentityStore resolveIdentityStore(IdentityObjectType iot)
    {
 
@@ -810,24 +834,21 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
                                                         boolean parent,
                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
    {
-      // Check in the mapped store and merge with default
 
       try
       {
-         //List<IdentityStore> mappedStores = resolveIdentityStores(identity.getIdentityType());
-         IdentityStore mappedStore = resolveIdentityStore(identity.getIdentityType());
-
-         IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
+         List<IdentityStore> mappedStores = resolveIdentityStores(identity.getIdentityType());
 
          IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
 
-         //if (mappedStores.size() == 1 && mappedStores.contains(defaultIdentityStore))
-         if (mappedStore.equals(defaultIdentityStore))
+         // Maybe only default store match
+         if (mappedStores.size() == 1 && mappedStores.contains(defaultIdentityStore))
          {
             return defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, criteria);
          }
 
+         // For the merge no paging
          IdentitySearchCriteriaImpl c = null;
 
          if (criteria != null)
@@ -838,38 +859,48 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
          Collection<IdentityObject> results = new LinkedList<IdentityObject>();
 
-         if (hasIdentityObject(mappedCtx, mappedStore, identity)
-             && (relationshipType == null
-                 || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName())
-                 || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
-            )
+         // Filter out duplicates results
+         HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
+
+         for (IdentityStore mappedStore : mappedStores)
          {
-            // If object present in identity store then don't apply page in criteria
-            if (hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+            IdentityStoreInvocationContext mappedCtx = resolveInvocationContext(mappedStore, invocationCxt);
+
+            // If object is in the store but there is no rel type provided or it is not a role
+            // So don't try to look for roles where they are not supported...
+            if (hasIdentityObject(mappedCtx, mappedStore, identity)
+               && (relationshipType == null
+               || !RoleManagerImpl.ROLE.getName().equals(relationshipType.getName())
+               || mappedStore.getSupportedFeatures().isNamedRelationshipsSupported())
+               )
             {
-               results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, c);
+               // If object present in identity store then don't apply page in criteria
+               if (hasIdentityObject(defaultCtx, defaultIdentityStore, identity))
+               {
+                  results = mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, c);
+                  // add with filter of duplicate
+                  merged.addAll(results);
+               }
+
+               // Otherwise if there was only mapped store simply return results as it shouldn't be present
+               // in default anyway...
+               else if (mappedStores.size() == 1)
+               {
+                  return mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
+               }
             }
 
-            // Otherwise simply return results
-            else
-            {
-               return mappedStore.findIdentityObject(mappedCtx, identity, relationshipType, parent, criteria);
-            }
          }
 
-
+         // So always check with default
          Collection<IdentityObject> objects = defaultIdentityStore.findIdentityObject(defaultCtx, identity, relationshipType, parent, c);
 
          // If default store contain related relationships merge and sort/page once more
          if (objects != null && objects.size() != 0)
          {
-
-            // Filter out duplicates
-            HashSet<IdentityObject> merged = new HashSet<IdentityObject>();
-            merged.addAll(results);
             merged.addAll(objects);
 
-
+            // So as things were merged criteria need to be reapplied
             if (criteria != null)
             {
 
@@ -917,17 +948,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
+         IdentityStore fromStore = resolveFirstIdentityStoreWithIO(fromIdentity, invocationCxt);
 
-         IdentityStore toStore = resolveIdentityStore(toIdentity);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(toIdentity, invocationCxt);
 
-         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+         IdentityStoreInvocationContext toTargetCtx =
+            toStore != null ? resolveInvocationContext(toStore, invocationCxt): null;
 
          IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-             && hasIdentityObject(toTargetCtx, fromStore, fromIdentity)
-             && hasIdentityObject(toTargetCtx, fromStore, toIdentity))
+         // Check if stores are not null so io exists in one of mappings.
+         if ((fromStore != null && toStore != null) &&
+             fromStore == toStore && !isIdentityStoreReadOnly(fromStore))
             {
             // If relationship is named and target store doesn't support named relationships it need to be put in default store anyway
             if (relationshipName == null ||
@@ -963,17 +995,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
+         IdentityStore fromStore = resolveFirstIdentityStoreWithIO(fromIdentity, invocationCxt);
 
-         IdentityStore toStore = resolveIdentityStore(toIdentity);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(toIdentity, invocationCxt);
 
-         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+         IdentityStoreInvocationContext toTargetCtx =
+            toStore != null ? resolveInvocationContext(toStore, invocationCxt): null;
 
          IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-            && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
-            && hasIdentityObject(toTargetCtx, toStore, toIdentity))
+         // Check if stores are not null so io exists in one of mappings.
+         if ((fromStore != null && toStore != null) &&
+            fromStore == toStore && !isIdentityStoreReadOnly(fromStore))
          {
             if (relationshipName == null ||
                (relationshipName != null && fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
@@ -1021,18 +1054,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(identity1);
+         IdentityStore fromStore = resolveFirstIdentityStoreWithIO(identity1, invocationCtx);
 
-         IdentityStore toStore = resolveIdentityStore(identity2);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity2, invocationCtx);
 
-         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCtx);
+         IdentityStoreInvocationContext toTargetCtx =
+            toStore != null ? resolveInvocationContext(toStore, invocationCtx): null;
 
          IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCtx);
 
 
-         if (fromStore == toStore && !isIdentityStoreReadOnly(fromStore)
-            && hasIdentityObject(toTargetCtx, toStore, identity1)
-            && hasIdentityObject(toTargetCtx, toStore, identity2))
+         // Check if stores are not null so io exists in one of mappings.
+         if ((fromStore != null && toStore != null) && fromStore == toStore && !isIdentityStoreReadOnly(fromStore))
          {
             fromStore.removeRelationships(toTargetCtx, identity1, identity2, named);
             return;
@@ -1068,19 +1101,20 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(fromIdentity);
+         IdentityStore fromStore = resolveFirstIdentityStoreWithIO(fromIdentity, invocationCxt);
 
-         IdentityStore toStore = resolveIdentityStore(toIdentity);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(toIdentity, invocationCxt);
 
-         IdentityStoreInvocationContext toTargetCtx = resolveInvocationContext(toStore, invocationCxt);
+         IdentityStoreInvocationContext toTargetCtx =
+            toStore != null ? resolveInvocationContext(toStore, invocationCxt): null;
 
          IdentityStoreInvocationContext defaultTargetCtx = resolveInvocationContext(defaultIdentityStore, invocationCxt);
 
-         if (fromStore == toStore &&
+         // Check if stores are not null so io exists in one of mappings.
+         if ((fromStore != null && toStore != null) &&
+            fromStore == toStore &&
             (!RoleManagerImpl.ROLE.getName().equals(relationshipType.getName()) ||
-             fromStore.getSupportedFeatures().isNamedRelationshipsSupported())
-            && hasIdentityObject(toTargetCtx, toStore, fromIdentity)
-            && hasIdentityObject(toTargetCtx, toStore, toIdentity))
+             fromStore.getSupportedFeatures().isNamedRelationshipsSupported()))
          {
             return fromStore.resolveRelationships(toTargetCtx, fromIdentity, toIdentity, relationshipType);
 
@@ -1369,10 +1403,12 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
-         IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
+         IdentityStore fromStore = resolveFirstIdentityStoreWithIO(relationship.getFromIdentityObject(), ctx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(relationship.getToIdentityObject(), ctx);
 
-         if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+         if (fromStore != null && toStore != null &&
+            fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() &&
+            !isIdentityStoreReadOnly(fromStore))
          {
             fromStore.setRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
             return;
@@ -1394,10 +1430,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore fromStore = resolveIdentityStore(relationship.getFromIdentityObject());
-         IdentityStore toStore = resolveIdentityStore(relationship.getToIdentityObject());
+          IdentityStore fromStore = resolveFirstIdentityStoreWithIO(relationship.getFromIdentityObject(), ctx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(relationship.getToIdentityObject(), ctx);
 
-         if (fromStore == toStore && toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
+         if (fromStore != null && toStore != null && fromStore == toStore &&
+            toStore.getSupportedFeatures().isNamedRelationshipsSupported() && !isIdentityStoreReadOnly(fromStore))
          {
             fromStore.removeRelationshipProperties(resolveInvocationContext(fromStore, ctx), relationship, properties);
             return;
@@ -1419,15 +1456,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore toStore = resolveIdentityStore(identityObject);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identityObject, ctx);
 
-         if (hasIdentityObject(targetCtx, toStore, identityObject))
+         if (toStore != null)
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+
             return toStore.validateCredential(targetCtx, identityObject, credential);
          }
 
-         targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
 
          if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
          {
@@ -1450,16 +1488,17 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         IdentityStore toStore = resolveIdentityStore(identityObject);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identityObject, ctx);
 
-         if (hasIdentityObject(targetCtx, toStore, identityObject))
+         if (toStore != null)
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, ctx);
+
             toStore.updateCredential(targetCtx, identityObject, credential);
             return;
          }
 
-         targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(defaultIdentityStore, ctx);
 
          if (toStore != defaultIdentityStore && hasIdentityObject(targetCtx, defaultIdentityStore, identityObject))
          {
@@ -1483,6 +1522,8 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          Set<String> results;
 
+
+         // TODO: just get the first mapped store and use... should it merge supported attrs from different mapped stores?
          IdentityStore toStore = resolveIdentityStore(identityType);
          IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
 
@@ -1513,6 +1554,8 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       try
       {
+
+         // TODO: just get the first mapped store and use... should it merge supported attrs from different mapped stores?
          IdentityStore targetStore = resolveIdentityStore(identityObjectType);
          IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationContext);
 
@@ -1557,15 +1600,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          IdentityObjectAttribute result = null;
 
-         IdentityStore toStore = resolveIdentityStore(identity);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity, invocationContext);
 
-         if (hasIdentityObject(targetCtx, toStore, identity))
+         if (toStore != null)
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
+
             result = toStore.getAttribute(targetCtx, identity, name);
          }
 
-         if (result == null && toStore != defaultAttributeStore)
+         if (result == null && (toStore == null || toStore != defaultAttributeStore))
          {
             IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
 
@@ -1590,16 +1634,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       {
          Map<String, IdentityObjectAttribute> results = new HashMap<String, IdentityObjectAttribute>();
 
-         IdentityStore toStore = resolveIdentityStore(identity);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity, invocationContext);
 
 
-         if (hasIdentityObject(targetCtx, toStore, identity))
+         if (toStore != null)
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationContext);
             results = toStore.getAttributes(targetCtx, identity);
          }
 
-         if (toStore != defaultAttributeStore)
+         if (toStore == null || toStore != defaultAttributeStore)
          {
             IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationContext);
 
@@ -1636,14 +1680,14 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
          IdentityObjectAttribute[] attributesToAdd = null;
 
-         IdentityStore toStore = resolveIdentityStore(identity);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity, invocationCtx);
 
          // Put supported attrs to the main store
-         if (toStore != defaultAttributeStore
-            && !isIdentityStoreReadOnly(toStore)
-            && hasIdentityObject(targetCtx, toStore, identity))
+         if (toStore != null && toStore != defaultAttributeStore
+            && !isIdentityStoreReadOnly(toStore))
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
             Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
             // Filter out supported and not supported attributes
@@ -1714,14 +1758,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          ArrayList<IdentityObjectAttribute> leftAttrs = new ArrayList<IdentityObjectAttribute>();
          IdentityObjectAttribute[] attributesToAdd = null;
 
-         IdentityStore toStore = resolveIdentityStore(identity);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity, invocationCtx);
 
          // Put supported attrs to the main store
-         if (toStore != defaultAttributeStore
-            && !isIdentityStoreReadOnly(toStore)
-            && hasIdentityObject(targetCtx, toStore, identity))
+         if (toStore != null &&
+            toStore != defaultAttributeStore
+            && !isIdentityStoreReadOnly(toStore))
          {
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
+
             Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
             // Filter out supported and not supported attributes
@@ -1794,14 +1840,16 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          List<String> filteredAttrs = new LinkedList<String>();
          List<String> leftAttrs = new LinkedList<String>();
 
-         IdentityStore toStore = resolveIdentityStore(identity);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+         IdentityStore toStore = resolveFirstIdentityStoreWithIO(identity, invocationCtx);
 
          // Put supported attrs to the main store
-         if (toStore != defaultAttributeStore
-            && !isIdentityStoreReadOnly(toStore)
-            && hasIdentityObject(targetCtx, toStore, identity))
+         if (toStore != null &&
+            toStore != defaultAttributeStore &&
+            !isIdentityStoreReadOnly(toStore))
          {
+
+            IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+
             Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identity.getIdentityType());
 
             // Filter out supported and not supported attributes
@@ -1865,30 +1913,36 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
    {
       try
       {
-         List<String> filteredAttrs = new LinkedList<String>();
-         List<String> leftAttrs = new LinkedList<String>();
 
-         IdentityStore toStore = resolveIdentityStore(identityObjectType);
-         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(toStore, invocationCtx);
+         Collection<IdentityStore> mappedStores = resolveIdentityStores(identityObjectType);
 
          IdentityObject result = null;
 
-         // Put supported attrs to the main store
-         if (toStore != defaultAttributeStore)
+         for (IdentityStore mappedStore : mappedStores)
          {
-            Set<String> supportedAttrs = toStore.getSupportedAttributeNames(targetCtx, identityObjectType);
-
-            if (supportedAttrs.contains(attribute.getName()))
+            if (mappedStore != defaultAttributeStore)
             {
-               result = toStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
+
+               IdentityStoreInvocationContext targetCtx = resolveInvocationContext(mappedStore, invocationCtx);
+
+               Set<String> supportedAttrs = mappedStore.getSupportedAttributeNames(targetCtx, identityObjectType);
+
+               if (supportedAttrs.contains(attribute.getName()))
+               {
+                  result = mappedStore.findIdentityObjectByUniqueAttribute(targetCtx, identityObjectType, attribute);
+               }
+
+               // First with any result win
+               if (result != null)
+               {
+                  return result;
+               }
             }
          }
 
-         if (result != null)
-         {
-            return result;
-         }
 
+
+         // And if we are still here just go with default
          IdentityStoreInvocationContext defaultCtx = resolveInvocationContext(defaultAttributeStore, invocationCtx);
 
          if (isAllowNotDefinedAttributes())
@@ -1900,7 +1954,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             Set<String> supportedAttrs = defaultAttributeStore.getSupportedAttributeNames(defaultCtx, identityObjectType);
             if (supportedAttrs.contains(attribute.getName()))
             {
-               return toStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
+               return defaultAttributeStore.findIdentityObjectByUniqueAttribute(defaultCtx, identityObjectType, attribute);
             }
          }
 
