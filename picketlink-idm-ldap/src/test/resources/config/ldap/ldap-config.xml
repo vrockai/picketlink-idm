@@ -15,20 +15,8 @@
         <value>password</value>
       </option>
       <option>
-        <name>searchTimeLimit</name>
-        <value>10000</value>
-      </option>
-      <option>
         <name>createMissingContexts</name>
         <value>true</value>
-      </option>
-      <option>
-        <name>cache.providerClass</name>
-        <value>org.picketlink.idm.impl.cache.JBossCacheIdentityStoreCacheProviderImpl</value>
-      </option>
-      <option>
-        <name>cache.configFile</name>
-        <value>jboss-cache.xml</value>
       </option>
       <option>
         <name>pagedResultsExtensionSupported</name>
@@ -44,33 +32,18 @@
         <attribute>
           <name>phone</name>
           <mapping>telephoneNumber</mapping>
-          <!--<type>text</type>-->
-          <!--<isRequired>false</isRequired>-->
-          <!--<isMultivalued>false</isMultivalued>-->
-          <!--<isReadOnly>false</isReadOnly>-->
-        </attribute>
+          </attribute>
         <attribute>
           <name>description</name>
           <mapping>description</mapping>
-          <type>text</type>
-          <isRequired>false</isRequired>
-          <isMultivalued>false</isMultivalued>
-          <isReadOnly>true</isReadOnly>
-        </attribute>
+          </attribute>
         <attribute>
           <name>carLicense</name>
           <mapping>carLicense</mapping>
-          <type>text</type>
-          <isRequired>false</isRequired>
-          <isMultivalued>false</isMultivalued>
-          <isReadOnly>false</isReadOnly>
-        </attribute>
+          </attribute>
         <attribute>
           <name>email</name>
           <mapping>mail</mapping>
-          <type>text</type>
-          <isRequired>false</isRequired>
-          <isMultivalued>false</isMultivalued>
           <isReadOnly>false</isReadOnly>
           <isUnique>true</isUnique>
         </attribute>
@@ -104,7 +77,7 @@
     <groups>
       <group>
         <name>FOO</name>
-        <mapping></mapping>
+        <mapping>/organization/acme/foo</mapping>
         <attributes/>
         <options>
           <option>
@@ -140,7 +113,7 @@
       </group>
       <group>
         <name>BAR</name>
-        <mapping></mapping>
+        <mapping>/organization/acme/bar</mapping>
         <attributes/>
         <options>
           <option>
