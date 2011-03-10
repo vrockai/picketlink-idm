@@ -21,6 +21,12 @@
       <outputDirectory>/</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${basedir}/../picketlink-idm-memory/target/classes/</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+
+   <!--
+    <fileSet>
       <directory>${basedir}/../picketlink-idm-cache/target/classes/</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
@@ -55,5 +61,8 @@
       </excludes>
       <outputDirectory>/</outputDirectory>
     </fileSet>
+    -->
+
+
   </fileSets>
 </assembly>

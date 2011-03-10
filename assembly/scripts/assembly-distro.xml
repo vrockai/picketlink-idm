@@ -97,6 +97,10 @@
       <directory>../picketlink-idm-core/src/main/java</directory>
       <outputDirectory>src</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>../picketlink-idm-memory/src/main/java</directory>
+      <outputDirectory>src</outputDirectory>
+    </fileSet>
 
   <!--
     <fileSet>

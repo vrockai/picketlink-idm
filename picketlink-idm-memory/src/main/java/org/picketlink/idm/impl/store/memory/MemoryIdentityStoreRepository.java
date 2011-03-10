@@ -22,13 +22,11 @@
 package org.picketlink.idm.impl.store.memory;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.picketlink.idm.common.exception.IdentityException;
-import org.picketlink.idm.core.factories.IdentityFactory;
 import org.picketlink.idm.spi.configuration.IdentityRepositoryConfigurationContext;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityConfigurationMetaData;
@@ -231,9 +229,7 @@ public class MemoryIdentityStoreRepository implements IdentityStoreRepository
 
    public void setRelationshipProperties(IdentityStoreInvocationContext ctx, IdentityObjectRelationship relationship,
          Map<String, String> properties) throws IdentityException, OperationNotSupportedException
-   {
-      
-
+   {  
    }
 
    public void removeRelationshipProperties(IdentityStoreInvocationContext ctx,
@@ -268,15 +264,13 @@ public class MemoryIdentityStoreRepository implements IdentityStoreRepository
 
    public Set<String> getSupportedAttributeNames(IdentityStoreInvocationContext invocationContext,
          IdentityObjectType identityType) throws IdentityException
-   {   
-      
+   {    
       throw new RuntimeException( "NYI" );
    }
 
    public Map<String, IdentityObjectAttributeMetaData> getAttributesMetaData(
          IdentityStoreInvocationContext invocationContext, IdentityObjectType identityType)
-   {   
-      
+   {    
       throw new RuntimeException( "NYI" );
    }
 
@@ -288,8 +282,7 @@ public class MemoryIdentityStoreRepository implements IdentityStoreRepository
 
    public IdentityObjectAttribute getAttribute(IdentityStoreInvocationContext invocationContext,
          IdentityObject identity, String name) throws IdentityException
-   {   
-      
+   {    
       throw new RuntimeException( "NYI" );
    }
 
@@ -332,6 +325,9 @@ public class MemoryIdentityStoreRepository implements IdentityStoreRepository
    { 
       repoMD = configurationContext.getRepositoryConfigurationMetaData(); 
       storeMD =  configurationContext.getConfigurationMetaData().getIdentityStores().get(0);
+      
+      if( !storeMD.getClassName().contains( "MemoryIdentityStore"))
+         throw new IdentityException( "Memory Identity Store is not configured" );
    }
    
 
@@ -342,37 +338,31 @@ public class MemoryIdentityStoreRepository implements IdentityStoreRepository
 
    public Set<IdentityStore> getConfiguredIdentityStores()
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 
    public Set<AttributeStore> getConfiguredAttributeStores()
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 
    public Map<String, IdentityStore> getIdentityStoreMappings()
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 
    public Map<String, AttributeStore> getAttributeStoreMappings()
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 
    public IdentityStore getIdentityStore(IdentityObjectType identityObjectType) throws IdentityException
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 
    public AttributeStore getAttributeStore(IdentityObjectType identityObjectType) throws IdentityException
    {   
-      
       throw new RuntimeException( "NYI" );
    }
 }
