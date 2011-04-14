@@ -43,6 +43,18 @@
       <profile>
          <id>all</id>
          <modules>
+            <module>parent</module>
+            <module>picketlink-idm-common</module>
+            <module>picketlink-idm-spi</module>
+            <module>picketlink-idm-api</module>
+            <module>picketlink-idm-core</module>
+            <module>picketlink-idm-hibernate</module>
+            <module>picketlink-idm-ldap</module>
+            <module>picketlink-idm-cache</module>
+            <module>picketlink-idm-auth</module>
+            <module>picketlink-idm-testsuite</module>
+            <module>integration</module>
+            <module>picketlink-idm-docs</module>
             <module>assembly</module>
             <module>example/simple</module>
             <module>example/auth</module>
