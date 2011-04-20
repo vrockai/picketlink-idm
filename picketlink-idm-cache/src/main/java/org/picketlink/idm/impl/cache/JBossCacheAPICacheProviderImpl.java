@@ -29,6 +29,7 @@ import org.picketlink.idm.api.query.GroupQuery;
 import org.picketlink.idm.api.query.RoleQuery;
 import org.picketlink.idm.impl.api.model.GroupKey;
 import org.jboss.cache.*;
+import org.jboss.cache.eviction.ExpirationAlgorithmConfig;
 
 import java.io.InputStream;
 import java.util.List;
@@ -111,6 +112,8 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
    public static final String NULL_NS_NODE = "PL_COMMON_NS";
 
    public static final String MAIN_ROOT = "NODE_MAIN_ROOT";
+
+   private int expiration = -1;
 
    private Fqn getRootNode()
    {
@@ -258,6 +261,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, user);
 
          if (log.isLoggable(Level.FINER))
@@ -308,6 +312,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(users));
 
          if (log.isLoggable(Level.FINER))
@@ -362,6 +367,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, count);
 
          if (log.isLoggable(Level.FINER))
@@ -414,6 +420,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, group);
 
          if (log.isLoggable(Level.FINER))
@@ -465,6 +472,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(groups));
 
          if (log.isLoggable(Level.FINER))
@@ -518,6 +526,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, count);
 
          if (log.isLoggable(Level.FINER))
@@ -572,6 +581,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, role);
 
          if (log.isLoggable(Level.FINER))
@@ -616,6 +626,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, role);
 
          if (log.isLoggable(Level.FINER))
@@ -659,6 +670,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(attributes));
 
          if (log.isLoggable(Level.FINER))
@@ -717,6 +729,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
 
          if (log.isLoggable(Level.FINER))
@@ -775,6 +788,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, Collections.unmodifiableMap(properties));
 
          if (log.isLoggable(Level.FINER))
@@ -851,6 +865,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
          if (log.isLoggable(Level.FINER))
@@ -891,6 +906,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
          if (log.isLoggable(Level.FINER))
@@ -929,6 +945,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode == null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, result);
 
          if (log.isLoggable(Level.FINER))
@@ -967,6 +984,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
          if (log.isLoggable(Level.FINER))
@@ -1005,6 +1023,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, unmodifiableCollection(results));
 
          if (log.isLoggable(Level.FINER))
@@ -1055,6 +1074,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_KEY, results);
 
          if (log.isLoggable(Level.FINER))
@@ -1073,6 +1093,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_UNIQUE_KEY, user);
 
          if (log.isLoggable(Level.FINER))
@@ -1143,6 +1164,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_KEY, unmodifiableCollection(results));
 
          if (log.isLoggable(Level.FINER))
@@ -1161,6 +1183,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_UNIQUE_KEY, group);
 
          if (log.isLoggable(Level.FINER))
@@ -1231,6 +1254,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_KEY, results);
 
          if (log.isLoggable(Level.FINER))
@@ -1249,6 +1273,7 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_QUERY_UNIQUE_KEY, role);
 
          if (log.isLoggable(Level.FINER))
@@ -1331,5 +1356,24 @@ public class JBossCacheAPICacheProviderImpl implements APICacheProvider
       }
 
       return Collections.unmodifiableCollection(collection);
+   }
+
+   public void setExpiration(Node node)
+   {
+      if (expiration != -1 && expiration > 0)
+      {
+         Long future = new Long(System.currentTimeMillis() + expiration);
+         node.put(ExpirationAlgorithmConfig.EXPIRATION_KEY, future);
+      }
+   }
+
+   public int getExpiration()
+   {
+      return expiration;
+   }
+
+   public void setExpiration(int expiration)
+   {
+      this.expiration = expiration;
    }
 }

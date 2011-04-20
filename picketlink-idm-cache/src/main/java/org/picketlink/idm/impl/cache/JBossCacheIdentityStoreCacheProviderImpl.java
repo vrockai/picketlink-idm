@@ -23,6 +23,7 @@
 package org.picketlink.idm.impl.cache;
 
 import org.jboss.cache.*;
+import org.jboss.cache.eviction.ExpirationAlgorithmConfig;
 
 import org.picketlink.idm.spi.configuration.IdentityConfigurationContext;
 import org.picketlink.idm.spi.model.IdentityObject;
@@ -90,6 +91,8 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
    public static final String NULL_NS_NODE = "PL_COMMON_NS";
 
    public static final String MAIN_ROOT = "NODE_MAIN_ROOT";
+
+   private int expiration = -1;
 
    private Fqn getRootNode()
    {
@@ -248,6 +251,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, count);
 
          if (log.isLoggable(Level.FINER))
@@ -303,6 +307,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, safeCopyIO(results));
 
          if (log.isLoggable(Level.FINER))
@@ -352,6 +357,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, safeCopyIOR(results));
 
          if (log.isLoggable(Level.FINER))
@@ -401,6 +407,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, results);
 
          if (log.isLoggable(Level.FINER))
@@ -450,6 +457,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, properties);
 
          if (log.isLoggable(Level.FINER))
@@ -518,6 +526,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, properties);
 
          if (log.isLoggable(Level.FINER))
@@ -579,6 +588,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, safeCopyAttr(attributes));
 
          if (log.isLoggable(Level.FINER))
@@ -637,6 +647,7 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
 
       if (ioNode != null)
       {
+         setExpiration(ioNode);
          ioNode.put(NODE_OBJECT_KEY, value);
 
          if (log.isLoggable(Level.FINER))
@@ -729,5 +740,23 @@ public class JBossCacheIdentityStoreCacheProviderImpl implements IdentityStoreCa
       return nr;
    }
 
+   public void setExpiration(Node node)
+   {
+      if (expiration != -1 && expiration > 0)
+      {
+         Long future = new Long(System.currentTimeMillis() + expiration);
+         node.put(ExpirationAlgorithmConfig.EXPIRATION_KEY, future);
+      }
+   }
+
+   public int getExpiration()
+   {
+      return expiration;
+   }
+
+   public void setExpiration(int expiration)
+   {
+      this.expiration = expiration;
+   }
 
 }
