@@ -58,12 +58,11 @@ public class ParserUtil
       {
          String name = null;
          List<String> values = new LinkedList<String>();
+         String tag = fork.next();
 
 
-         while(fork.hasNext())
+         while(tag != null)
          {
-            String tag = fork.next();
-
             if (tag.equals("name"))
             {
                name = fork.getContent();
@@ -72,6 +71,8 @@ public class ParserUtil
             {
                values.add(fork.getContent());
             }
+
+            tag = fork.next();
          }
 
          if (name != null && name.length() > 0)
@@ -117,9 +118,10 @@ public class ParserUtil
          boolean isReadOnly = false;
          boolean isUnique = false;
 
-         while(fork.hasNext())
+         String tag = fork.next();
+
+         while(tag != null)
          {
-            String tag = fork.next();
 
             if (tag.equals("name"))
             {
@@ -149,6 +151,9 @@ public class ParserUtil
             {
                isUnique = Boolean.valueOf(fork.getContent());
             }
+
+            tag = fork.next();
+
          }
 
          if (name != null && name.length() > 0)

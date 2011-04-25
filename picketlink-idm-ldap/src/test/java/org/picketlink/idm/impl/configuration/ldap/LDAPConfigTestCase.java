@@ -36,12 +36,17 @@ public class LDAPConfigTestCase extends TestCase
    @Override
    protected void setUp() throws Exception
    {
-      InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("portlet-application.xml");
-      XMLInputFactory factory = XMLInputFactory.newInstance();
-      XMLStreamReader stream = factory.createXMLStreamReader(is);
+//      InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("portlet-application.xml");
+//      XMLInputFactory factory = XMLInputFactory.newInstance();
+//      XMLStreamReader stream = factory.createXMLStreamReader(is);
+//
 
+//      navigator = new StaxNavigatorImpl<String>(new Naming.Local(), stream);
+   }
+
+   public void testSimple() throws Exception
+   {
       //
-      navigator = new StaxNavigatorImpl<String>(new Naming.Local(), stream);
    }
 
 }
