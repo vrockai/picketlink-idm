@@ -37,8 +37,8 @@
     </dependency>
 
     <dependency>
-      <groupId>staxnav</groupId>
-      <artifactId>staxnav</artifactId>
+      <groupId>org.staxnav</groupId>
+      <artifactId>staxnav.core</artifactId>
       <version>0.9.0</version>
     </dependency>
 
