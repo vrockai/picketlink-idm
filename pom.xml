@@ -45,6 +45,26 @@
       </modules>
     </profile>
     <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>parent</module>
+        <module>picketlink-idm-common</module>
+        <module>picketlink-idm-spi</module>
+        <module>picketlink-idm-api</module>
+        <module>picketlink-idm-core</module>
+        <module>picketlink-idm-testsuite/common</module>
+        <module>picketlink-idm-hibernate</module>
+        <module>picketlink-idm-jpa</module>
+        <module>picketlink-idm-ldap</module>
+        <module>picketlink-idm-cache</module>
+        <module>picketlink-idm-auth</module>
+        <module>picketlink-idm-testsuite/integration</module>
+      </modules>
+    </profile>
+    <profile>
       <id>all</id>
       <modules>
         <module>parent</module>

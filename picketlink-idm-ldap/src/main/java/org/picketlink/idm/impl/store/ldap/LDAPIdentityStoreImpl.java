@@ -1111,12 +1111,26 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    }
 
 
-   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
                                                         boolean parent,
-                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
    {
+      return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
+
+
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+
+      //TODO: implement excludes
+
       if (log.isLoggable(Level.FINER))
       {
          Tools.logMethodIn(

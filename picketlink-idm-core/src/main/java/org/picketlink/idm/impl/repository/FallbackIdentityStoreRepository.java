@@ -834,6 +834,17 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
                                                         boolean parent,
                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
    {
+      return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
+
+
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
 
       try
       {

@@ -26,6 +26,7 @@ import org.picketlink.idm.common.exception.IdentityException;
 import org.picketlink.idm.impl.helper.Tools;
 import org.picketlink.idm.impl.model.hibernate.*;
 import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
+import org.picketlink.idm.impl.types.SimpleIdentityObject;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectTypeMetaData;
@@ -662,31 +663,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
       checkIOType(type);
 
-      HibernateIdentityObjectType hibernateType = getHibernateIdentityObjectType(ctx, type);
-
-      HibernateIdentityObject hibernateObject = null;
-
-      try
-      {
-         hibernateObject = (HibernateIdentityObject)getHibernateSession(ctx).
-            createCriteria(HibernateIdentityObject.class)
-            .add(Restrictions.eq("name", name))
-            .createAlias("realm", "rm")
-            .add(Restrictions.eq("rm.name", getRealmName(ctx)))
-            .createAlias("identityType", "type")
-            .add(Restrictions.eq("type.name", hibernateType.getName()))
-            .setCacheable(true)
-            .uniqueResult();
-      }
-      catch (Exception e)
-      {
-         if (log.isLoggable(Level.FINER))
-         {
-            log.log(Level.FINER, "Exception occurred: ", e);
-         }
-
-         throw new IdentityException("Cannot find IdentityObject with name '" + name + "' and type '" + type.getName() + "'", e);
-      }
+      HibernateIdentityObject hibernateObject = safeGet(ctx, new SimpleIdentityObject(name, type));
 
       // Check result with case sensitive compare:
       if (isAllowNotCaseSensitiveSearch())
@@ -738,6 +715,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       checkIOType(identityType);
 
       HibernateIdentityObjectType hibernateType = getHibernateIdentityObjectType(ctx, identityType);
+      HibernateRealm realm = getRealm(getHibernateSession(ctx),ctx);
 
       List<IdentityObject> results;
 
@@ -748,10 +726,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          Criteria hc = hibernateSession.createCriteria(HibernateIdentityObject.class)
             .setCacheable(true)
-            .createAlias("realm", "rm")
-            .add(Restrictions.eq("rm.name", getRealmName(ctx)))
-            .createAlias("identityType", "type")
-            .add(Restrictions.eq("type.name", hibernateType.getName()));
+            .add(Restrictions.eq("realm", realm))
+            .add(Restrictions.eq("identityType", hibernateType));
 
          if (criteria != null && criteria.isSorted())
          {
@@ -821,11 +797,22 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
 
    @SuppressWarnings("unchecked")
-   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
                                                         boolean parent,
-                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
+
+   @SuppressWarnings("unchecked")
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       //TODO:test
 
@@ -865,6 +852,18 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                hqlString.append("select distinct ior.toIdentityObject from HibernateIdentityObjectRelationship ior where " +
                   "ior.toIdentityObject.name like :nameFilter and ior.fromIdentityObject = :identity");
             }
+
+            if (excludes != null && excludes.size() > 0)
+            {
+
+               int i = 0;
+               for (IdentityObjectType exclude : excludes)
+               {
+                  hqlString.append(" and ior.toIdentityObject.identityType.name != ")
+                  .append(":exclude" + i++);
+               }
+            }
+
             if (orderByName)
             {
                hqlString.append(" order by ior.toIdentityObject.name");
@@ -887,9 +886,19 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                   "ior.fromIdentityObject.name like :nameFilter and ior.toIdentityObject = :identity");
             }
 
+            if (excludes != null && excludes.size() > 0)
+            {
+               int i = 0;
+               for (IdentityObjectType exclude : excludes)
+               {
+                  hqlString.append(" and ior.fromIdentityObject.identityType.name != ")
+                  .append(":exclude" + i++);
+               }
+            }
+
             if (orderByName)
             {
-               hqlString.append(" order by ior.toIdentityObject.name");
+               hqlString.append(" order by ior.fromIdentityObject.name");
                if (ascending)
                {
                   hqlString.append(" asc");
@@ -916,7 +925,14 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             q.setParameter("nameFilter", "%");
          }
 
-
+         if (excludes != null && excludes.size() > 0)
+         {
+            int i = 0;
+            for (IdentityObjectType exclude : excludes)
+            {
+               q.setParameter("exclude" + i++, exclude.getName());
+            }
+         }
          if (criteria != null && criteria.isPaged() && !criteria.isFiltered())
          {
             q.setFirstResult(criteria.getFirstResult());
@@ -991,6 +1007,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       }
 
       HibernateIdentityObjectRelationship relationship = null;
+      HibernateRealm hibernateRealm = getRealm(getHibernateSession(ctx),ctx);
 
       if (name != null)
       {
@@ -999,9 +1016,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             (HibernateIdentityObjectRelationshipName)getHibernateSession(ctx).
                createCriteria(HibernateIdentityObjectRelationshipName.class).
                setCacheable(true).
-               createAlias("realm", "r").
                add(Restrictions.eq("name", name)).
-               add(Restrictions.eq("r.name", realm.getName())).
+               add(Restrictions.eq("realm", hibernateRealm)).
                uniqueResult();
 
          if (relationshipName == null)
@@ -1244,6 +1260,9 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          criteria.add(Restrictions.eq("toIdentityObject", hio));
       }
+
+      criteria.setFetchMode("fromIdentityObject", FetchMode.JOIN);
+      criteria.setFetchMode("toIdentityObject", FetchMode.JOIN);
 
       List<HibernateIdentityObjectRelationship> results = criteria.list();
 
@@ -1811,21 +1830,22 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    public Map<String, IdentityObjectAttribute> getAttributes(IdentityStoreInvocationContext ctx, IdentityObject identity) throws IdentityException
    {
 
-      HibernateIdentityObject hibernateObject = safeGet(ctx, identity);
-
-
+      HibernateRealm realm = getRealm(getHibernateSession(ctx), ctx);
+      HibernateIdentityObjectType hibernateType = getHibernateIdentityObjectType(ctx, identity.getIdentityType());
 
       Map<String, IdentityObjectAttribute> result = new HashMap<String, IdentityObjectAttribute>();
 
-      if (hibernateObject == null)
-      {
-         return result;
-      }
+      Criteria criteria = getHibernateSession(ctx).
+         createCriteria(HibernateIdentityObjectAttribute.class)
+         .setCacheable(true)
+         .setFetchMode("textValues", FetchMode.JOIN)
+         .setFetchSize(20)
+         .createAlias("identityObject", "io")
+         .add(Restrictions.eq("io.name", identity.getName()))
+         .add(Restrictions.eq("io.realm", realm))
+         .add(Restrictions.eq("io.identityType", hibernateType));
 
-      Set<HibernateIdentityObjectAttribute> storeAttributes =  hibernateObject.getAttributes();
-
-      Hibernate.initialize(storeAttributes);
-
+      Collection<HibernateIdentityObjectAttribute> storeAttributes =  (Collection<HibernateIdentityObjectAttribute>)criteria.list();
 
       // Remap the names
       for (HibernateIdentityObjectAttribute attribute : storeAttributes)
@@ -2604,6 +2624,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
    {
 
       HibernateIdentityObject hibernateObject = null;
+      HibernateIdentityObjectType hibernateType = getHibernateIdentityObjectType(ctx, io.getIdentityType());
+      HibernateRealm realm = getRealm(getHibernateSession(ctx),ctx);
 
       Session hibernateSession = getHibernateSession(ctx);
 
@@ -2612,10 +2634,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
          hibernateObject = (HibernateIdentityObject)hibernateSession.createCriteria(HibernateIdentityObject.class)
             .add(Restrictions.eq("name", io.getName()))
-            .createAlias("identityType", "type")
-            .add(Restrictions.eq("type.name", io.getIdentityType().getName()))
-            .createAlias("realm", "rm")
-            .add(Restrictions.eq("rm.name", getRealmName(ctx)))
+            .add(Restrictions.eq("identityType", hibernateType))
+            .add(Restrictions.eq("realm", realm))
             .setCacheable(true)
             .uniqueResult();
 

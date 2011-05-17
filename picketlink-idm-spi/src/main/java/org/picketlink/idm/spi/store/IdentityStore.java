@@ -168,6 +168,24 @@ public interface IdentityStore extends AttributeStore
                                                     boolean parent,
                                                     IdentityObjectSearchCriteria criteria) throws IdentityException;
 
+   /**
+    * Find identites that have relationship with given identity. Relationships are directional (from parent to child).
+    *
+    * @param invocationCxt
+    * @param identity
+    * @param relationshipType
+    * @param excludes list of object types to not include in search
+    * @param parent defines if given identity is parent or child side in the
+    *                         relationship - default is true (parent)
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt, IdentityObject identity,
+                                                    IdentityObjectRelationshipType relationshipType,
+                                                    Collection<IdentityObjectType> excludes,
+                                                    boolean parent,
+                                                    IdentityObjectSearchCriteria criteria) throws IdentityException;
 
 
    /**

@@ -1319,10 +1319,24 @@ public class JpaIdentityStore implements IdentityStore, Serializable
       return objs;
    }
 
-   public Collection<IdentityObject> findIdentityObject(
-         IdentityStoreInvocationContext invocationCxt, IdentityObject identity,
-         IdentityObjectRelationshipType relationshipType, boolean parent,
-         IdentityObjectSearchCriteria criteria) throws IdentityException
+
+
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
+
+
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       List<IdentityObject> objs = new ArrayList<IdentityObject>();
       

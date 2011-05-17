@@ -903,6 +903,8 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
          IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
 
+         Collection excludes = new HashSet<IdentityObjectType>();
+         excludes.add(getUserObjectType());
 
          if (cascade)
          {
@@ -928,7 +930,15 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
          else
          {
 
-            Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(group), MEMBER, parent, convertSearchControls(criteria));
+
+            Collection<IdentityObject> ios = getRepository().
+               findIdentityObject(
+                  getInvocationContext(),
+                  createIdentityObject(group),
+                  MEMBER,
+                  excludes,
+                  parent,
+                  convertSearchControls(criteria));
 
             for (IdentityObject io : ios)
             {
@@ -1009,7 +1019,17 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
          IdentityObjectType iot = groupType != null ? getIdentityObjectType(groupType) : null;
 
-         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
+         Collection excludes = new HashSet<IdentityObjectType>();
+         excludes.add(getUserObjectType());
+
+         Collection<IdentityObject> ios = getRepository().
+            findIdentityObject(
+               getInvocationContext(),
+               createIdentityObject(user),
+               MEMBER,
+               excludes,
+               false,
+               convertSearchControls(criteria));
 
          for (IdentityObject io : ios)
          {
@@ -1082,7 +1102,17 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
          List<Group> identities = new LinkedList<Group>();
 
-         Collection<IdentityObject> ios = getRepository().findIdentityObject(getInvocationContext(), createIdentityObject(user), MEMBER, false, convertSearchControls(criteria));
+         Collection excludes = new HashSet<IdentityObjectType>();
+         excludes.add(getUserObjectType());
+
+         Collection<IdentityObject> ios = getRepository().
+            findIdentityObject(
+               getInvocationContext(),
+               createIdentityObject(user),
+               MEMBER,
+               excludes,
+               false,
+               convertSearchControls(criteria));
 
 
          String userTypeName = getUserObjectType().getName();

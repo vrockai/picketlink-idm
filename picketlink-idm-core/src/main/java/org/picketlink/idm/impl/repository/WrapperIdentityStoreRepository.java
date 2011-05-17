@@ -187,6 +187,16 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return defaultIdentityStore.findIdentityObject(resolveIdentityStoreInvocationContext(invocationCtx), identity, relationshipType, excludes, parent, criteria);
+   }
+
+   public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
                                                         boolean parent,
                                                         IdentityObjectSearchCriteria criteria) throws IdentityException
    {
