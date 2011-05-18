@@ -15,8 +15,8 @@
   <description />
 
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/branches/1.2.0</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/branches/1.2.0</developerConnection>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
     <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/jboss-parent-5/picketlink-idm-parent/jboss-identity-idm-pom</url>
 
   </scm>
