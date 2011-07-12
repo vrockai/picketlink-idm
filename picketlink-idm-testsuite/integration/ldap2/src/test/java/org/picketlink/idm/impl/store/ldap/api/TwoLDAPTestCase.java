@@ -61,6 +61,11 @@ public class TwoLDAPTestCase
       hibernateTest.start();
       ldapTestPOJO.start();
 
+      if (!ldapTestPOJO.getDirectoryName().equals(ldapTestPOJO.EMBEDDED_OPEN_DS_DIRECTORY_NAME))
+      {
+         return;
+      }
+
       setRealmName("DB_2LDAP_REALM");
 
       ldapTestPOJO.populateLDIF("ldap/initial-opends.ldif");
@@ -85,6 +90,12 @@ public class TwoLDAPTestCase
 
    public void testWhatIsAccesible() throws Exception
    {
+
+      if (!ldapTestPOJO.getDirectoryName().equals(ldapTestPOJO.EMBEDDED_OPEN_DS_DIRECTORY_NAME))
+      {
+         return;
+      }
+
       IdentitySession session = identitySessionFactory.createIdentitySession(getRealmName());
 
       begin();
