@@ -56,6 +56,8 @@ public class OrganizationLDAPTestCase extends IdentityTestPOJO
       hibernateTest.start();
       ldapTestPOJO.start();
 
+      identityConfig = ldapTestPOJO.getIdentityConfig();
+
       orgTest = new OrganizationTest(this);
 
       ldapTestPOJO.populateClean();

@@ -876,7 +876,7 @@
             <options>
                <option>
                   <name>providerURL</name>
-                  <value>ldap://dev39.qa.atl.jboss.com:389</value>
+                  <value>ldap://dev39.mw.lab.eng.bos.redhat.com:389</value>
                </option>
                <option>
                   <name>adminDN</name>

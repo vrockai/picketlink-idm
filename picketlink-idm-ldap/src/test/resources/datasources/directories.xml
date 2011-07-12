@@ -40,10 +40,10 @@
    </directory>
    <directory>
       <directory-name>OpenDS-2-0</directory-name>
-      <description>ldap://dev39.qa.atl.jboss.com:2389</description>
+      <description>ldap://dev39.mw.lab.eng.bos.redhat.com:2389</description>
       <!--identity configuration file-->
       <config-file>test-identity-config-opends20.xml</config-file>
-      <host>dev39.qa.atl.jboss.com</host>
+      <host>perf15.mw.lab.eng.bos.redhat.com</host>
       <port>2389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>cn=Directory Manager</admin-dn>
@@ -55,10 +55,10 @@
    </directory>
    <directory>
       <directory-name>OpenDS-1-2</directory-name>
-      <description>ldap://dev39.qa.atl.jboss.com:3389</description>
+      <description>ldap://dev39.mw.lab.eng.bos.redhat.com:3389</description>
       <!--identity configuration file-->
       <config-file>test-identity-config-opends12.xml</config-file>
-      <host>dev39.qa.atl.jboss.com</host>
+      <host>dev39.mw.lab.eng.bos.redhat.com</host>
       <port>3389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>cn=Directory Manager</admin-dn>
@@ -70,10 +70,10 @@
    </directory>
    <directory>
       <directory-name>SunDS</directory-name>
-      <description>ldap://dev39.qa.atl.jboss.com:1389</description>
+      <description>ldap://dev39.mw.lab.eng.bos.redhat.com:1389</description>
       <!--identity configuration file-->
       <config-file>test-identity-config-sunds.xml</config-file>
-      <host>dev39.qa.atl.jboss.com</host>
+      <host>dev39.mw.lab.eng.bos.redhat.com</host>
       <port>1389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>cn=Directory Manager</admin-dn>
@@ -85,10 +85,10 @@
    </directory>
    <directory>
       <directory-name>RedHatDS</directory-name>
-      <description>ldap://dev39.qa.atl.jboss.com:10389</description>
+      <description>ldap://dev39.mw.lab.eng.bos.redhat.com:10389</description>
 
       <config-file>test-identity-config-redhatds.xml</config-file>
-      <host>dev39.qa.atl.jboss.com</host>
+      <host>dev39.mw.lab.eng.bos.redhat.com</host>
       <port>10389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>cn=Directory Manager</admin-dn>
@@ -100,10 +100,10 @@
    </directory>
    <directory>
       <directory-name>OpenLDAP</directory-name>
-      <description>ldap://dev39.qa.atl.jboss.com:389</description>
+      <description>ldap://dev39.mw.lab.eng.bos.redhat.com:389</description>
 
       <config-file>test-identity-config-openldapds.xml</config-file>
-      <host>dev39.qa.atl.jboss.com</host>
+      <host>dev39.mw.lab.eng.bos.redhat.com</host>
       <port>389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>cn=Manager,dc=my-domain,dc=com</admin-dn>
@@ -145,10 +145,10 @@
    </directory>
    <directory>
       <directory-name>MSAD-2k3</directory-name>
-      <description>ldap://dev44.qa.atl.jboss.com:389</description>
+      <description>ldap://dev44.mw.lab.eng.bos.redhat.com:389</description>
 
       <config-file>test-identity-config-msad-2k3.xml</config-file>
-      <host>dev44.qa.atl.jboss.com</host>
+      <host>dev44.mw.lab.eng.bos.redhat.com</host>
       <port>389</port>
       <context-factory>com.sun.jndi.ldap.LdapCtxFactory</context-factory>
       <admin-dn>JBOSS\jbossqa</admin-dn>

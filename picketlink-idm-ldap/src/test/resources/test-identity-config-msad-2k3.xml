@@ -866,7 +866,7 @@
             <options>
                <option>
                   <name>providerURL</name>
-                  <value>ldaps://dev44.qa.atl.jboss.com:636</value>
+                  <value>ldap://dev44.mw.lab.eng.bos.redhat.com:636</value>
                </option>
                <option>
                   <name>adminDN</name>
