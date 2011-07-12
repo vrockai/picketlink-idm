@@ -72,6 +72,8 @@ public class APILDAPTestCase extends IdentityTestPOJO
       hibernateTest.start();
       ldapTestPOJO.start();
 
+      identityConfig = ldapTestPOJO.getIdentityConfig();
+
       persistenceManagerTest = new PersistenceManagerTest(this);
       relationshipManagerTest = new RelationshipManagerTest(this);
       roleManagerTest = new RoleManagerTest(this);
