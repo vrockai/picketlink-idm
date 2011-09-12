@@ -828,6 +828,62 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
    }
 
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      //TODO: merge vs sum strategy
+
+      int count = 0;
+
+      Collection<IdentityStore> mappedStores = getConfiguredIdentityStores();
+
+      for (IdentityStore mappedStore : mappedStores)
+      {
+         count += mappedStore.getIdentityObjectCount(
+            invocationCxt,
+            identity,
+            relationshipType,
+            parent,
+            criteria
+         );
+
+      }
+
+      return count;
+   }
+
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     Collection<IdentityObjectType> excludes,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+
+      //TODO: merge vs sum strategy
+
+      int count = 0;
+
+      Collection<IdentityStore> mappedStores = getConfiguredIdentityStores();
+
+      for (IdentityStore mappedStore : mappedStores)
+      {
+         count += mappedStore.getIdentityObjectCount(
+            ctx,
+            identity,
+            relationshipType,
+            excludes,
+            parent,
+            criteria
+         );
+      }
+      return count;
+   }
+
+
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
@@ -1153,7 +1209,45 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
    }
 
-   public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectRelationshipType relationshipType, boolean parent, boolean named, String name) throws IdentityException
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx,
+                                    IdentityObject identity,
+                                    IdentityObjectRelationshipType type,
+                                    boolean parent,
+                                    boolean named,
+                                    String name,
+                                    IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+
+      //TODO: merge vs sum strategy
+
+      int count = 0;
+
+      Collection<IdentityStore> mappedStores = getConfiguredIdentityStores();
+
+      for (IdentityStore mappedStore : mappedStores)
+      {
+         count += mappedStore.getRelationshipsCount(
+            ctx,
+            identity,
+            type,
+            parent,
+            named,
+            name,
+            searchCriteria
+         );
+      }
+
+      return count;
+
+   }
+
+   public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext ctx,
+                                                               IdentityObject identity,
+                                                               IdentityObjectRelationshipType relationshipType,
+                                                               boolean parent,
+                                                               boolean named,
+                                                               String name,
+                                                               IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       try
       {
@@ -1173,7 +1267,8 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
                && hasIdentityObject(storeCtx, identityStore, identity))
             {
-               relationships.addAll(identityStore.resolveRelationships(storeCtx, identity, relationshipType, parent, named, name));
+               relationships.addAll(identityStore.
+                  resolveRelationships(storeCtx, identity, relationshipType, parent, named, name, criteria));
             }
          }
 

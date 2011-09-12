@@ -344,6 +344,31 @@ public interface RoleManager
    <T extends IdentityType> Collection<Role> findRoles(T identityType,
                                                        RoleType roleType) throws IdentityException;
 
+
+   /**
+    * Find Role objects count with a given RoleType associated with a given IdentityType
+    * @param identityType
+    * @param roleType
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   int getRolesCount(IdentityType identityType,
+                     RoleType roleType,
+                     IdentitySearchCriteria criteria) throws IdentityException;
+
+   /**
+    * Find Role objects with a given RoleType associated with a given IdentityType
+    * @param identityType
+    * @param roleType
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   <T extends IdentityType> Collection<Role> findRoles(T identityType,
+                                                       RoleType roleType,
+                                                       IdentitySearchCriteria criteria) throws IdentityException;
+
    /**
     * Find Role objects with a given RoleType name associated with IdentityType for a given key
     * @param key
@@ -353,6 +378,19 @@ public interface RoleManager
     */
    <T extends IdentityType> Collection<Role> findRoles(String key,
                                                        String roleTypeName) throws IdentityException;
+
+
+   /**
+    * Find Role objects with a given RoleType name associated with IdentityType for a given key
+    * @param key
+    * @param roleTypeName
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   <T extends IdentityType> Collection<Role> findRoles(String key,
+                                                       String roleTypeName,
+                                                       IdentitySearchCriteria criteria) throws IdentityException;
 
    /**
     *

@@ -39,4 +39,32 @@ public class AbstractSPISearchImpl implements Search
    {
       this.identityObjectSearchCriteria = identityObjectSearchCriteria;
    }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+      {
+         return true;
+      }
+      if (!(o instanceof AbstractSPISearchImpl))
+      {
+         return false;
+      }
+
+      AbstractSPISearchImpl that = (AbstractSPISearchImpl)o;
+
+      if (identityObjectSearchCriteria != null ? !identityObjectSearchCriteria.equals(that.identityObjectSearchCriteria) : that.identityObjectSearchCriteria != null)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return identityObjectSearchCriteria != null ? identityObjectSearchCriteria.hashCode() : 0;
+   }
 }

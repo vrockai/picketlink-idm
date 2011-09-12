@@ -311,6 +311,27 @@ public interface RelationshipManager
                                         boolean parent,
                                         boolean cascade) throws IdentityException;
 
+
+   /**
+    * Get count of groups that are associated with given group.
+    * If 'parent' parameter is set to false, all parent group will be returned. If parent parameter is
+    * set to true and 'cascade' is set to true all nested subgroubs will be returned.
+    *
+    * @param group parent group
+    * @param groupType can be null
+    * @param parent defines if given identity is parent or child side in the
+    * relationship - default is true (parent)
+    * @param cascade if true also identities from subgroubs will be retreived. Matters only when parent is set to true.
+    * Default is false
+    * @return
+    * @throws org.picketlink.idm.common.exception.IdentityException
+    */
+   int getAssociatedGroupsCount(Group group,
+                                String groupType,
+                                boolean parent,
+                                boolean cascade,
+                                IdentitySearchCriteria criteria) throws IdentityException;
+
    /**
     * Find groups that are associated with given group.
     * If 'parent' parameter is set to false, all parent group will be returned. If parent parameter is

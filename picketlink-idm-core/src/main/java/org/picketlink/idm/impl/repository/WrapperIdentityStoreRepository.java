@@ -184,6 +184,38 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
       return defaultIdentityStore.findIdentityObject(resolveIdentityStoreInvocationContext(invocationCtx), identityType, criteria);
    }
 
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return defaultIdentityStore.getIdentityObjectCount(
+         invocationCxt,
+         identity,
+         relationshipType,
+         parent,
+         criteria
+      );
+   }
+
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     Collection<IdentityObjectType> excludes,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return defaultIdentityStore.getIdentityObjectCount(
+         ctx,
+         identity,
+         relationshipType,
+         excludes,
+         parent,
+         criteria
+      );
+   }
+
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCtx,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
@@ -239,15 +271,37 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
       return defaultIdentityStore.resolveRelationships(resolveIdentityStoreInvocationContext(invocationCxt), fromIdentity, toIdentity, relationshipType);
    }
 
+
+
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx,
+                                    IdentityObject identity,
+                                    IdentityObjectRelationshipType type,
+                                    boolean parent,
+                                    boolean named,
+                                    String name,
+                                    IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+      return defaultIdentityStore.getRelationshipsCount(
+         ctx,
+         identity,
+         type,
+         parent,
+         named,
+         name,
+         searchCriteria
+      );
+   }
+
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext invocationCtx,
                                                                IdentityObject identity,
                                                                IdentityObjectRelationshipType relationshipType,
                                                                boolean parent,
                                                                boolean named,
-                                                               String name) throws IdentityException
+                                                               String name,
+                                                               IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       return defaultIdentityStore.resolveRelationships(resolveIdentityStoreInvocationContext(invocationCtx),
-         identity, relationshipType, parent, named, name);
+         identity, relationshipType, parent, named, name, criteria);
    }
 
    public String createRelationshipName(IdentityStoreInvocationContext ctx,

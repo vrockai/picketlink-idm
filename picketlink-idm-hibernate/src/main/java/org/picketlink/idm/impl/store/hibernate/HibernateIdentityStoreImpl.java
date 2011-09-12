@@ -795,15 +795,61 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       return findIdentityObject(ctx, identityType, null);
    }
 
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        boolean parent,
+                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return getIdentityObjectCount(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
 
    @SuppressWarnings("unchecked")
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
                                                         boolean parent,
-                                                       IdentityObjectSearchCriteria criteria) throws IdentityException
+                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
+   }
+
+
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      int result;
+
+      try
+      {
+         org.hibernate.Query q = prepareIdentityObjectQuery(
+            ctx,
+            identity,
+            relationshipType,
+            excludes,
+            parent,
+            criteria,
+            false);
+
+
+         result = ((Integer)q.iterate().next() ).intValue();
+      }
+      catch (Exception e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
+         throw new IdentityException("Cannot get IdentityObject count", e);
+      }
+
+      return result;
+
    }
 
    @SuppressWarnings("unchecked")
@@ -814,11 +860,60 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                                                         boolean parent,
                                                        IdentityObjectSearchCriteria criteria) throws IdentityException
    {
+
+      List<IdentityObject> results;
+
+      try
+      {
+         org.hibernate.Query q = prepareIdentityObjectQuery(
+            ctx,
+            identity,
+            relationshipType,
+            excludes,
+            parent,
+            criteria,
+            false);
+
+
+         results = q.list();
+         Hibernate.initialize(results);
+
+
+      }
+      catch (Exception e)
+      {
+         if (log.isLoggable(Level.FINER))
+         {
+            log.log(Level.FINER, "Exception occurred: ", e);
+         }
+
+         throw new IdentityException("Cannot find IdentityObjects", e);
+      }
+
+      if (criteria != null && criteria.isFiltered())
+      {
+         filterByAttributesValues(results, criteria.getValues());
+         if (criteria.isPaged())
+         {
+            results = (LinkedList)cutPageFromResults(results, criteria);
+         }
+      }
+
+      return results;
+   }
+
+   @SuppressWarnings("unchecked")
+   public org.hibernate.Query prepareIdentityObjectQuery(IdentityStoreInvocationContext ctx,
+                                                        IdentityObject identity,
+                                                        IdentityObjectRelationshipType relationshipType,
+                                                        Collection<IdentityObjectType> excludes,
+                                                        boolean parent,
+                                                        IdentityObjectSearchCriteria criteria,
+                                                        boolean count) throws IdentityException
+   {
       //TODO:test
 
       HibernateIdentityObject hibernateObject = safeGet(ctx, identity);
-
-      List<IdentityObject> results;
 
       boolean orderByName = false;
       boolean ascending = true;
@@ -829,9 +924,11 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          ascending = criteria.isAscending();
       }
 
+      org.hibernate.Query q = null;
+
       try
       {
-         org.hibernate.Query q = null;
+
 
          StringBuilder hqlString = new StringBuilder("");
 
@@ -841,16 +938,24 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          if (parent)
          {
 
-            if (relationshipType != null)
+            if (count)
             {
+               hqlString.append("select count(distinct ior.toIdentityObject) from HibernateIdentityObjectRelationship ior where ");
 
-               hqlString.append("select distinct ior.toIdentityObject from HibernateIdentityObjectRelationship ior where " +
-                  "ior.toIdentityObject.name like :nameFilter and ior.type.name = :relType and ior.fromIdentityObject = :identity");
             }
             else
             {
-               hqlString.append("select distinct ior.toIdentityObject from HibernateIdentityObjectRelationship ior where " +
-                  "ior.toIdentityObject.name like :nameFilter and ior.fromIdentityObject = :identity");
+               hqlString.append("select distinct ior.toIdentityObject from HibernateIdentityObjectRelationship ior where ");
+            }
+
+            if (relationshipType != null)
+            {
+
+               hqlString.append("ior.toIdentityObject.name like :nameFilter and ior.type.name = :relType and ior.fromIdentityObject = :identity");
+            }
+            else
+            {
+               hqlString.append("ior.toIdentityObject.name like :nameFilter and ior.fromIdentityObject = :identity");
             }
 
             if (excludes != null && excludes.size() > 0)
@@ -859,7 +964,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                int i = 0;
                for (IdentityObjectType exclude : excludes)
                {
-                  hqlString.append(" and ior.toIdentityObject.identityType.name != ")
+                  hqlString.append(" and ior.toIdentityObject.identityType.id <> ")
                   .append(":exclude" + i++);
                }
             }
@@ -875,15 +980,24 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
          }
          else
          {
-            if (relationshipType != null)
+
+            if (count)
             {
-               hqlString.append("select distinct ior.fromIdentityObject from HibernateIdentityObjectRelationship ior where " +
-                  "ior.fromIdentityObject.name like :nameFilter and ior.type.name = :relType and ior.toIdentityObject = :identity");
+               hqlString.append("select count(distinct ior.fromIdentityObject) from HibernateIdentityObjectRelationship ior where ");
+
             }
             else
             {
-              hqlString.append("select distinct ior.fromIdentityObject from HibernateIdentityObjectRelationship ior where " +
-                  "ior.fromIdentityObject.name like :nameFilter and ior.toIdentityObject = :identity");
+               hqlString.append("select distinct ior.fromIdentityObject from HibernateIdentityObjectRelationship ior where ");
+            }
+
+            if (relationshipType != null)
+            {
+               hqlString.append("ior.fromIdentityObject.name like :nameFilter and ior.type.name = :relType and ior.toIdentityObject = :identity");
+            }
+            else
+            {
+              hqlString.append("ior.fromIdentityObject.name like :nameFilter and ior.toIdentityObject = :identity");
             }
 
             if (excludes != null && excludes.size() > 0)
@@ -891,7 +1005,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                int i = 0;
                for (IdentityObjectType exclude : excludes)
                {
-                  hqlString.append(" and ior.fromIdentityObject.identityType.name != ")
+                  hqlString.append(" and ior.fromIdentityObject.identityType.id <> ")
                   .append(":exclude" + i++);
                }
             }
@@ -930,7 +1044,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             int i = 0;
             for (IdentityObjectType exclude : excludes)
             {
-               q.setParameter("exclude" + i++, exclude.getName());
+               HibernateIdentityObjectType exType = getHibernateIdentityObjectType(ctx, exclude);
+               q.setParameter("exclude" + i++, exType.getId());
             }
          }
          if (criteria != null && criteria.isPaged() && !criteria.isFiltered())
@@ -944,10 +1059,6 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
 
          q.setCacheable(true);
-         results = q.list();
-         Hibernate.initialize(results);
-
-
       }
       catch (Exception e)
       {
@@ -956,19 +1067,10 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             log.log(Level.FINER, "Exception occurred: ", e);
          }
 
-         throw new IdentityException("Cannot find IdentityObjects", e);
+         throw new IdentityException("Cannot prepare hibernate query", e);
       }
 
-      if (criteria != null && criteria.isFiltered())
-      {
-         filterByAttributesValues(results, criteria.getValues());
-         if (criteria.isPaged())
-         {
-            results = (LinkedList)cutPageFromResults(results, criteria);
-         }
-      }
-
-      return results;
+      return q;
    }
 
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
@@ -1219,12 +1321,76 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       return new HashSet<IdentityObjectRelationship>(results);
    }
 
+
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx,
+                                                               IdentityObject identity,
+                                                               IdentityObjectRelationshipType type,
+                                                               boolean parent,
+                                                               boolean named,
+                                                               String name,
+                                                               IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+
+      Criteria criteria = prepareResolveRelationshipsCriteria(
+         ctx,
+         identity,
+         type,
+         parent,
+         named,
+         name,
+         searchCriteria
+      );
+
+      criteria.setProjection(Projections.rowCount());
+
+      Iterator result = criteria.list().iterator();
+
+
+      if (!result.hasNext())
+      {
+         return 0;
+      }
+
+      return (Integer)result.next();
+
+   }
+
+
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext ctx,
                                                                IdentityObject identity,
                                                                IdentityObjectRelationshipType type,
                                                                boolean parent,
                                                                boolean named,
-                                                               String name) throws IdentityException
+                                                               String name,
+                                                               IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+      HibernateIdentityObject hio = safeGet(ctx, identity);
+
+
+      Criteria criteria = prepareResolveRelationshipsCriteria(
+         ctx,
+         identity,
+         type,
+         parent,
+         named,
+         name,
+         searchCriteria
+      );
+
+      List<HibernateIdentityObjectRelationship> results = criteria.list();
+
+      Hibernate.initialize(results);
+
+      return new HashSet<IdentityObjectRelationship>(results);
+   }
+
+   public Criteria prepareResolveRelationshipsCriteria(IdentityStoreInvocationContext ctx,
+                                                               IdentityObject identity,
+                                                               IdentityObjectRelationshipType type,
+                                                               boolean parent,
+                                                               boolean named,
+                                                               String name,
+                                                               IdentityObjectSearchCriteria searchCriteria) throws IdentityException
    {
       HibernateIdentityObject hio = safeGet(ctx, identity);
 
@@ -1264,11 +1430,17 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       criteria.setFetchMode("fromIdentityObject", FetchMode.JOIN);
       criteria.setFetchMode("toIdentityObject", FetchMode.JOIN);
 
-      List<HibernateIdentityObjectRelationship> results = criteria.list();
+      if (searchCriteria != null && searchCriteria.isPaged() && !searchCriteria.isFiltered())
+      {
+         if (searchCriteria.getMaxResults() > 0)
+         {
+            criteria.setMaxResults(searchCriteria.getMaxResults());
+         }
+         criteria.setFirstResult(searchCriteria.getFirstResult());
+      }
 
-      Hibernate.initialize(results);
 
-      return new HashSet<IdentityObjectRelationship>(results);
+      return criteria;
    }
 
    public String createRelationshipName(IdentityStoreInvocationContext ctx, String name) throws IdentityException, OperationNotSupportedException

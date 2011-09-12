@@ -842,7 +842,71 @@ public class RoleManagerImpl extends AbstractManager implements RoleManager, Ser
       return findGroupsWithRelatedRole(user, groupType, criteria);
    }
 
-   public Collection<Role> findRoles(IdentityType identityType, RoleType roleType) throws IdentityException
+   public int getRolesCount(IdentityType identityType, RoleType roleType, IdentitySearchCriteria criteria) throws IdentityException
+   {
+      //TODO: cache support
+
+      checkNotNullArgument(identityType, "IdentityType");
+
+
+//      if (cache != null)
+//      {
+//         RoleSearchImpl search = new RoleSearchImpl();
+//         search.setIdentityTypeId(identityType.getKey());
+//         search.setRoleType(roleType);
+//
+//         Collection<Role> results = cache.getRoleSearch(cacheNS, search);
+//         if (results != null)
+//         {
+//            return results;
+//         }
+//      }
+
+      int relationshipsCount = 0;
+
+      // If Identity then search for parent relationships
+      if (identityType instanceof User)
+      {
+         relationshipsCount = getRepository().
+            getRelationshipsCount(
+               getInvocationContext(),
+               createIdentityObject(identityType),
+               ROLE,
+               false,
+               true,
+               null,
+               convertSearchControls(criteria));
+      }
+      // If Group then search for child relationships
+      else
+      {
+         relationshipsCount = getRepository().
+            getRelationshipsCount(
+               getInvocationContext(),
+               createIdentityObject(identityType),
+               ROLE,
+               true,
+               true,
+               null,
+               convertSearchControls(criteria));
+      }
+
+
+//      if (cache != null)
+//      {
+//         RoleSearchImpl search = new RoleSearchImpl();
+//         search.setIdentityTypeId(identityType.getKey());
+//         search.setRoleType(roleType);
+//
+//          cache.putRoleSearch(cacheNS, search, roles);
+//
+//      }
+
+      return relationshipsCount;
+
+   }
+
+   public Collection<Role> findRoles(IdentityType identityType, RoleType roleType, IdentitySearchCriteria criteria) throws IdentityException
    {
       checkNotNullArgument(identityType, "IdentityType");
       //checkNotNullArgument(roleType, "RoleType");
@@ -867,12 +931,28 @@ public class RoleManagerImpl extends AbstractManager implements RoleManager, Ser
       // If Identity then search for parent relationships
       if (identityType instanceof User)
       {
-         relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(identityType), ROLE, false, true, null);
+         relationships = getRepository().
+            resolveRelationships(
+               getInvocationContext(),
+               createIdentityObject(identityType),
+               ROLE,
+               false,
+               true,
+               null,
+               convertSearchControls(criteria));
       }
       // If Group then search for child relationships
       else
       {
-         relationships = getRepository().resolveRelationships(getInvocationContext(), createIdentityObject(identityType), ROLE, true, true, null);
+         relationships = getRepository().
+            resolveRelationships(
+               getInvocationContext(),
+               createIdentityObject(identityType),
+               ROLE,
+               true,
+               true,
+               null,
+               convertSearchControls(criteria));
       }
 
       for (IdentityObjectRelationship relationship : relationships)
@@ -904,12 +984,22 @@ public class RoleManagerImpl extends AbstractManager implements RoleManager, Ser
 
    }
 
-   public Collection<Role> findRoles(String id, String roleTypeName) throws IdentityException
+   public Collection<Role> findRoles(IdentityType identityType, RoleType roleType) throws IdentityException
+   {
+      return findRoles(identityType, roleType, null);
+   }
+
+   public Collection<Role> findRoles(String id, String roleTypeName, IdentitySearchCriteria criteria) throws IdentityException
    {
       checkNotNullArgument(id, "Group id or User name");
 
       RoleType roleType = roleTypeName != null ? new SimpleRoleType(roleTypeName) : null;
-      return findRoles(createIdentityTypeFromId(id), roleType);
+      return findRoles(createIdentityTypeFromId(id), roleType, criteria);
+   }
+
+   public <T extends IdentityType> Collection<Role> findRoles(String key, String roleTypeName) throws IdentityException
+   {
+      return findRoles(key, roleTypeName, null);
    }
 
    public Map<String, String> getProperties(RoleType roleType)  throws IdentityException

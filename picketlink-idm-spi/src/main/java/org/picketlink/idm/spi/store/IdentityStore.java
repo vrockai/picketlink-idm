@@ -182,10 +182,49 @@ public interface IdentityStore extends AttributeStore
     * @throws IdentityException
     */
    Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt, IdentityObject identity,
-                                                    IdentityObjectRelationshipType relationshipType,
-                                                    Collection<IdentityObjectType> excludes,
-                                                    boolean parent,
-                                                    IdentityObjectSearchCriteria criteria) throws IdentityException;
+                                                 IdentityObjectRelationshipType relationshipType,
+                                                 Collection<IdentityObjectType> excludes,
+                                                 boolean parent,
+                                                 IdentityObjectSearchCriteria criteria) throws IdentityException;
+
+   /**
+    * Get count of relationship with given identity. Relationships are directional (from parent to child).
+    *
+    * @param invocationCxt
+    * @param identity
+    * @param relationshipType
+    * @param parent defines if given identity is parent or child side in the
+    *                         relationship - default is true (parent)
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                              IdentityObject identity,
+                              IdentityObjectRelationshipType relationshipType,
+                              boolean parent,
+                              IdentityObjectSearchCriteria criteria) throws IdentityException;
+
+
+    /**
+    * Get count of relationship with given identity. Relationships are directional (from parent to child).
+    *
+    * @param ctx
+    * @param identity
+    * @param relationshipType
+    * @param excludes list of object types to not include in search
+    * @param parent defines if given identity is parent or child side in the
+    *                         relationship - default is true (parent)
+    * @param criteria
+    * @return
+    * @throws IdentityException
+    */
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     Collection<IdentityObjectType> excludes,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException;
 
 
    /**
@@ -252,12 +291,32 @@ public interface IdentityStore extends AttributeStore
 
 
    /**
+    * Get count of relationships for a given IdentityObject. Relationships can be directional and parent switch defines which
+    * role identity play in it.
+    * @param ctx
+    * @param identity
+    * @param named
+    * @param name - can be null
+    * @param searchCriteria
+    * @return
+    * @throws IdentityException
+    */
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx,
+                                    IdentityObject identity,
+                                    IdentityObjectRelationshipType type,
+                                    boolean parent,
+                                    boolean named,
+                                    String name,
+                                    IdentityObjectSearchCriteria searchCriteria) throws IdentityException;
+
+   /**
     * Resolve relationships for a given IdentityObject. Relationships can be directional and parent switch defines which
     * role identity play in it.
     * @param invocationCxt
     * @param identity
     * @param named
-    * @param name - can be null 
+    * @param name - can be null
+    * @param criteria
     * @return
     * @throws IdentityException
     */
@@ -266,8 +325,10 @@ public interface IdentityStore extends AttributeStore
                                                         IdentityObjectRelationshipType relationshipType,
                                                         boolean parent,
                                                         boolean named,
-                                                        String name)
+                                                        String name,
+                                                        IdentityObjectSearchCriteria criteria)
       throws IdentityException;
+
 
 
    // Named relationships

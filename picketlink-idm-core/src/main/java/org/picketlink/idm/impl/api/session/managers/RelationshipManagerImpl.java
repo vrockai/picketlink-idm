@@ -856,6 +856,8 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
 
    private Collection<Group> findAssociatedGroupsCascaded(Collection<Group> previous, Group group, String groupType, boolean parent, IdentitySearchCriteria criteria) throws IdentityException
    {
+      getIdentitySession().save();
+
       Collection<Group> results = findAssociatedGroups(group, groupType, parent, false, criteria);
 
       List<Group> newResults = new LinkedList<Group>();
@@ -868,11 +870,22 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
          {
             newResults.add(result);
             previous.add(result);
+
+            getIdentitySession().save();
+
             newResults.addAll(findAssociatedGroupsCascaded(previous, result, groupType, parent, criteria));
          }
       }
 
       return newResults;
+
+   }
+
+   public int getAssociatedGroupsCount(Group group, String groupType, boolean parent, boolean cascade, IdentitySearchCriteria criteria) throws IdentityException
+   {
+
+      //TODO: implement!
+      return findAssociatedGroups(group, groupType, parent, cascade, criteria).size();
 
    }
 
@@ -929,7 +942,6 @@ public class RelationshipManagerImpl extends AbstractManager implements Relation
          }
          else
          {
-
 
             Collection<IdentityObject> ios = getRepository().
                findIdentityObject(

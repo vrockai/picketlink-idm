@@ -1120,6 +1120,36 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return findIdentityObject(invocationCxt, identity, relationshipType, null, parent, criteria);
    }
 
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return findIdentityObject(
+         invocationCxt,
+         identity,
+         relationshipType,
+         parent,
+         criteria).size();
+   }
+
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     Collection<IdentityObjectType> excludes,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return findIdentityObject(
+         ctx,
+         identity,
+         relationshipType,
+         excludes,
+         parent,
+         criteria
+      ).size();
+   }
 
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext ctx,
                                                         IdentityObject identity,
@@ -1531,12 +1561,18 @@ public class LDAPIdentityStoreImpl implements IdentityStore
       return objects;
    }
 
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx, IdentityObject identity, IdentityObjectRelationshipType type, boolean parent, boolean named, String name, IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+      return resolveRelationships(ctx, identity, type, parent, named, name, searchCriteria).size();
+   }
+
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext ctx,
                                                                IdentityObject identity,
                                                                IdentityObjectRelationshipType type,
                                                                boolean parent,
                                                                boolean named,
-                                                               String name) throws IdentityException
+                                                               String name,
+                                                               IdentityObjectSearchCriteria searchCriteria) throws IdentityException
    {
 
       if (log.isLoggable(Level.FINER))

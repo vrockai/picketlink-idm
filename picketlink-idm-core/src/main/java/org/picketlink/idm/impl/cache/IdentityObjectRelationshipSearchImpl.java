@@ -206,4 +206,21 @@ public class IdentityObjectRelationshipSearchImpl extends AbstractSPISearchImpl 
 
       return true;
    }
+
+   @Override
+   public int hashCode()
+   {
+      int result = super.hashCode();
+      result = 31 * result + (fromIOName != null ? fromIOName.hashCode() : 0);
+      result = 31 * result + (fromIOType != null ? fromIOType.hashCode() : 0);
+      result = 31 * result + (toIOName != null ? toIOName.hashCode() : 0);
+      result = 31 * result + (toIOType != null ? toIOType.hashCode() : 0);
+      result = 31 * result + (relationshipType != null ? relationshipType.hashCode() : 0);
+      result = 31 * result + (ioName != null ? ioName.hashCode() : 0);
+      result = 31 * result + (ioType != null ? ioType.hashCode() : 0);
+      result = 31 * result + (parent ? 1 : 0);
+      result = 31 * result + (named ? 1 : 0);
+      result = 31 * result + (name != null ? name.hashCode() : 0);
+      return result;
+   }
 }

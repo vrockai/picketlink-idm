@@ -245,6 +245,38 @@ public class JBossCacheIdentityStoreWrapper extends JBossCacheAttributeStoreWrap
 
    }
 
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return identityStore.getIdentityObjectCount(
+         invocationCxt,
+         identity,
+         relationshipType,
+         parent,
+         criteria
+      );
+   }
+
+   public int getIdentityObjectCount(IdentityStoreInvocationContext ctx,
+                                     IdentityObject identity,
+                                     IdentityObjectRelationshipType relationshipType,
+                                     Collection<IdentityObjectType> excludes,
+                                     boolean parent,
+                                     IdentityObjectSearchCriteria criteria) throws IdentityException
+   {
+      return identityStore.getIdentityObjectCount(
+         ctx,
+         identity,
+         relationshipType,
+         excludes,
+         parent,
+         criteria
+      );
+   }
+
    public Collection<IdentityObject> findIdentityObject(IdentityStoreInvocationContext invocationCxt,
                                                         IdentityObject identity,
                                                         IdentityObjectRelationshipType relationshipType,
@@ -381,12 +413,36 @@ public class JBossCacheIdentityStoreWrapper extends JBossCacheAttributeStoreWrap
 
    }
 
+   public int getRelationshipsCount(IdentityStoreInvocationContext ctx,
+                                    IdentityObject identity,
+                                    IdentityObjectRelationshipType type,
+                                    boolean parent,
+                                    boolean named,
+                                    String name,
+                                    IdentityObjectSearchCriteria searchCriteria) throws IdentityException
+   {
+
+      //TODO implement cache
+
+      return identityStore.getRelationshipsCount(
+         ctx,
+         identity,
+         type,
+         parent,
+         named,
+         name,
+         searchCriteria
+      );
+   }
+
+
    public Set<IdentityObjectRelationship> resolveRelationships(IdentityStoreInvocationContext invocationCtx,
                                                                IdentityObject identity,
                                                                IdentityObjectRelationshipType relationshipType,
                                                                boolean parent,
                                                                boolean named,
-                                                               String name) throws IdentityException
+                                                               String name,
+                                                               IdentityObjectSearchCriteria criteria) throws IdentityException
    {
 
       IdentityObjectRelationshipSearchImpl search = new IdentityObjectRelationshipSearchImpl();
@@ -402,6 +458,7 @@ public class JBossCacheIdentityStoreWrapper extends JBossCacheAttributeStoreWrap
       search.setParent(parent);
       search.setNamed(named);
       search.setName(name);
+      search.setIdentityObjectSearchCriteria(criteria);
 
       Set<IdentityObjectRelationship> results = cacheSupport.getIdentityObjectRelationshipSearch(getCacheNS(invocationCtx), search);
 
@@ -411,7 +468,7 @@ public class JBossCacheIdentityStoreWrapper extends JBossCacheAttributeStoreWrap
       }
 
       results = identityStore.resolveRelationships(invocationCtx,
-         identity, relationshipType, parent, named, name);
+         identity, relationshipType, parent, named, name, criteria);
 
       cacheSupport.putIdentityObjectRelationshipSearch(getCacheNS(invocationCtx), search, results);
 
