@@ -2,22 +2,22 @@
   <parent>
     <groupId>org.picketlink.idm</groupId>
     <artifactId>picketlink-idm-parent</artifactId>
-    <version>1.3.0.Alpha04-SNAPSHOT</version>
+    <version>1.3.0.Alpha04</version>
     <relativePath>parent</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.picketlink.idm</groupId>
   <artifactId>jboss-identity-idm-pom</artifactId>
-  <version>1.3.0.Alpha04-SNAPSHOT</version>
+  <version>1.3.0.Alpha04</version>
   <packaging>pom</packaging>
   <name>PicketLink IDM - Aggregator</name>
   <url>http://labs.jboss.org/portal/jbosssecurity/</url>
   <description />
 
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
-    <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/jboss-parent-5/picketlink-idm-parent/jboss-identity-idm-pom</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/tags/1.3.0.Alpha04</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/tags/1.3.0.Alpha04</developerConnection>
+    <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/1.3.0.Alpha04</url>
 
   </scm>
 
