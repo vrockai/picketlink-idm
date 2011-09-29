@@ -724,7 +724,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.FINER))
+            if (log.isLoggable(Level.INFO))
             {
                log.log(Level.FINER, "Exception occurred: ", e);
             }
@@ -760,7 +760,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             }
             catch (IdentityException e)
             {
-               if (log.isLoggable(Level.FINER))
+               if (log.isLoggable(Level.INFO))
                {
                   log.log(Level.FINER, "Exception occurred: ", e);
                }
@@ -780,7 +780,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
                }
                catch (IdentityException e)
                {
-                  if (log.isLoggable(Level.FINER))
+                  if (log.isLoggable(Level.INFO))
                   {
                      log.log(Level.FINER, "Exception occurred: ", e);
                   }
