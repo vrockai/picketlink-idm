@@ -33,11 +33,13 @@ import org.picketlink.idm.api.UnsupportedCriterium;
 import org.picketlink.idm.api.Group;
 import org.picketlink.idm.api.IdentityType;
 
+import java.io.Serializable;
+
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
  * @version : 0.1 $
  */
-public class AbstractQueryBuilder implements QueryBuilder
+public class AbstractQueryBuilder implements QueryBuilder, Serializable
 {
 
    //TODO: query should check criteria with features description
