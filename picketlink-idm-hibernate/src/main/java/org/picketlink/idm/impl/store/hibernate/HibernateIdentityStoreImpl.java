@@ -1443,24 +1443,26 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       {
          if (parent)
          {
+            criteria.createAlias("toIdentityObject", "io");
             if (searchCriteria.isAscending())
             {
-               criteria.addOrder(Order.asc("toIdentityObject.name"));
+               criteria.addOrder(Order.asc("io.name"));
             }
             else
             {
-               criteria.addOrder(Order.desc("toIdentityObject.name"));
+               criteria.addOrder(Order.desc("io.name"));
             }
          }
          else
          {
+            criteria.createAlias("fromIdentityObject", "io");
             if (searchCriteria.isAscending())
             {
-               criteria.addOrder(Order.asc("fromIdentityObject.name"));
+               criteria.addOrder(Order.asc("io.name"));
             }
             else
             {
-               criteria.addOrder(Order.desc("fromIdentityObject.name"));
+               criteria.addOrder(Order.desc("io.name"));
             }
          }
       }
