@@ -184,14 +184,14 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
       return defaultIdentityStore.findIdentityObject(resolveIdentityStoreInvocationContext(invocationCtx), identityType, criteria);
    }
 
-   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCxt,
+   public int getIdentityObjectCount(IdentityStoreInvocationContext invocationCtx,
                                      IdentityObject identity,
                                      IdentityObjectRelationshipType relationshipType,
                                      boolean parent,
                                      IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       return defaultIdentityStore.getIdentityObjectCount(
-         invocationCxt,
+         resolveIdentityStoreInvocationContext(invocationCtx),
          identity,
          relationshipType,
          parent,
@@ -207,7 +207,7 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
                                      IdentityObjectSearchCriteria criteria) throws IdentityException
    {
       return defaultIdentityStore.getIdentityObjectCount(
-         ctx,
+         resolveIdentityStoreInvocationContext(ctx),
          identity,
          relationshipType,
          excludes,
@@ -282,7 +282,7 @@ public class WrapperIdentityStoreRepository extends AbstractIdentityStoreReposit
                                     IdentityObjectSearchCriteria searchCriteria) throws IdentityException
    {
       return defaultIdentityStore.getRelationshipsCount(
-         ctx,
+         resolveIdentityStoreInvocationContext(ctx),
          identity,
          type,
          parent,
