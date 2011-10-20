@@ -617,6 +617,11 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       int result = 0;
 
+      if (!targetStores.contains(defaultIdentityStore))
+      {
+         targetStores.add(defaultIdentityStore);
+      }
+
       for (IdentityStore targetStore : targetStores)
       {
          IdentityStoreInvocationContext targetCtx = resolveInvocationContext(targetStore, invocationCtx);
@@ -840,10 +845,17 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       Collection<IdentityStore> mappedStores = getConfiguredIdentityStores();
 
+      if (!mappedStores.contains(defaultIdentityStore))
+      {
+         mappedStores.add(defaultIdentityStore);
+      }
+
       for (IdentityStore mappedStore : mappedStores)
       {
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(mappedStore, invocationCxt);
+
          count += mappedStore.getIdentityObjectCount(
-            invocationCxt,
+            targetCtx,
             identity,
             relationshipType,
             parent,
@@ -869,10 +881,18 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       Collection<IdentityStore> mappedStores = getConfiguredIdentityStores();
 
+      if (!mappedStores.contains(defaultIdentityStore))
+      {
+         mappedStores.add(defaultIdentityStore);
+      }
+
       for (IdentityStore mappedStore : mappedStores)
       {
+
+         IdentityStoreInvocationContext targetCtx = resolveInvocationContext(mappedStore, ctx);
+
          count += mappedStore.getIdentityObjectCount(
-            ctx,
+            targetCtx,
             identity,
             relationshipType,
             excludes,
@@ -1226,15 +1246,21 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
       for (IdentityStore mappedStore : mappedStores)
       {
-         count += mappedStore.getRelationshipsCount(
-            ctx,
-            identity,
-            type,
-            parent,
-            named,
-            name,
-            searchCriteria
-         );
+         IdentityStoreInvocationContext storeCtx = resolveInvocationContext(mappedStore, ctx);
+
+
+         if (hasIdentityObject(storeCtx, mappedStore, identity))
+         {
+            count += mappedStore.getRelationshipsCount(
+               storeCtx,
+               identity,
+               type,
+               parent,
+               named,
+               name,
+               searchCriteria
+            );
+         }
       }
 
       return count;
@@ -1256,16 +1282,17 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          // For any IdentityStore that supports named relationships...
          for (IdentityStore identityStore : configuredIdentityStores)
          {
-            if (relationshipType.getName() != null &&
-               !identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
-            {
-               continue;
-            }
+//            if (relationshipType.getName() != null &&
+//               !identityStore.getSupportedFeatures().getSupportedRelationshipTypes().contains(relationshipType.getName()))
+//            {
+//               continue;
+//            }
 
             IdentityStoreInvocationContext storeCtx = resolveInvocationContext(identityStore, ctx);
 
-            if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
-               && hasIdentityObject(storeCtx, identityStore, identity))
+            //if ((!named || (named && identityStore.getSupportedFeatures().isNamedRelationshipsSupported()))
+            //   && hasIdentityObject(storeCtx, identityStore, identity))
+            if (hasIdentityObject(storeCtx, identityStore, identity))
             {
                relationships.addAll(identityStore.
                   resolveRelationships(storeCtx, identity, relationshipType, parent, named, name, criteria));

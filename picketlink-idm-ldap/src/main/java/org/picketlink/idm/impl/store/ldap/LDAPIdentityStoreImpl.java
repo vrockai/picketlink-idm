@@ -31,6 +31,7 @@ import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectImpl;
 import org.picketlink.idm.impl.model.ldap.LDAPIdentityObjectRelationshipImpl;
 import org.picketlink.idm.impl.store.FeaturesMetaDataImpl;
 import org.picketlink.idm.impl.types.SimpleIdentityObject;
+import org.picketlink.idm.impl.types.SimpleIdentityObjectRelationshipType;
 import org.picketlink.idm.spi.cache.IdentityStoreCacheProvider;
 import org.picketlink.idm.spi.configuration.IdentityStoreConfigurationContext;
 import org.picketlink.idm.spi.configuration.metadata.IdentityObjectAttributeMetaData;
@@ -109,6 +110,10 @@ public class LDAPIdentityStoreImpl implements IdentityStore
    private IdentityStoreCacheProvider cache;
 
    public static final String MEMBERSHIP_TYPE = "JBOSS_IDENTITY_MEMBERSHIP";
+
+   public static final String ROLE_TYPE = "JBOSS_IDENTITY_ROLE";
+
+   public static final String ROLE_TYPE_MEMBER = "member";
 
    private FeaturesMetaData supportedFeatures;
 
@@ -1175,7 +1180,6 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             });
       }
 
-
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
       {
          throw new IdentityException("This store implementation supports only '" + MEMBERSHIP_TYPE +"' relationship type");
@@ -1590,7 +1594,13 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             });
       }
 
-      if (type == null || !type.getName().equals(MEMBERSHIP_TYPE))
+
+      if (type == null || (type.getName().equals(ROLE_TYPE) && (name == null || name.equalsIgnoreCase(ROLE_TYPE_MEMBER))))
+      {
+         type = new SimpleIdentityObjectRelationshipType(MEMBERSHIP_TYPE);
+      }
+
+      if (!type.getName().equals(MEMBERSHIP_TYPE))
       {
          throw new IdentityException("This store implementation supports only '" + MEMBERSHIP_TYPE +"' relationship type");
       }
@@ -2235,6 +2245,11 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                "toIdentity", toIdentity,
                "IdentityObjectRelationshipType", relationshipType
             });
+      }
+
+      if (relationshipType == null)
+      {
+         relationshipType = new SimpleIdentityObjectRelationshipType(MEMBERSHIP_TYPE);
       }
 
       if (relationshipType != null && !relationshipType.getName().equals(MEMBERSHIP_TYPE))
