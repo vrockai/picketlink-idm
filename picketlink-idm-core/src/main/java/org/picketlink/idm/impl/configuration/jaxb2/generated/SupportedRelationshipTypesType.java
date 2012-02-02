@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -42,6 +43,7 @@ import javax.xml.bind.annotation.XmlType;
 public class SupportedRelationshipTypesType {
 
     @XmlElement(name = "relationship-type")
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected List<String> relationshipType;
 
     /**

@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -42,8 +43,12 @@ import javax.xml.bind.annotation.XmlType;
 public class GroupTypeMappingType {
 
     @XmlElement(name = "group-type-name", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String groupTypeName;
+
+
     @XmlElement(name = "identity-object-type-name", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String identityObjectTypeName;
 
     /**

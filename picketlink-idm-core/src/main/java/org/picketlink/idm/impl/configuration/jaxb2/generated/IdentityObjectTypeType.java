@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -90,7 +91,9 @@ import javax.xml.bind.annotation.XmlType;
 public class IdentityObjectTypeType {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String name;
+
     @XmlElement(required = true)
     protected IdentityObjectTypeType.Relationships relationships;
     @XmlElement(required = true)
@@ -306,6 +309,7 @@ public class IdentityObjectTypeType {
     public static class Credentials {
 
         @XmlElement(name = "credential-type")
+        @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
         protected List<String> credentialType;
 
         /**

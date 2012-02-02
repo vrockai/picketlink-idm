@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -46,9 +47,13 @@ import javax.xml.bind.annotation.XmlType;
 public class RealmType {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String id;
+
     @XmlElement(name = "repository-id-ref", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String repositoryIdRef;
+
     @XmlElement(name = "identity-type-mappings")
     protected IdentityTypeMappingsType identityTypeMappings;
     protected OptionsType options;

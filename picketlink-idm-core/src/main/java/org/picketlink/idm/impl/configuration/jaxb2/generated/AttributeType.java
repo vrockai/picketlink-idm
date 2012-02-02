@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -67,14 +68,27 @@ import javax.xml.bind.annotation.XmlType;
 public class AttributeType {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String name;
+
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String mapping;
+
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String type;
+
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String isRequired;
+
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String isMultivalued;
+
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String isReadOnly;
+
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String isUnique;
 
     /**

@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -44,7 +45,10 @@ import javax.xml.bind.annotation.XmlType;
 public class OptionType {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String name;
+
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected List<String> value;
 
     /**

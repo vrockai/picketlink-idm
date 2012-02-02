@@ -25,8 +25,13 @@ package org.picketlink.idm.impl.configuration;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
 
 import org.picketlink.idm.impl.configuration.jaxb2.JAXB2IdentityConfiguration;
+import org.picketlink.idm.impl.configuration.jaxb2.SystemPropertiesSubstitutionConverter;
 import org.picketlink.idm.spi.configuration.metadata.IdentityConfigurationMetaData;
 
 /**
@@ -48,5 +53,49 @@ public class ConfigurationTestCase extends TestCase
       assertEquals("HibernateTestStore", config.getIdentityStores().get(0).getId() );
 
       
+   }
+
+   public void testSystemPropertiesSubstitution() throws Exception
+   {
+      // Init system properties for substitution
+      System.setProperty("identity.store.id", "HibernateStore");
+      System.setProperty("relationship.type1", "JBOSS_IDENTITY_MEMBERSHIP");
+      System.setProperty("relationship.type2", "JBOSS_IDENTITY_ROLLE");
+      
+      System.setProperty("option2.value", "Value of option2");
+      System.setProperty("option3.value", "Value of option3");
+      System.setProperty("option5.value1", "Option5 value1");
+      System.setProperty("option5.value2", "Option5 value2");
+      System.setProperty("option6.value1", "Option6 value1");
+      System.setProperty("option7.value2", "Option7 value2");
+      System.setProperty("option8.value2", "Option8 value2");
+      System.setProperty("option8.value4", "Option8 value4");
+
+      // Parse config file
+      IdentityConfigurationMetaData config = JAXB2IdentityConfiguration.createConfigurationMetaData(new File("src/test/resources/example-system-properties-config.xml"));
+      assertNotNull(config);
+
+      // Assert that values from configuration were correctly substituted
+      assertEquals("HibernateStore", config.getRepositories().get(0).getDefaultIdentityStoreId());
+      assertEquals("HibernateStore", config.getRepositories().get(0).getDefaultAttributeStoreId());
+      assertEquals("true", config.getRepositories().get(0).getOption("allowNotDefinedAttributes").get(0));
+      assertEquals("HibernateStore", config.getIdentityStores().get(0).getId());
+      assertTrue(config.getIdentityStores().get(0).getSupportedRelationshipTypes().contains("JBOSS_IDENTITY_MEMBERSHIP"));
+      assertTrue(config.getIdentityStores().get(0).getSupportedRelationshipTypes().contains("JBOSS_IDENTITY_ROLLE"));
+
+      // Assert that all options were correctly substituted
+      Map<String, List<String>> options = config.getIdentityStores().get(0).getOptions();
+      assertEquals("option1Value", options.get("option1").get(0));
+      assertEquals("Value of option2", options.get("option2").get(0));
+      assertEquals("Value of option3", options.get("option3").get(0));
+      assertEquals("defaultValue", options.get("option4").get(0));
+      assertEquals("Option5 value1", options.get("option5").get(0));
+      assertEquals("Option6 value1", options.get("option6").get(0));
+      assertEquals("Option7 value2", options.get("option7").get(0));
+      assertEquals("something1 Option8 value2 something2 defaultValue something3 Option8 value4 something4", options.get("option8").get(0));
+      assertEquals("something1 ${} something2", options.get("option9").get(0));
+      assertEquals("${option10.value1}", options.get("option10").get(0));
+      assertEquals("value2", options.get("option10").get(1));
+      assertEquals("defaultValue3", options.get("option10").get(2));
    }
 }

@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -44,7 +45,9 @@ import javax.xml.bind.annotation.XmlType;
 public class IdentityTypeMappingsType {
 
     @XmlElement(name = "user-mapping", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String identityMapping;
+
     @XmlElement(name = "group-type-mapping")
     protected List<GroupTypeMappingType> groupTypeMapping;
 

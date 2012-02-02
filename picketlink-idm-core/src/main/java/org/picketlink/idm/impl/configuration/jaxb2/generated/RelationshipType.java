@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -42,8 +43,11 @@ import javax.xml.bind.annotation.XmlType;
 public class RelationshipType {
 
     @XmlElement(name = "relationship-type-ref", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String relationshipTypeRef;
+
     @XmlElement(name = "identity-object-type-ref", required = true)
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String identityObjectTypeRef;
 
     /**

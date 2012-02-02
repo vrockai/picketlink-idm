@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -39,8 +40,11 @@ import javax.xml.bind.annotation.XmlValue;
 public class ExternalConfigType {
 
     @XmlValue
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String value;
+
     @XmlAttribute
+    @XmlJavaTypeAdapter(SystemPropertiesSubstitutionAdapter.class)
     protected String override;
 
     /**
