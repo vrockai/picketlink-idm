@@ -514,10 +514,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.INFO))
-         {
-            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
-         }
+         log.log(Level.SEVERE, "Failed to create IdentityObject: ", e);
       }
 
       return result;
@@ -552,10 +549,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.INFO))
-         {
-            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
-         }
+         log.log(Level.SEVERE, "Failed to create IdentityObject: ", e);
       }
 
       return result;
@@ -583,10 +577,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.INFO))
-            {
-               log.log(Level.INFO, "Failed to remove IdentityObject from target store: ", e);
-            }
+            log.log(Level.SEVERE, "Failed to remove IdentityObject from target store: ", e);
          }
       }
 
@@ -601,10 +592,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.INFO))
-            {
-               log.log(Level.INFO, "Failed to remove IdentityObject from default store: ", e);
-            }
+            log.log(Level.SEVERE, "Failed to remove IdentityObject from default store: ", e);
          }
       }
    }
@@ -631,10 +619,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.FINER))
-            {
-               log.log(Level.INFO, "Failed to obtain IdentityObject count: ", e);
-            }
+            log.log(Level.SEVERE, "Failed to obtain IdentityObject count from store " + targetStore.getId() + " : ", e);
          }
       }
       
@@ -659,10 +644,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.INFO))
-            {
-               log.log(Level.INFO, "Failed to create IdentityObject: ", e);
-            }
+            log.log(Level.SEVERE, "Failed to find IdentityObject in target store: ", e);
          }
 
          if (io != null)
@@ -680,10 +662,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (IdentityException e)
       {
-         if (log.isLoggable(Level.INFO))
-         {
-            log.log(Level.INFO, "Failed to create IdentityObject: ", e);
-         }
+         log.log(Level.SEVERE, "Failed to find IdentityObject in default store: ", e);
       }
 
       return io;
@@ -729,10 +708,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
          }
          catch (IdentityException e)
          {
-            if (log.isLoggable(Level.INFO))
-            {
-               log.log(Level.FINER, "Exception occurred: ", e);
-            }
+            log.log(Level.SEVERE, "Exception occurred: ", e);
          }
 
          return resx;
@@ -765,10 +741,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
             }
             catch (IdentityException e)
             {
-               if (log.isLoggable(Level.INFO))
-               {
-                  log.log(Level.FINER, "Exception occurred: ", e);
-               }
+               log.log(Level.SEVERE, "Exception occurred: ", e);
             }
 
             return resx;
@@ -785,10 +758,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
                }
                catch (IdentityException e)
                {
-                  if (log.isLoggable(Level.INFO))
-                  {
-                     log.log(Level.FINER, "Exception occurred: ", e);
-                  }
+                  log.log(Level.SEVERE, "Exception occurred: ", e);
                }
             }
 
@@ -1719,10 +1689,7 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
       }
       catch (Exception e)
       {
-         if (log.isLoggable(Level.FINER))
-         {
-            log.log(Level.FINER, "Exception occurred: ", e);
-         }
+         log.log(Level.SEVERE, "Exception occurred: ", e);
       }
       return new HashMap<String, IdentityObjectAttributeMetaData>();
    }
