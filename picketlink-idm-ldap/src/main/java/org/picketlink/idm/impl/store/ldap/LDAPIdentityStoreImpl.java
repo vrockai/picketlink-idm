@@ -22,7 +22,6 @@
 
 package org.picketlink.idm.impl.store.ldap;
 
-import org.picketlink.idm.api.cfg.IdentityConfigurationRegistry;
 import org.picketlink.idm.common.exception.IdentityException;
 import org.picketlink.idm.impl.NotYetImplementedException;
 import org.picketlink.idm.impl.api.SimpleAttribute;
@@ -54,7 +53,6 @@ import org.picketlink.idm.spi.store.IdentityStoreSession;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -811,7 +809,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
 
             for (String typeCtx : typeCtxs)
             {
-               if (dn.toLowerCase().endsWith(typeCtx.toLowerCase()))
+               if (Tools.dnEndsWith(dn, typeCtx))
                {
                   matches.add(possibleType);
                   break;
@@ -833,7 +831,7 @@ public class LDAPIdentityStoreImpl implements IdentityStore
             for (IdentityObjectType match : matches)
             {
                LDAPIdentityObjectImpl entry = (LDAPIdentityObjectImpl)this.findIdentityObject(ctx, name, match);
-               if (entry != null && entry.getDn().equalsIgnoreCase(dn))
+               if (entry != null && Tools.dnEquals(entry.getDn(), dn))
                {
                   type = match;
                   break;
@@ -2297,8 +2295,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                {
                   String memberRef = memberValues.nextElement().toString();
 
-                  if ((fromTypeConfig.isParentMembershipAttributeDN() && memberRef.equals(ldapToIO.getDn())) ||
-                     (!fromTypeConfig.isParentMembershipAttributeDN() && memberRef.equals(ldapToIO.getName())))
+                  if ((fromTypeConfig.isParentMembershipAttributeDN() && Tools.dnEquals(memberRef, ldapToIO.getDn())) ||
+                     (!fromTypeConfig.isParentMembershipAttributeDN() && Tools.dnEquals(memberRef, ldapToIO.getName())))
                   {
                      //TODO: impl lacks support for rel type
                      relationships.add(new LDAPIdentityObjectRelationshipImpl(MEMBERSHIP_TYPE, ldapFromIO, ldapToIO));
@@ -2317,8 +2315,8 @@ public class LDAPIdentityStoreImpl implements IdentityStore
                {
                   String memberRef = memberValues.nextElement().toString();
 
-                  if ((toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getDn())) ||
-                     (!toTypeConfig.isChildMembershipAttributeDN() && memberRef.equals(ldapFromIO.getName())))
+                  if ((toTypeConfig.isChildMembershipAttributeDN() && Tools.dnEquals(memberRef, ldapToIO.getDn())) ||
+                     (!toTypeConfig.isChildMembershipAttributeDN() && Tools.dnEquals(memberRef, ldapToIO.getName())))
                   {
                      //TODO: impl lacks support for rel type
                      relationships.add(new LDAPIdentityObjectRelationshipImpl(MEMBERSHIP_TYPE, ldapFromIO, ldapToIO));

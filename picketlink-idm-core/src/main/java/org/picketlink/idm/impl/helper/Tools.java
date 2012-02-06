@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:boleslaw.dawidowicz at redhat.com">Boleslaw Dawidowicz</a>
@@ -40,6 +42,9 @@ import java.util.logging.Logger;
  */
 public class Tools
 {
+   private static final String DN_REGEX = "([^=,\\\\]*(\\\\.)?)+";
+
+   private static Logger log = Logger.getLogger(Tools.class.getName());
 
    private static MBeanServer instance = null;
 
@@ -256,6 +261,75 @@ public class Tools
 
 
       throw new IllegalStateException("No 'jboss' MBeanServer found!");
+   }
+
+   /**
+    * @param dn1
+    * @param dn2
+    * @return true if first DN ends with second Ldap DN. It will ignore whitespaces in the path. See {@link #dnFormatWhitespaces}
+    */
+   public static boolean dnEndsWith(String dn1, String dn2)
+   {
+      String dn1Formatted = dnFormatWhitespaces(dn1);
+      String dn2Formatted = dnFormatWhitespaces(dn2);
+
+      return dn1Formatted.endsWith(dn2Formatted);
+   }
+
+   /**
+    * @param dn1
+    * @param dn2
+    * @return true if first DN equals second Ldap DN. It will ignore whitespaces in the path. See {@link #dnFormatWhitespaces}
+    */
+   public static boolean dnEquals(String dn1, String dn2)
+   {
+      String dn1Formatted = dnFormatWhitespaces(dn1);
+      String dn2Formatted = dnFormatWhitespaces(dn2);
+
+      return dn1Formatted.equals(dn2Formatted);
+   }
+
+   /**
+    * Format whitespaces in DN records path. It won't affect whitespaces inside some record, but it will affect
+    * whitespaces at the beginning or at the end of single path argument.
+    *
+    * Examples:
+    * input="uid=root, ou=Organization, o=gatein,dc=example,dc=com " , output="uid=root,ou=Organization,o=gatein,dc=example,dc=com"
+    * input="uid=root, ou=My Big Organization Unit,o=gatein org,dc= example ,dc=com " , output="uid=root,ou=My Big Organization Unit,o=gatein org,dc=example,dc=com"
+    *
+    * @param inputDn
+    * @return formatted inputDn
+    */
+   public static String dnFormatWhitespaces(String inputDn)
+   {
+      String inputlc = inputDn.toLowerCase();
+
+      StringBuilder result = new StringBuilder();
+      int last = 0;
+
+      Pattern pattern = Pattern.compile(DN_REGEX);
+      Matcher m = pattern.matcher(inputlc);
+      while (m.find())
+      {
+         if (m.group().length() == 0)
+         {
+            continue;
+         }
+
+         last++;
+         if (last > 1)
+         {
+            result.append(last%2 == 0 ? '=' : ',');
+         }
+         result.append(m.group().trim());
+      }
+
+      if (log.isLoggable(Level.FINER))
+      {
+         log.log(Level.FINER, "Input to format=\"" + inputDn + "\", Output from format=\"" + result.toString() + "\"");
+      }
+
+      return result.toString();
    }
 
 
