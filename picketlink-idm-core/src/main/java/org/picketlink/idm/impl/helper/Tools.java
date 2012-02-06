@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  */
 public class Tools
 {
-   private static final String DN_REGEX = "([^=,\\\\]*(\\\\.)?)+";
+   private static final Pattern DN_PATTERN = Pattern.compile("([^=,\\\\]*(\\\\.)?)+");
 
    private static Logger log = Logger.getLogger(Tools.class.getName());
 
@@ -307,8 +307,7 @@ public class Tools
       StringBuilder result = new StringBuilder();
       int last = 0;
 
-      Pattern pattern = Pattern.compile(DN_REGEX);
-      Matcher m = pattern.matcher(inputlc);
+      Matcher m = DN_PATTERN.matcher(inputlc);
       while (m.find())
       {
          if (m.group().length() == 0)
