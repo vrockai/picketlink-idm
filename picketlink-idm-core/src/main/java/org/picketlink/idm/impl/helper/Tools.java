@@ -291,11 +291,11 @@ public class Tools
 
    /**
     * Format whitespaces in DN records path. It won't affect whitespaces inside some record, but it will affect
-    * whitespaces at the beginning or at the end of single path argument.
+    * whitespaces at the beginning or at the end of single path argument. It also lowercase all letters.
     *
     * Examples:
-    * input="uid=root, ou=Organization, o=gatein,dc=example,dc=com " , output="uid=root,ou=Organization,o=gatein,dc=example,dc=com"
-    * input="uid=root, ou=My Big Organization Unit,o=gatein org,dc= example ,dc=com " , output="uid=root,ou=My Big Organization Unit,o=gatein org,dc=example,dc=com"
+    * input="uid=root, ou=Organization, o=gatein,dc=example,dc=com " , output="uid=root,ou=organization,o=gatein,dc=example,dc=com"
+    * input="uid=root, ou=My Big Organization Unit,o=gatein org,dc= example ,dc=com " , output="uid=root,ou=my big organization unit,o=gatein org,dc=example,dc=com"
     *
     * @param inputDn
     * @return formatted inputDn
