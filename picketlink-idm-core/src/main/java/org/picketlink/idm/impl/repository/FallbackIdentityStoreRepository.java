@@ -573,7 +573,10 @@ public class FallbackIdentityStoreRepository extends AbstractIdentityStoreReposi
 
          try
          {
-            targetStore.removeIdentityObject(targetCtx, identity);
+            if (hasIdentityObject(targetCtx, targetStore, identity))
+            {
+               targetStore.removeIdentityObject(targetCtx, identity);
+            }
          }
          catch (IdentityException e)
          {
