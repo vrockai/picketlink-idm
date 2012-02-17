@@ -914,6 +914,7 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
       //TODO:test
 
       HibernateIdentityObject hibernateObject = safeGet(ctx, identity);
+      HibernateRealm realm = getRealm(getHibernateSession(ctx),ctx);
 
       boolean orderByName = false;
       boolean ascending = true;
@@ -947,6 +948,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
             {
                hqlString.append("select distinct ior.toIdentityObject from HibernateIdentityObjectRelationship ior where ");
             }
+
+            hqlString.append("ior.toIdentityObject.realm = :realm and ior.fromIdentityObject.realm = :realm and ");
 
             if (relationshipType != null)
             {
@@ -991,6 +994,9 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
                hqlString.append("select distinct ior.fromIdentityObject from HibernateIdentityObjectRelationship ior where ");
             }
 
+            hqlString.append("ior.toIdentityObject.realm = :realm and ior.fromIdentityObject.realm = :realm and ");
+
+
             if (relationshipType != null)
             {
                hqlString.append("ior.fromIdentityObject.name like :nameFilter and ior.type.name = :relType and ior.toIdentityObject = :identity");
@@ -1023,7 +1029,8 @@ public class HibernateIdentityStoreImpl implements IdentityStore, Serializable
 
 
          q = getHibernateSession(ctx).createQuery(hqlString.toString())
-            .setParameter("identity",hibernateObject).setCacheable(true);
+            .setParameter("identity",hibernateObject)
+            .setParameter("realm",realm).setCacheable(true);
 
          if (relationshipType != null)
          {
