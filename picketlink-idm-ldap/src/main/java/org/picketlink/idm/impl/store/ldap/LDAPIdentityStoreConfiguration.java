@@ -93,5 +93,7 @@ public interface LDAPIdentityStoreConfiguration
    int getPagedExtensionSize();
 
    public boolean isAllowNotCaseSensitiveSearch();
+
+   public boolean isCacheEmptySearchResults();
    
 }

@@ -95,6 +95,8 @@ public class SimpleLDAPIdentityStoreConfiguration
 
    private final boolean allowNotCaseSensitiveSearch;
 
+   private final boolean cacheEmptySearchResults;
+
 
    // Consts
 
@@ -151,6 +153,9 @@ public class SimpleLDAPIdentityStoreConfiguration
    public static final String CREATE_MISSING_CONTEXTS = "createMissingContexts";
 
    public static final String ALLOW_NOT_CASE_SENSITIVE_SEARCH = "allowNotCaseSensitiveSearch";
+
+   public static final String CACHE_EMPTY_SEARCH_RESULTS = "cacheEmptySearchResults";
+
 
    public SimpleLDAPIdentityStoreConfiguration(IdentityStoreConfigurationMetaData storeMD)
    {
@@ -244,6 +249,16 @@ public class SimpleLDAPIdentityStoreConfiguration
       else
       {
          this.allowNotCaseSensitiveSearch = false;
+      }
+
+      String cacheEmptySearchResults = storeMD.getOptionSingleValue(CACHE_EMPTY_SEARCH_RESULTS);
+      if (cacheEmptySearchResults != null && cacheEmptySearchResults.equalsIgnoreCase("false"))
+      {
+         this.cacheEmptySearchResults = false;
+      }
+      else
+      {
+         this.cacheEmptySearchResults = true;
       }
 
       Map<String, LDAPIdentityObjectTypeConfiguration> types = new HashMap<String, LDAPIdentityObjectTypeConfiguration>();
@@ -567,5 +582,10 @@ public class SimpleLDAPIdentityStoreConfiguration
    public boolean isAllowNotCaseSensitiveSearch()
    {
       return allowNotCaseSensitiveSearch;
+   }
+
+   public boolean isCacheEmptySearchResults()
+   {
+      return cacheEmptySearchResults;
    }
 }

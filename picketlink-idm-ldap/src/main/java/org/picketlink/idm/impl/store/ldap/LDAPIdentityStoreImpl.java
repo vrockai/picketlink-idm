@@ -3885,7 +3885,9 @@ public class LDAPIdentityStoreImpl implements IdentityStore
          ldapContext.close();
       }
 
-      if (getCache() != null && finalResults != null)
+      if (getCache() != null
+          && finalResults != null
+          && (finalResults.size() > 0 || configuration.isCacheEmptySearchResults()))
       {
          LDAPSearch search =
             new LDAPSearch(entryCtxs, filter, filterArgs, returningAttributes, searchScope, requestControls);
