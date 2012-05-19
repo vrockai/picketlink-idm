@@ -15,11 +15,11 @@
   <description />
 
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/picketlink/idm/trunk</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/picketlink/idm/trunk</developerConnection>
-    <url>http://anonsvn.jboss.org/repos/maven/poms/jboss-parent-pom/tags/jboss-parent-5/picketlink-idm-parent/jboss-identity-idm-pom</url>
+      <connection>scm:git:git://github.com/picketlink/picketlink-idm.git</connection>
+      <developerConnection>scm:git:ssh://git@github.com/picketlink/picketlink-idm.git</developerConnection>
+      <url>https://github.com/picketlink/picketlink-idm</url>
+   </scm>
 
-  </scm>
 
   <profiles>
     <profile>

@@ -22,6 +22,20 @@
     <url>http://www.jboss.org</url>
   </organization>
   
+  <properties>
+  
+    <!-- maven-release-plugin -->
+    <useReleaseProfile>false</useReleaseProfile>
+    <arguments>-Prelease</arguments>
+    <version.release.plugin>2.2.1</version.release.plugin>
+    <pushChanges>false</pushChanges>
+    <autoVersionSubmodules>true</autoVersionSubmodules>
+      
+    <!-- buildnumber-maven-plugin : needs 1.0 for git -->
+    <version.buildnumber.plugin>1.0</version.buildnumber.plugin>
+
+  </properties>
+  
   <build>
     <plugins>
       <plugin>
